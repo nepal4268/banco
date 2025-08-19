@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
             $table->string('nome', 100);
-            $table->enum('sexo', ['masculino', 'feminino', 'outro']);
+            $table->enum('sexo', ['M', 'F']);
             $table->string('bi', 25)->unique();
             $table->foreignId('tipo_cliente_id')->constrained('tipos_cliente')->onDelete('restrict');
             $table->foreignId('status_cliente_id')->constrained('status_cliente')->onDelete('restrict');
