@@ -20,8 +20,13 @@ class PopulateDemoData extends Command
                 $this->truncateAll();
             }
 
-            $this->info('Criando clientes...');
-            $clientes = Cliente::factory()->count(5)->create();
+            $this->info('Verificando clientes existentes...');
+            $clientes = Cliente::take(5)->get();
+            
+            if ($clientes->isEmpty()) {
+                $this->warn('Nenhum cliente encontrado. Execute primeiro: php artisan db:seed');
+                return self::FAILURE;
+            }
 
             $this->info('Buscando tabelas de apoio...');
             $agencia = Agencia::first();

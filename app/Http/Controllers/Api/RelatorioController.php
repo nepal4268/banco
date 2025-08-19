@@ -1,0 +1,229 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Transacao;
+use App\Models\Conta;
+use App\Models\Cliente;
+use App\Models\LogAcao;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+
+class RelatorioController extends Controller
+{
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/dashboard",
+     *     summary="Dashboard com métricas gerais",
+     *     tags={"Relatórios"},
+     *     @OA\Response(response=200, description="Métricas do dashboard")
+     * )
+     */
+    public function dashboard(): JsonResponse
+    {
+        $metricas = [
+            'clientes' => [
+                'total' => Cliente::count(),
+                'ativos' => Cliente::whereHas('statusCliente', function($q) {
+                    $q->where('nome', 'Ativo');
+                })->count(),
+                'novos_mes' => Cliente::whereMonth('created_at', now()->month)->count()
+            ],
+            'contas' => [
+                'total' => Conta::count(),
+                'ativas' => Conta::whereHas('statusConta', function($q) {
+                    $q->where('nome', 'Ativa');
+                })->count(),
+                'saldo_total' => Conta::sum('saldo')
+            ],
+            'transacoes' => [
+                'hoje' => Transacao::whereDate('created_at', today())->count(),
+                'mes' => Transacao::whereMonth('created_at', now()->month)->count(),
+                'volume_mes' => Transacao::whereMonth('created_at', now()->month)->sum('valor')
+            ]
+        ];
+
+        return response()->json($metricas);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/transacoes",
+     *     summary="Relatório detalhado de transações",
+     *     tags={"Relatórios"},
+     *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date"), description="Data início"),
+     *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date"), description="Data fim"),
+     *     @OA\Parameter(name="tipo", in="query", @OA\Schema(type="string"), description="Tipo de transação"),
+     *     @OA\Parameter(name="moeda", in="query", @OA\Schema(type="string"), description="Código da moeda"),
+     *     @OA\Response(response=200, description="Relatório de transações")
+     * )
+     */
+    public function transacoes(Request $request): JsonResponse
+    {
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
+            'tipo' => 'nullable|string',
+            'moeda' => 'nullable|string|size:3'
+        ]);
+
+        $query = Transacao::with([
+            'contaOrigem.cliente', 
+            'contaDestino.cliente', 
+            'tipoTransacao', 
+            'moeda',
+            'statusTransacao'
+        ]);
+
+        if ($request->filled('data_inicio')) {
+            $query->whereDate('created_at', '>=', $request->data_inicio);
+        }
+
+        if ($request->filled('data_fim')) {
+            $query->whereDate('created_at', '<=', $request->data_fim);
+        }
+
+        if ($request->filled('tipo')) {
+            $query->whereHas('tipoTransacao', function($q) use ($request) {
+                $q->where('nome', 'like', '%' . $request->tipo . '%');
+            });
+        }
+
+        if ($request->filled('moeda')) {
+            $query->whereHas('moeda', function($q) use ($request) {
+                $q->where('codigo', $request->moeda);
+            });
+        }
+
+        // Estatísticas resumidas
+        $estatisticas = [
+            'total_transacoes' => $query->count(),
+            'volume_total' => $query->sum('valor'),
+            'por_tipo' => $query->select('tipo_transacao_id')
+                ->selectRaw('COUNT(*) as quantidade, SUM(valor) as volume')
+                ->with('tipoTransacao:id,nome')
+                ->groupBy('tipo_transacao_id')
+                ->get(),
+            'por_moeda' => $query->select('moeda_id')
+                ->selectRaw('COUNT(*) as quantidade, SUM(valor) as volume')
+                ->with('moeda:id,codigo,nome')
+                ->groupBy('moeda_id')
+                ->get()
+        ];
+
+        $perPage = $request->get('per_page', 50);
+        $transacoes = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json([
+            'estatisticas' => $estatisticas,
+            'transacoes' => $transacoes
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/contas/{id}/extrato",
+     *     summary="Extrato detalhado da conta",
+     *     tags={"Relatórios"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Response(response=200, description="Extrato da conta")
+     * )
+     */
+    public function extrato(Request $request, Conta $conta): JsonResponse
+    {
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim' => 'nullable|date|after_or_equal:data_inicio'
+        ]);
+
+        $dataInicio = $request->data_inicio ?? now()->subMonth()->toDateString();
+        $dataFim = $request->data_fim ?? now()->toDateString();
+
+        // Transações da conta
+        $transacoes = Transacao::where(function($q) use ($conta) {
+                $q->where('conta_origem_id', $conta->id)
+                  ->orWhere('conta_destino_id', $conta->id);
+            })
+            ->whereDate('created_at', '>=', $dataInicio)
+            ->whereDate('created_at', '<=', $dataFim)
+            ->with(['contaOrigem', 'contaDestino', 'tipoTransacao', 'statusTransacao'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($transacao) use ($conta) {
+                $tipo = 'entrada';
+                if ($transacao->conta_origem_id == $conta->id) {
+                    $tipo = 'saida';
+                }
+                
+                return [
+                    'id' => $transacao->id,
+                    'data' => $transacao->created_at,
+                    'descricao' => $transacao->descricao,
+                    'tipo' => $tipo,
+                    'valor' => $transacao->valor,
+                    'saldo_anterior' => null, // Pode ser calculado se necessário
+                    'tipo_transacao' => $transacao->tipoTransacao->nome,
+                    'status' => $transacao->statusTransacao->nome,
+                    'referencia' => $transacao->referencia_externa
+                ];
+            });
+
+        $resumo = [
+            'conta' => $conta->load(['cliente', 'agencia', 'tipoConta', 'moeda']),
+            'periodo' => [
+                'inicio' => $dataInicio,
+                'fim' => $dataFim
+            ],
+            'saldo_atual' => $conta->saldo,
+            'total_entradas' => $transacoes->where('tipo', 'entrada')->sum('valor'),
+            'total_saidas' => $transacoes->where('tipo', 'saida')->sum('valor'),
+            'quantidade_transacoes' => $transacoes->count()
+        ];
+
+        return response()->json([
+            'resumo' => $resumo,
+            'transacoes' => $transacoes->values()
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/auditoria",
+     *     summary="Relatório de auditoria (logs de ações)",
+     *     tags={"Relatórios"},
+     *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="acao", in="query", @OA\Schema(type="string"), description="Filtrar por ação"),
+     *     @OA\Response(response=200, description="Logs de auditoria")
+     * )
+     */
+    public function auditoria(Request $request): JsonResponse
+    {
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
+            'acao' => 'nullable|string'
+        ]);
+
+        $query = LogAcao::orderBy('created_at', 'desc');
+
+        if ($request->filled('data_inicio')) {
+            $query->whereDate('created_at', '>=', $request->data_inicio);
+        }
+
+        if ($request->filled('data_fim')) {
+            $query->whereDate('created_at', '<=', $request->data_fim);
+        }
+
+        if ($request->filled('acao')) {
+            $query->where('acao', 'like', '%' . $request->acao . '%');
+        }
+
+        $perPage = $request->get('per_page', 50);
+        return response()->json($query->paginate($perPage));
+    }
+}
