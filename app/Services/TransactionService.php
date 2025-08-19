@@ -238,7 +238,15 @@ class TransactionService
     {
         $tipo = TipoTransacao::where('nome', $nome)->first();
         if (!$tipo) {
-            throw new InvalidArgumentException("Tipo de transação '{$nome}' não encontrado.");
+            // Tentar criar o tipo se não existir
+            try {
+                $tipo = TipoTransacao::create([
+                    'nome' => $nome,
+                    'descricao' => 'Tipo de transação criado automaticamente'
+                ]);
+            } catch (\Exception $e) {
+                throw new InvalidArgumentException("Tipo de transação '{$nome}' não encontrado e não foi possível criar automaticamente.");
+            }
         }
         return (int) $tipo->id;
     }
@@ -247,7 +255,15 @@ class TransactionService
     {
         $status = StatusTransacao::where('nome', $nome)->first();
         if (!$status) {
-            throw new InvalidArgumentException("Status de transação '{$nome}' não encontrado.");
+            // Tentar criar o status se não existir
+            try {
+                $status = StatusTransacao::create([
+                    'nome' => $nome,
+                    'descricao' => 'Status de transação criado automaticamente'
+                ]);
+            } catch (\Exception $e) {
+                throw new InvalidArgumentException("Status de transação '{$nome}' não encontrado e não foi possível criar automaticamente.");
+            }
         }
         return (int) $status->id;
     }

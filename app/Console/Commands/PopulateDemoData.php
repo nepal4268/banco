@@ -20,8 +20,13 @@ class PopulateDemoData extends Command
                 $this->truncateAll();
             }
 
-            $this->info('Criando clientes...');
-            $clientes = Cliente::factory()->count(5)->create();
+            $this->info('Verificando clientes existentes...');
+            $clientes = Cliente::take(5)->get();
+            
+            if ($clientes->isEmpty()) {
+                $this->warn('Nenhum cliente encontrado. Execute primeiro: php artisan db:seed');
+                return self::FAILURE;
+            }
 
             $this->info('Buscando tabelas de apoio...');
             $agencia = Agencia::first();
@@ -47,12 +52,13 @@ class PopulateDemoData extends Command
             $this->info('Criando cartões...');
             $tipoCartao = TipoCartao::first();
             $statusCartao = StatusCartao::first();
-            foreach ($contas as $conta) {
+            foreach ($contas as $index => $conta) {
                 Cartao::create([
                     'conta_id' => $conta->id,
                     'tipo_cartao_id' => $tipoCartao->id,
-                    'numero_cartao' => '4111111111111111',
+                    'numero_cartao' => '411111111111' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
                     'validade' => now()->addYears(3)->toDateString(),
+                    'limite' => 50000.00,
                     'status_cartao_id' => $statusCartao->id,
                 ]);
             }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('numero_cartao');
             $table->string('numero_cartao_hash', 64)->unique();
             $table->date('validade');
+            $table->decimal('limite', 15, 2)->default(0.00);
             $table->foreignId('status_cartao_id')->constrained('status_cartao')->onDelete('restrict');
             $table->timestamps();
             $table->softDeletes();

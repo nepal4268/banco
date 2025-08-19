@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Cliente;
 use App\Models\LogAcao;
+use Illuminate\Support\Facades\Log;
 
 class ClienteObserver
 {
@@ -12,10 +13,14 @@ class ClienteObserver
      */
     public function created(Cliente $cliente): void
     {
-        LogAcao::create([
-            'acao' => 'cliente_criado',
-            'detalhes' => "Cliente {$cliente->nome} (ID: {$cliente->id}, BI: {$cliente->bi}) foi criado.",
-        ]);
+        try {
+            LogAcao::create([
+                'acao' => 'cliente_criado',
+                'detalhes' => "Cliente {$cliente->nome} (ID: {$cliente->id}, BI: {$cliente->bi}) foi criado.",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar log de cliente criado: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -23,16 +28,20 @@ class ClienteObserver
      */
     public function updated(Cliente $cliente): void
     {
-        $changes = $cliente->getChanges();
-        $original = $cliente->getOriginal();
-        
-        $detalhes = "Cliente {$cliente->nome} (ID: {$cliente->id}) foi atualizado. ";
-        $detalhes .= "Campos alterados: " . json_encode($changes);
-        
-        LogAcao::create([
-            'acao' => 'cliente_atualizado',
-            'detalhes' => $detalhes,
-        ]);
+        try {
+            $changes = $cliente->getChanges();
+            $original = $cliente->getOriginal();
+            
+            $detalhes = "Cliente {$cliente->nome} (ID: {$cliente->id}) foi atualizado. ";
+            $detalhes .= "Campos alterados: " . json_encode($changes);
+            
+            LogAcao::create([
+                'acao' => 'cliente_atualizado',
+                'detalhes' => $detalhes,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar log de cliente atualizado: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -40,10 +49,14 @@ class ClienteObserver
      */
     public function deleted(Cliente $cliente): void
     {
-        LogAcao::create([
-            'acao' => 'cliente_excluido',
-            'detalhes' => "Cliente {$cliente->nome} (ID: {$cliente->id}, BI: {$cliente->bi}) foi excluído.",
-        ]);
+        try {
+            LogAcao::create([
+                'acao' => 'cliente_excluido',
+                'detalhes' => "Cliente {$cliente->nome} (ID: {$cliente->id}, BI: {$cliente->bi}) foi excluído.",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar log de cliente excluído: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -51,9 +64,13 @@ class ClienteObserver
      */
     public function restored(Cliente $cliente): void
     {
-        LogAcao::create([
-            'acao' => 'cliente_restaurado',
-            'detalhes' => "Cliente {$cliente->nome} (ID: {$cliente->id}, BI: {$cliente->bi}) foi restaurado.",
-        ]);
+        try {
+            LogAcao::create([
+                'acao' => 'cliente_restaurado',
+                'detalhes' => "Cliente {$cliente->nome} (ID: {$cliente->id}, BI: {$cliente->bi}) foi restaurado.",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar log de cliente restaurado: ' . $e->getMessage());
+        }
     }
 }

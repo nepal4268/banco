@@ -18,6 +18,7 @@ class Cartao extends Model
         'tipo_cartao_id',
         'numero_cartao',
         'validade',
+        'limite',
         'status_cartao_id',
         'numero_cartao_hash',
     ];
@@ -25,6 +26,7 @@ class Cartao extends Model
     protected $casts = [
         'validade' => 'date',
         'numero_cartao' => 'encrypted',
+        'limite' => 'decimal:2',
     ];
 
     protected static function boot()

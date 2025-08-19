@@ -22,6 +22,7 @@ class Usuario extends Authenticatable
 		'email',
 		'senha',
 		'perfil_id',
+		'agencia_id',
 		'status_usuario',
 	];
 
@@ -44,6 +45,11 @@ class Usuario extends Authenticatable
 	public function perfil(): BelongsTo
 	{
 		return $this->belongsTo(Perfil::class, 'perfil_id');
+	}
+
+	public function agencia(): BelongsTo
+	{
+		return $this->belongsTo(Agencia::class, 'agencia_id');
 	}
 
 	public function permissoes(): BelongsToMany

@@ -13,7 +13,53 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Login do usuário
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Autenticar usuário",
+     *     description="Realiza login no sistema e retorna token de autenticação",
+     *     tags={"Autenticação"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "senha"},
+     *             @OA\Property(property="email", type="string", format="email", example="admin@banco.ao", description="Email do usuário"),
+     *             @OA\Property(property="senha", type="string", format="password", example="admin123", description="Senha do usuário")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login realizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Login realizado com sucesso"),
+     *             @OA\Property(
+     *                 property="user",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nome", type="string", example="Administrador do Sistema"),
+     *                 @OA\Property(property="email", type="string", example="admin@banco.ao"),
+     *                 @OA\Property(property="perfil", type="string", example="Administrador"),
+     *                 @OA\Property(property="status", type="string", example="ativo")
+     *             ),
+     *             @OA\Property(property="token", type="string", example="1|abc123def456...", description="Token Bearer para autenticação")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Credenciais inválidas",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="email",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="As credenciais fornecidas estão incorretas.")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function login(Request $request): JsonResponse
     {
@@ -53,7 +99,27 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout do usuário
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Logout do usuário",
+     *     description="Invalida o token atual e realiza logout",
+     *     tags={"Autenticação"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout realizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Logout realizado com sucesso")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Token inválido ou expirado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function logout(Request $request): JsonResponse
     {

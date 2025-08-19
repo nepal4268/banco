@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('moeda_origem_id')->constrained('moedas')->onDelete('restrict');
             $table->foreignId('moeda_destino_id')->constrained('moedas')->onDelete('restrict');
-            $table->decimal('taxa', 20, 8);
+            $table->decimal('taxa_compra', 20, 8);
+            $table->decimal('taxa_venda', 20, 8);
+            $table->boolean('ativa')->default(true);
             $table->date('data_taxa');
             $table->timestamps();
             $table->softDeletes();

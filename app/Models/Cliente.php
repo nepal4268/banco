@@ -18,12 +18,19 @@ class Cliente extends Model
         'nome',
         'sexo',
         'bi',
+        'email',
+        'telefone',
+        'data_nascimento',
+        'endereco',
+        'cidade',
+        'provincia',
         'tipo_cliente_id',
         'status_cliente_id',
     ];
 
     protected $casts = [
         'sexo' => 'string',
+        'data_nascimento' => 'date',
     ];
 
     // Relacionamentos
@@ -44,7 +51,7 @@ class Cliente extends Model
 
     public function operacoesCambio(): HasMany
     {
-        return $this->hasMany(OperacaoCambio::class, 'cliente_id');
+        return $this->belongsTo(OperacaoCambio::class, 'cliente_id');
     }
 
     public function apolices(): HasMany

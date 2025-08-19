@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\ContaController;
 use App\Http\Controllers\Api\TransacaoController;
+use App\Http\Controllers\Api\CartaoController;
+use App\Http\Controllers\Api\SeguroController;
+use App\Http\Controllers\Api\TaxaCambioController;
+use App\Http\Controllers\Api\RelatorioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,4 +43,28 @@ Route::middleware('auth:sanctum')->group(function () {
 
 	Route::post('contas/{conta}/depositar', [ContaController::class, 'depositar']);
 	Route::post('contas/{conta}/levantar', [ContaController::class, 'levantar']);
+
+	// Cartões
+	Route::apiResource('cartoes', CartaoController::class);
+	Route::post('cartoes/{cartao}/bloquear', [CartaoController::class, 'bloquear']);
+
+	// Seguros
+	Route::get('seguros/apolices', [SeguroController::class, 'indexApolices']);
+	Route::post('seguros/apolices', [SeguroController::class, 'storeApolice']);
+	Route::get('seguros/apolices/{apolice}', [SeguroController::class, 'showApolice']);
+	Route::get('seguros/sinistros', [SeguroController::class, 'indexSinistros']);
+	Route::post('seguros/sinistros', [SeguroController::class, 'storeSinistro']);
+	Route::get('seguros/sinistros/{sinistro}', [SeguroController::class, 'showSinistro']);
+
+	// Taxas de Câmbio
+	Route::get('taxas-cambio', [TaxaCambioController::class, 'index']);
+	Route::get('taxas-cambio/cotacao', [TaxaCambioController::class, 'cotacao']);
+	Route::post('taxas-cambio', [TaxaCambioController::class, 'store']);
+	Route::get('operacoes-cambio', [TaxaCambioController::class, 'historico']);
+
+	// Relatórios
+	Route::get('relatorios/dashboard', [RelatorioController::class, 'dashboard']);
+	Route::get('relatorios/transacoes', [RelatorioController::class, 'transacoes']);
+	Route::get('relatorios/contas/{conta}/extrato', [RelatorioController::class, 'extrato']);
+	Route::get('relatorios/auditoria', [RelatorioController::class, 'auditoria']);
 });

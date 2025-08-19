@@ -17,12 +17,16 @@ class TaxaCambio extends Model
     protected $fillable = [
         'moeda_origem_id',
         'moeda_destino_id',
-        'taxa',
+        'taxa_compra',
+        'taxa_venda',
+        'ativa',
         'data_taxa',
     ];
 
     protected $casts = [
-        'taxa' => 'decimal:8',
+        'taxa_compra' => 'decimal:8',
+        'taxa_venda' => 'decimal:8',
+        'ativa' => 'boolean',
         'data_taxa' => 'date',
     ];
 
