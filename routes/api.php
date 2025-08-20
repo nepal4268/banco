@@ -34,9 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
 		return $request->user();
 	});
 
-	Route::apiResource('clientes', ClienteController::class);
-	// Lookups de clientes
+	// Lookups de clientes (deve vir antes do apiResource)
 	Route::get('clientes/lookups', [ClienteController::class, 'lookups']);
+	Route::apiResource('clientes', ClienteController::class);
 	Route::apiResource('contas', ContaController::class);
 
 	Route::get('transacoes', [TransacaoController::class, 'index']);
