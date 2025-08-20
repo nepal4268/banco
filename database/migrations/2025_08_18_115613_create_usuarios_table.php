@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('telefone')->nullable();
             $table->string('senha', 255);
             $table->foreignId('perfil_id')->nullable()->constrained('perfis')->onDelete('set null');
-            $table->foreignId('agencia_id')->nullable()->constrained('agencias')->onDelete('set null');
+            $table->foreignId('agencia_id')->nullable();
             $table->string('status_usuario', 30)->default('ativo');
             $table->string('endereco', 255)->nullable();
             $table->string('cidade', 100)->nullable();
