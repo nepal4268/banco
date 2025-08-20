@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\TaxaCambio;
 use App\Models\OperacaoCambio;
 use Illuminate\Http\Request;
+use App\Http\Requests\TaxaCambioCotacaoRequest;
+use App\Http\Requests\TaxaCambioStoreRequest;
 use Illuminate\Http\JsonResponse;
 
 class TaxaCambioController extends Controller
@@ -52,13 +54,9 @@ class TaxaCambioController extends Controller
      *     @OA\Response(response=200, description="Cotação atual")
      * )
      */
-    public function cotacao(Request $request): JsonResponse
+    public function cotacao(TaxaCambioCotacaoRequest $request): JsonResponse
     {
-        $request->validate([
-            'moeda_origem' => 'required|string|size:3',
-            'moeda_destino' => 'required|string|size:3',
-            'valor' => 'nullable|numeric|min:0'
-        ]);
+        $request->validated();
 
         $taxa = TaxaCambio::with(['moedaOrigem', 'moedaDestino'])
             ->whereHas('moedaOrigem', function($q) use ($request) {
@@ -113,15 +111,9 @@ class TaxaCambioController extends Controller
      *     @OA\Response(response=201, description="Taxa criada/atualizada com sucesso")
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(TaxaCambioStoreRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'moeda_origem_id' => 'required|integer|exists:moedas,id',
-            'moeda_destino_id' => 'required|integer|exists:moedas,id|different:moeda_origem_id',
-            'taxa_compra' => 'required|numeric|min:0',
-            'taxa_venda' => 'required|numeric|min:0',
-            'ativa' => 'boolean'
-        ]);
+        $validated = $request->validated();
 
         // Desativar taxa anterior se existir
         TaxaCambio::where('moeda_origem_id', $request->moeda_origem_id)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\ContaOperacaoRequest;
 use Illuminate\Http\JsonResponse;
 use App\Models\Conta;
 use App\Http\Requests\ContaRequest;
@@ -147,14 +148,9 @@ class ContaController extends Controller
      *   @OA\Response(response=200, description="OK")
      * )
      */
-    public function depositar(Conta $conta, Request $request, TransactionService $service): JsonResponse
+    public function depositar(Conta $conta, ContaOperacaoRequest $request, TransactionService $service): JsonResponse
     {
-        $data = $request->validate([
-            'valor' => 'required|numeric|min:0.01|max:999999999999999999.99',
-            'moeda_id' => 'required|integer|exists:moedas,id',
-            'descricao' => 'nullable|string|max:255',
-            'referencia_externa' => 'nullable|string|max:100',
-        ]);
+        $data = $request->validated();
         $transacao = $service->deposit($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null);
         return response()->json(['message' => 'Depósito efetuado', 'transacao' => $transacao]);
     }
@@ -175,14 +171,9 @@ class ContaController extends Controller
      *   @OA\Response(response=200, description="OK")
      * )
      */
-    public function levantar(Conta $conta, Request $request, TransactionService $service): JsonResponse
+    public function levantar(Conta $conta, ContaOperacaoRequest $request, TransactionService $service): JsonResponse
     {
-        $data = $request->validate([
-            'valor' => 'required|numeric|min:0.01|max:999999999999999999.99',
-            'moeda_id' => 'required|integer|exists:moedas,id',
-            'descricao' => 'nullable|string|max:255',
-            'referencia_externa' => 'nullable|string|max:100',
-        ]);
+        $data = $request->validated();
         $transacao = $service->withdraw($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null);
         return response()->json(['message' => 'Levantamento efetuado', 'transacao' => $transacao]);
     }

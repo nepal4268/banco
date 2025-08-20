@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\TransacaoCambioRequest;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\TransferenciaInternaRequest;
 use App\Http\Requests\TransferenciaExternaRequest;
@@ -157,17 +158,9 @@ class TransacaoController extends Controller
      *   @OA\Response(response=200, description="OK")
      * )
      */
-    public function cambio(Request $request, TransactionService $service): JsonResponse
+    public function cambio(TransacaoCambioRequest $request, TransactionService $service): JsonResponse
     {
-        $data = $request->validate([
-            'cliente_id' => 'nullable|integer|exists:clientes,id',
-            'conta_origem_id' => 'required|integer|exists:contas,id',
-            'conta_destino_id' => 'required|integer|exists:contas,id',
-            'moeda_origem_id' => 'required|integer|exists:moedas,id',
-            'moeda_destino_id' => 'required|integer|exists:moedas,id',
-            'valor_origem' => 'required|numeric|min:0.01|max:999999999999999999.99',
-            'descricao' => 'nullable|string|max:255',
-        ]);
+        $data = $request->validated();
 
         $op = $service->exchange(
             $data['cliente_id'] ?? null,

@@ -14,7 +14,17 @@ use Illuminate\Validation\Rule;
 class ClienteController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *   path="/api/clientes",
+     *   summary="Listar clientes",
+     *   tags={"Clientes"},
+     *   @OA\Parameter(name="nome", in="query", @OA\Schema(type="string")),
+     *   @OA\Parameter(name="bi", in="query", @OA\Schema(type="string")),
+     *   @OA\Parameter(name="tipo_cliente_id", in="query", @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="status_cliente_id", in="query", @OA\Schema(type="integer")),
+     *   @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="Lista paginada de clientes")
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -45,7 +55,29 @@ class ClienteController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *   path="/api/clientes",
+     *   summary="Criar cliente",
+     *   tags={"Clientes"},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       required={"nome","sexo","bi","tipo_cliente_id","status_cliente_id"},
+     *       @OA\Property(property="nome", type="string", maxLength=100),
+     *       @OA\Property(property="sexo", type="string", enum={"M","F"}),
+     *       @OA\Property(property="bi", type="string", maxLength=25),
+     *       @OA\Property(property="email", type="string", format="email"),
+     *       @OA\Property(property="telefone", type="array", @OA\Items(type="string")),
+     *       @OA\Property(property="data_nascimento", type="string", format="date"),
+     *       @OA\Property(property="endereco", type="string"),
+     *       @OA\Property(property="cidade", type="string"),
+     *       @OA\Property(property="provincia", type="string"),
+     *       @OA\Property(property="tipo_cliente_id", type="integer"),
+     *       @OA\Property(property="status_cliente_id", type="integer")
+     *     )
+     *   ),
+     *   @OA\Response(response=201, description="Cliente criado")
+     * )
      */
     public function store(ClienteRequest $request): JsonResponse
     {
@@ -61,7 +93,13 @@ class ClienteController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *   path="/api/clientes/{id}",
+     *   summary="Obter cliente",
+     *   tags={"Clientes"},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="Cliente")
+     * )
      */
     public function show(Cliente $cliente): JsonResponse
     {
@@ -71,7 +109,26 @@ class ClienteController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *   path="/api/clientes/{id}",
+     *   summary="Atualizar cliente",
+     *   tags={"Clientes"},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\RequestBody(@OA\JsonContent(
+     *       @OA\Property(property="nome", type="string", maxLength=100),
+     *       @OA\Property(property="sexo", type="string", enum={"M","F"}),
+     *       @OA\Property(property="bi", type="string", maxLength=25),
+     *       @OA\Property(property="email", type="string", format="email"),
+     *       @OA\Property(property="telefone", type="array", @OA\Items(type="string")),
+     *       @OA\Property(property="data_nascimento", type="string", format="date"),
+     *       @OA\Property(property="endereco", type="string"),
+     *       @OA\Property(property="cidade", type="string"),
+     *       @OA\Property(property="provincia", type="string"),
+     *       @OA\Property(property="tipo_cliente_id", type="integer"),
+     *       @OA\Property(property="status_cliente_id", type="integer")
+     *   )),
+     *   @OA\Response(response=200, description="Cliente atualizado")
+     * )
      */
     public function update(ClienteRequest $request, Cliente $cliente): JsonResponse
     {
@@ -87,7 +144,13 @@ class ClienteController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *   path="/api/clientes/{id}",
+     *   summary="Excluir cliente",
+     *   tags={"Clientes"},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="Excluído")
+     * )
      */
     public function destroy(Cliente $cliente): JsonResponse
     {
@@ -110,7 +173,12 @@ class ClienteController extends Controller
     }
 
     /**
-     * Get lookup data for client form
+     * @OA\Get(
+     *   path="/api/clientes/lookups",
+     *   summary="Listas de apoio para cliente",
+     *   tags={"Clientes"},
+     *   @OA\Response(response=200, description="Listas de apoio")
+     * )
      */
     public function lookups(): JsonResponse
     {

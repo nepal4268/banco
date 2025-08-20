@@ -8,6 +8,9 @@ use App\Models\Conta;
 use App\Models\Cliente;
 use App\Models\LogAcao;
 use Illuminate\Http\Request;
+use App\Http\Requests\RelatorioTransacoesRequest;
+use App\Http\Requests\RelatorioExtratoRequest;
+use App\Http\Requests\RelatorioAuditoriaRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -60,14 +63,9 @@ class RelatorioController extends Controller
      *     @OA\Response(response=200, description="Relatório de transações")
      * )
      */
-    public function transacoes(Request $request): JsonResponse
+    public function transacoes(RelatorioTransacoesRequest $request): JsonResponse
     {
-        $request->validate([
-            'data_inicio' => 'nullable|date',
-            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
-            'tipo' => 'nullable|string',
-            'moeda' => 'nullable|string|size:3'
-        ]);
+        $request->validated();
 
         $query = Transacao::with([
             'contaOrigem.cliente', 
@@ -133,12 +131,9 @@ class RelatorioController extends Controller
      *     @OA\Response(response=200, description="Extrato da conta")
      * )
      */
-    public function extrato(Request $request, Conta $conta): JsonResponse
+    public function extrato(RelatorioExtratoRequest $request, Conta $conta): JsonResponse
     {
-        $request->validate([
-            'data_inicio' => 'nullable|date',
-            'data_fim' => 'nullable|date|after_or_equal:data_inicio'
-        ]);
+        $request->validated();
 
         $dataInicio = $request->data_inicio ?? now()->subMonth()->toDateString();
         $dataFim = $request->data_fim ?? now()->toDateString();
@@ -201,13 +196,9 @@ class RelatorioController extends Controller
      *     @OA\Response(response=200, description="Logs de auditoria")
      * )
      */
-    public function auditoria(Request $request): JsonResponse
+    public function auditoria(RelatorioAuditoriaRequest $request): JsonResponse
     {
-        $request->validate([
-            'data_inicio' => 'nullable|date',
-            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
-            'acao' => 'nullable|string'
-        ]);
+        $request->validated();
 
         $query = LogAcao::orderBy('created_at', 'desc');
 

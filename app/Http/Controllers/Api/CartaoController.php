@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CartaoRequest;
 use App\Models\Cartao;
 use Illuminate\Http\Request;
+use App\Http\Requests\CartaoBloquearRequest;
 use Illuminate\Http\JsonResponse;
 
 class CartaoController extends Controller
@@ -129,9 +130,9 @@ class CartaoController extends Controller
      *     @OA\Response(response=200, description="Cartão bloqueado com sucesso")
      * )
      */
-    public function bloquear(Request $request, Cartao $cartao): JsonResponse
+    public function bloquear(CartaoBloquearRequest $request, Cartao $cartao): JsonResponse
     {
-        $request->validate(['motivo' => 'nullable|string|max:255']);
+        $request->validated();
         
         $statusBloqueado = \App\Models\StatusCartao::where('nome', 'Bloqueado')->first();
         if (!$statusBloqueado) {
