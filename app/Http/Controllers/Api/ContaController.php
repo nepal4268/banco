@@ -140,12 +140,17 @@ class ContaController extends Controller
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\RequestBody(@OA\JsonContent(
      *       required={"valor","moeda_id"},
-     *       @OA\Property(property="valor", type="number", format="float"),
-     *       @OA\Property(property="moeda_id", type="integer"),
-     *       @OA\Property(property="descricao", type="string"),
-     *       @OA\Property(property="referencia_externa", type="string")
+     *       @OA\Property(property="valor", type="number", format="float", example=100.50),
+     *       @OA\Property(property="moeda_id", type="integer", example=1),
+     *       @OA\Property(property="descricao", type="string", example="Depósito em numerário"),
+     *       @OA\Property(property="referencia_externa", type="string", example="EXT-12345")
      *   )),
-     *   @OA\Response(response=200, description="OK")
+     *   @OA\Response(response=200, description="OK",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Depósito efetuado"),
+     *       @OA\Property(property="transacao", type="object")
+     *     )
+     *   )
      * )
      */
     public function depositar(Conta $conta, ContaOperacaoRequest $request, TransactionService $service): JsonResponse
@@ -163,12 +168,17 @@ class ContaController extends Controller
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\RequestBody(@OA\JsonContent(
      *       required={"valor","moeda_id"},
-     *       @OA\Property(property="valor", type="number", format="float"),
-     *       @OA\Property(property="moeda_id", type="integer"),
-     *       @OA\Property(property="descricao", type="string"),
-     *       @OA\Property(property="referencia_externa", type="string")
+     *       @OA\Property(property="valor", type="number", format="float", example=50.00),
+     *       @OA\Property(property="moeda_id", type="integer", example=1),
+     *       @OA\Property(property="descricao", type="string", example="Levantamento no balcão"),
+     *       @OA\Property(property="referencia_externa", type="string", example="EXT-98765")
      *   )),
-     *   @OA\Response(response=200, description="OK")
+     *   @OA\Response(response=200, description="OK",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Levantamento efetuado"),
+     *       @OA\Property(property="transacao", type="object")
+     *     )
+     *   )
      * )
      */
     public function levantar(Conta $conta, ContaOperacaoRequest $request, TransactionService $service): JsonResponse

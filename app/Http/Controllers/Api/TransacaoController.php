@@ -152,10 +152,15 @@ class TransacaoController extends Controller
      *       @OA\Property(property="conta_destino_id", type="integer"),
      *       @OA\Property(property="moeda_origem_id", type="integer"),
      *       @OA\Property(property="moeda_destino_id", type="integer"),
-     *       @OA\Property(property="valor_origem", type="number", format="float"),
+     *       @OA\Property(property="valor_origem", type="number", format="float", example=100.00),
      *       @OA\Property(property="descricao", type="string")
      *   )),
-     *   @OA\Response(response=200, description="OK")
+     *   @OA\Response(response=200, description="OK",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Operação de câmbio concluída"),
+     *       @OA\Property(property="operacao", type="object")
+     *     )
+     *   )
      * )
      */
     public function cambio(TransacaoCambioRequest $request, TransactionService $service): JsonResponse

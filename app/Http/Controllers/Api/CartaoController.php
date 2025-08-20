@@ -127,7 +127,12 @@ class CartaoController extends Controller
      *             @OA\Property(property="motivo", type="string", example="Solicitação do cliente")
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Cartão bloqueado com sucesso")
+     *     @OA\Response(response=200, description="Cartão bloqueado com sucesso",
+     *       @OA\JsonContent(
+     *         @OA\Property(property="message", type="string", example="Cartão bloqueado com sucesso"),
+     *         @OA\Property(property="cartao", type="object")
+     *       )
+     *     )
      * )
      */
     public function bloquear(CartaoBloquearRequest $request, Cartao $cartao): JsonResponse

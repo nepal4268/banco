@@ -51,7 +51,21 @@ class TaxaCambioController extends Controller
      *     @OA\Parameter(name="moeda_origem", in="query", required=true, @OA\Schema(type="string"), description="Código da moeda origem"),
      *     @OA\Parameter(name="moeda_destino", in="query", required=true, @OA\Schema(type="string"), description="Código da moeda destino"),
      *     @OA\Parameter(name="valor", in="query", @OA\Schema(type="number"), description="Valor para conversão"),
-     *     @OA\Response(response=200, description="Cotação atual")
+     *     @OA\Response(response=200, description="Cotação atual",
+     *       @OA\JsonContent(
+     *         @OA\Property(property="moeda_origem", type="string", example="USD"),
+     *         @OA\Property(property="moeda_destino", type="string", example="AOA"),
+     *         @OA\Property(property="taxa_compra", type="number", format="float", example=825.5),
+     *         @OA\Property(property="taxa_venda", type="number", format="float", example=830.0),
+     *         @OA\Property(property="data_atualizacao", type="string", format="date-time"),
+     *         @OA\Property(property="conversao", type="object",
+     *           @OA\Property(property="valor_origem", type="number", format="float", example=100),
+     *           @OA\Property(property="valor_convertido_compra", type="number", format="float", example=82550),
+     *           @OA\Property(property="valor_convertido_venda", type="number", format="float", example=83000)
+     *         )
+     *       )
+     *     ),
+     *     @OA\Response(response=422, description="Parâmetros inválidos")
      * )
      */
     public function cotacao(TaxaCambioCotacaoRequest $request): JsonResponse
@@ -108,7 +122,17 @@ class TaxaCambioController extends Controller
      *             @OA\Property(property="ativa", type="boolean", example=true)
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Taxa criada/atualizada com sucesso")
+     *     @OA\Response(response=201, description="Taxa criada/atualizada com sucesso",
+     *       @OA\JsonContent(
+     *         @OA\Property(property="id", type="integer", example=10),
+     *         @OA\Property(property="moeda_origem_id", type="integer", example=1),
+     *         @OA\Property(property="moeda_destino_id", type="integer", example=2),
+     *         @OA\Property(property="taxa_compra", type="number", format="float", example=825.5),
+     *         @OA\Property(property="taxa_venda", type="number", format="float", example=830.0),
+     *         @OA\Property(property="ativa", type="boolean", example=true)
+     *       )
+     *     ),
+     *     @OA\Response(response=422, description="Dados inválidos")
      * )
      */
     public function store(TaxaCambioStoreRequest $request): JsonResponse
@@ -133,6 +157,7 @@ class TaxaCambioController extends Controller
      *     @OA\Parameter(name="conta_id", in="query", @OA\Schema(type="integer"), description="Filtrar por conta"),
      *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date"), description="Data início"),
      *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date"), description="Data fim"),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer"), description="Itens por página"),
      *     @OA\Response(response=200, description="Histórico de operações")
      * )
      */

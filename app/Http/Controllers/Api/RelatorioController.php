@@ -60,6 +60,7 @@ class RelatorioController extends Controller
      *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date"), description="Data fim"),
      *     @OA\Parameter(name="tipo", in="query", @OA\Schema(type="string"), description="Tipo de transação"),
      *     @OA\Parameter(name="moeda", in="query", @OA\Schema(type="string"), description="Código da moeda"),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer"), description="Itens por página"),
      *     @OA\Response(response=200, description="Relatório de transações")
      * )
      */
@@ -128,6 +129,7 @@ class RelatorioController extends Controller
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Extrato da conta")
      * )
      */
@@ -193,6 +195,7 @@ class RelatorioController extends Controller
      *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="acao", in="query", @OA\Schema(type="string"), description="Filtrar por ação"),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Logs de auditoria")
      * )
      */
