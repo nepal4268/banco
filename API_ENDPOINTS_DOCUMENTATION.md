@@ -447,6 +447,311 @@ The API will be available at: `http://localhost:8000/api/`
 Swagger documentation is available at:
 `http://localhost:8000/api/documentation`
 
+## Configuration Management (Configuração)
+
+### List All Lookups
+**GET** `/api/configuracoes/lookups`
+Returns all types and status for dropdowns in a single call.
+
+### Get All Types
+**GET** `/api/configuracoes/tipos`
+Returns all system types (client, account, card, insurance, transaction).
+
+### Get All Status
+**GET** `/api/configuracoes/status`
+Returns all system statuses.
+
+### Currency Management (Moedas)
+
+#### List Currencies
+**GET** `/api/moedas`
+Query parameters:
+- `ativa`: Filter by active currencies
+
+#### Create Currency
+**POST** `/api/moedas`
+```json
+{
+    "codigo": "USD",
+    "nome": "Dólar Americano",
+    "simbolo": "$"
+}
+```
+
+#### Get Currency
+**GET** `/api/moedas/{id}`
+
+#### Update Currency
+**PUT** `/api/moedas/{id}`
+
+#### Delete Currency
+**DELETE** `/api/moedas/{id}`
+
+### Branch Management (Agências)
+
+#### List Branches
+**GET** `/api/agencias`
+Query parameters:
+- `ativa`: Filter by active branches
+- `codigo_agencia`: Filter by branch code
+
+#### Create Branch
+**POST** `/api/agencias`
+```json
+{
+    "codigo_banco": "0042",
+    "codigo_agencia": "0001",
+    "nome": "Agência Central",
+    "endereco": "Rua da Independência, 123",
+    "telefone": ["+244 222 123 456"],
+    "email": "central@banco.ao",
+    "ativa": true
+}
+```
+
+#### Get Branch
+**GET** `/api/agencias/{id}`
+
+#### Update Branch
+**PUT** `/api/agencias/{id}`
+
+#### Delete Branch
+**DELETE** `/api/agencias/{id}`
+
+## User Management (Gestão de Usuários)
+
+### Profile Management (Perfis)
+
+#### List Profiles
+**GET** `/api/perfis`
+Query parameters:
+- `per_page`: Items per page
+
+#### Create Profile
+**POST** `/api/perfis`
+```json
+{
+    "nome": "Gerente",
+    "descricao": "Perfil para gerentes de agência",
+    "permissoes": [1, 2, 3, 5, 8]
+}
+```
+
+#### Get Profile
+**GET** `/api/perfis/{id}`
+
+#### Update Profile
+**PUT** `/api/perfis/{id}`
+
+#### Delete Profile
+**DELETE** `/api/perfis/{id}`
+
+#### Add Permissions to Profile
+**POST** `/api/perfis/{id}/permissoes`
+```json
+{
+    "permissoes": [10, 11, 12]
+}
+```
+
+#### Remove Permission from Profile
+**DELETE** `/api/perfis/{id}/permissoes/{permissao_id}`
+
+### Permission Management (Permissões)
+
+#### List Permissions
+**GET** `/api/permissoes`
+Query parameters:
+- `grupo`: Filter by permission group
+
+#### Create Permission
+**POST** `/api/permissoes`
+```json
+{
+    "nome": "Criar Cliente",
+    "code": "cliente.create",
+    "descricao": "Permite criar novos clientes",
+    "grupo": "Clientes"
+}
+```
+
+#### Get Permission
+**GET** `/api/permissoes/{id}`
+
+#### Update Permission
+**PUT** `/api/permissoes/{id}`
+
+#### Delete Permission
+**DELETE** `/api/permissoes/{id}`
+
+#### List Permission Groups
+**GET** `/api/permissoes/grupos`
+
+### Types and Status Endpoints
+
+#### Client Types
+**GET** `/api/tipos-cliente`
+**POST** `/api/tipos-cliente`
+
+#### Account Types
+**GET** `/api/tipos-conta`
+
+#### Card Types
+**GET** `/api/tipos-cartao`
+
+#### Insurance Types
+**GET** `/api/tipos-seguro`
+
+#### Transaction Types
+**GET** `/api/tipos-transacao`
+
+#### Client Status
+**GET** `/api/status-cliente`
+**POST** `/api/status-cliente`
+
+#### Account Status
+**GET** `/api/status-conta`
+
+#### Card Status
+**GET** `/api/status-cartao`
+
+#### Payment Status
+**GET** `/api/status-pagamento`
+
+#### Claim Status
+**GET** `/api/status-sinistro`
+
+#### Transaction Status
+**GET** `/api/status-transacao`
+
+#### Policy Status
+**GET** `/api/status-apolice`
+
+## Payment Management (Pagamentos)
+
+### List Payments
+**GET** `/api/pagamentos`
+Query parameters:
+- `conta_id`: Filter by account
+- `status`: Filter by status
+- `parceiro`: Filter by partner
+- `data_inicio`: Start date
+- `data_fim`: End date
+- `per_page`: Items per page
+
+### Create Payment
+**POST** `/api/pagamentos`
+```json
+{
+    "conta_id": 1,
+    "parceiro": "UNITEL",
+    "referencia": "244912345678",
+    "valor": 50.00,
+    "moeda_id": 1,
+    "data_pagamento": "2025-01-15 14:30:00",
+    "status_pagamento_id": 1
+}
+```
+
+### Get Payment
+**GET** `/api/pagamentos/{id}`
+
+### Update Payment
+**PUT** `/api/pagamentos/{id}`
+
+### Delete Payment
+**DELETE** `/api/pagamentos/{id}`
+
+### Process Payment
+**POST** `/api/pagamentos/{id}/processar`
+
+### Cancel Payment
+**POST** `/api/pagamentos/{id}/cancelar`
+
+## Audit Management (Auditoria)
+
+### List Action Logs
+**GET** `/api/logs`
+Query parameters:
+- `usuario_id`: Filter by user
+- `acao`: Filter by action
+- `tabela`: Filter by table
+- `data_inicio`: Start date
+- `data_fim`: End date
+- `per_page`: Items per page
+
+### Get Log Details
+**GET** `/api/logs/{id}`
+
+### Log Statistics
+**GET** `/api/logs/estatisticas`
+Query parameters:
+- `periodo`: Period (hoje, semana, mes, ano)
+
+### List Actions
+**GET** `/api/logs/acoes`
+Returns all recorded action types.
+
+### List Monitored Tables
+**GET** `/api/logs/tabelas`
+Returns all monitored tables.
+
+### User Logs
+**GET** `/api/logs/usuario/{usuario_id}`
+Query parameters:
+- `per_page`: Items per page
+
+### Clean Old Logs
+**DELETE** `/api/logs/limpar`
+```json
+{
+    "dias": 90
+}
+```
+
+## Summary of All Available Endpoints
+
+The system now includes **108 endpoints** organized in these categories:
+
+### 🔐 **Authentication (4 endpoints)**
+- Login, Logout, User Info, Change Password
+
+### 👥 **Client Management (6 endpoints)**
+- Full CRUD + lookups for clients
+
+### 🏦 **Account Management (8 endpoints)**
+- Full CRUD + deposit/withdraw/payment operations
+
+### 💳 **Card Management (6 endpoints)**
+- Full CRUD + block functionality
+
+### 🔄 **Transaction Management (5 endpoints)**
+- List, view, internal/external transfers, currency exchange
+
+### 🛡️ **Insurance Management (6 endpoints)**
+- Policies and claims management
+
+### 💱 **Currency Exchange (4 endpoints)**
+- Exchange rates and operations
+
+### 📊 **Reports (5 endpoints)**
+- Dashboard, statements, audit reports
+
+### ⚙️ **Configuration (23 endpoints)**
+- Currencies, branches, types, status, lookups
+
+### 👤 **User Management (12 endpoints)**
+- Profiles, permissions, user roles
+
+### 💰 **Payment Management (7 endpoints)**
+- Full payment lifecycle management
+
+### 📋 **Audit Management (7 endpoints)**
+- Action logs, statistics, cleanup
+
+### 🔍 **Lookup Endpoints (15 endpoints)**
+- All types and status for dropdowns
+
 ## Notes
 
 1. All endpoints requiring authentication need the `Authorization: Bearer {token}` header
@@ -457,3 +762,8 @@ Swagger documentation is available at:
 6. All CRUD operations are properly implemented and tested
 7. Proper validation is implemented for all endpoints
 8. The database configuration supports the default Laravel port (8000) on localhost
+9. **NEW**: Complete configuration management for all system entities
+10. **NEW**: Full user and permission management system
+11. **NEW**: Comprehensive audit trail with statistics
+12. **NEW**: Payment processing with status management
+13. **NEW**: All lookup tables now have dedicated endpoints

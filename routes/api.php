@@ -10,6 +10,13 @@ use App\Http\Controllers\Api\CartaoController;
 use App\Http\Controllers\Api\SeguroController;
 use App\Http\Controllers\Api\TaxaCambioController;
 use App\Http\Controllers\Api\RelatorioController;
+use App\Http\Controllers\Api\MoedaController;
+use App\Http\Controllers\Api\AgenciaController;
+use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\PermissaoController;
+use App\Http\Controllers\Api\ConfiguracaoController;
+use App\Http\Controllers\Api\PagamentoController;
+use App\Http\Controllers\Api\LogAcaoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,4 +80,58 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::get('relatorios/contas/{conta}/extrato', [RelatorioController::class, 'extrato']);
 	Route::get('relatorios/clientes/{cliente}/extrato', [RelatorioController::class, 'extratoCliente']);
 	Route::get('relatorios/auditoria', [RelatorioController::class, 'auditoria']);
+
+	// ========== NOVAS ROTAS ==========
+
+	// Configuração - Moedas
+	Route::apiResource('moedas', MoedaController::class);
+
+	// Configuração - Agências
+	Route::apiResource('agencias', AgenciaController::class);
+
+	// Gestão de Usuários - Perfis
+	Route::apiResource('perfis', PerfilController::class);
+	Route::post('perfis/{perfil}/permissoes', [PerfilController::class, 'adicionarPermissoes']);
+	Route::delete('perfis/{perfil}/permissoes/{permissao}', [PerfilController::class, 'removerPermissao']);
+
+	// Gestão de Usuários - Permissões
+	Route::apiResource('permissoes', PermissaoController::class);
+	Route::get('permissoes/grupos', [PermissaoController::class, 'grupos']);
+
+	// Configuração - Tipos e Status (Lookups)
+	Route::get('configuracoes/tipos', [ConfiguracaoController::class, 'tipos']);
+	Route::get('configuracoes/status', [ConfiguracaoController::class, 'status']);
+	Route::get('configuracoes/lookups', [ConfiguracaoController::class, 'lookups']);
+
+	// Endpoints específicos para tipos
+	Route::get('tipos-cliente', [ConfiguracaoController::class, 'tiposCliente']);
+	Route::post('tipos-cliente', [ConfiguracaoController::class, 'storeTipoCliente']);
+	Route::get('tipos-conta', [ConfiguracaoController::class, 'tiposConta']);
+	Route::get('tipos-cartao', [ConfiguracaoController::class, 'tiposCartao']);
+	Route::get('tipos-seguro', [ConfiguracaoController::class, 'tiposSeguro']);
+	Route::get('tipos-transacao', [ConfiguracaoController::class, 'tiposTransacao']);
+
+	// Endpoints específicos para status
+	Route::get('status-cliente', [ConfiguracaoController::class, 'statusCliente']);
+	Route::post('status-cliente', [ConfiguracaoController::class, 'storeStatusCliente']);
+	Route::get('status-conta', [ConfiguracaoController::class, 'statusConta']);
+	Route::get('status-cartao', [ConfiguracaoController::class, 'statusCartao']);
+	Route::get('status-pagamento', [ConfiguracaoController::class, 'statusPagamento']);
+	Route::get('status-sinistro', [ConfiguracaoController::class, 'statusSinistro']);
+	Route::get('status-transacao', [ConfiguracaoController::class, 'statusTransacao']);
+	Route::get('status-apolice', [ConfiguracaoController::class, 'statusApolice']);
+
+	// Pagamentos
+	Route::apiResource('pagamentos', PagamentoController::class);
+	Route::post('pagamentos/{pagamento}/processar', [PagamentoController::class, 'processar']);
+	Route::post('pagamentos/{pagamento}/cancelar', [PagamentoController::class, 'cancelar']);
+
+	// Auditoria - Logs de Ação
+	Route::get('logs', [LogAcaoController::class, 'index']);
+	Route::get('logs/estatisticas', [LogAcaoController::class, 'estatisticas']);
+	Route::get('logs/acoes', [LogAcaoController::class, 'acoes']);
+	Route::get('logs/tabelas', [LogAcaoController::class, 'tabelas']);
+	Route::get('logs/usuario/{usuarioId}', [LogAcaoController::class, 'logsPorUsuario']);
+	Route::get('logs/{log}', [LogAcaoController::class, 'show']);
+	Route::delete('logs/limpar', [LogAcaoController::class, 'limpar']);
 });
