@@ -14,8 +14,9 @@ class DatabaseSeeder extends Seeder
 	{
 		$this->command->info('🏦 Iniciando população do Sistema Bancário...');
 		
-		// 1. Estrutura organizacional (dependências básicas)
-		$this->command->info('📋 Criando estrutura organizacional...');
+		// Tabelas de lookup são populadas nas migrations
+		
+		// 1. Estrutura organizacional
 		$this->call([
 			AgenciaSeeder::class,
 			PermissaoSeeder::class,
@@ -24,14 +25,12 @@ class DatabaseSeeder extends Seeder
 		]);
 
 		// 2. Dados de clientes e contas (com relacionamentos)
-		$this->command->info('👥 Criando clientes e contas...');
 		$this->call([
 			ClienteSeeder::class,
 			ContaSeeder::class, // Cria contas e cartões automaticamente
 		]);
 
 		// 3. Histórico e operações
-		$this->command->info('💸 Criando histórico e operações...');
 		$this->call([
 			TaxaCambioSeeder::class,
 			TransacaoSeeder::class, // Cria histórico de transações
