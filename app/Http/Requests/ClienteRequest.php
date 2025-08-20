@@ -34,6 +34,7 @@ class ClienteRequest extends FormRequest
                 $requiredOrSometimes,
                 'string',
                 'max:25',
+                'regex:/^\d{9}[A-Z]{2}\d{3}$/',
                 Rule::unique('clientes', 'bi')->ignore($clienteId)
             ],
             'email' => ['nullable', 'email', Rule::unique('clientes', 'email')->ignore($clienteId)],
@@ -55,6 +56,7 @@ class ClienteRequest extends FormRequest
             'bi.required' => 'O BI é obrigatório.',
             'bi.unique' => 'Este BI já está cadastrado.',
             'bi.max' => 'O BI não pode ter mais de 25 caracteres.',
+            'bi.regex' => 'O BI deve seguir o formato angolano: 9 dígitos, 2 letras maiúsculas, 3 dígitos (ex: 123456789AZ123).',
             'tipo_cliente_id.required' => 'O tipo de cliente é obrigatório.',
             'tipo_cliente_id.exists' => 'O tipo de cliente selecionado é inválido.',
             'status_cliente_id.required' => 'O status do cliente é obrigatório.',

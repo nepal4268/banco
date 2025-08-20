@@ -34,6 +34,10 @@ class DatabaseSeeder extends Seeder
 		$this->call([
 			TaxaCambioSeeder::class,
 			TransacaoSeeder::class, // Cria histórico de transações
+			PagamentoSeeder::class,
+			ApoliceSeeder::class,
+			SinistroSeeder::class,
+			OperacaoCambioSeeder::class,
 		]);
 
 		$this->command->info('');

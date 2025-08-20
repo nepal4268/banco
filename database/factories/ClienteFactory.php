@@ -23,7 +23,7 @@ class ClienteFactory extends Factory
             'tipo_cliente_id' => $tipoCliente->id,
             'nome' => $this->faker->name(),
             'sexo' => $this->faker->randomElement(['M', 'F']),
-            'bi' => $this->faker->unique()->numerify('#########'),
+            'bi' => $this->faker->unique()->regexify('\\d{9}[A-Z]{2}\\d{3}'),
             'email' => $this->faker->unique()->safeEmail(),
             'telefone' => [$this->faker->numerify('9########')],
             'data_nascimento' => $this->faker->dateTimeBetween('-65 years', '-18 years')->format('Y-m-d'),

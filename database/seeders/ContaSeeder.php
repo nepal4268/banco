@@ -23,7 +23,7 @@ class ContaSeeder extends Seeder
     {
         $clientes = Cliente::all();
         $agencias = Agencia::all();
-        $tipoConta = TipoConta::where('nome', 'Corrente')->first() ?? TipoConta::first();
+        $tipoConta = TipoConta::where('nome', 'Conta Corrente')->first() ?? TipoConta::first();
         $statusAtiva = StatusConta::where('nome', 'Ativa')->first() ?? StatusConta::first();
         $moedaAOA = Moeda::where('codigo', 'AOA')->first();
         $moedaUSD = Moeda::where('codigo', 'USD')->first();
