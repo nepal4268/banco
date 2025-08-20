@@ -80,6 +80,8 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::get('relatorios/contas/{conta}/extrato', [RelatorioController::class, 'extrato']);
 	Route::get('relatorios/clientes/{cliente}/extrato', [RelatorioController::class, 'extratoCliente']);
 	Route::get('relatorios/auditoria', [RelatorioController::class, 'auditoria']);
+	Route::get('relatorios/clientes/{cliente}/contas', [RelatorioController::class, 'contasDoCliente']);
+	Route::get('relatorios/movimentos', [RelatorioController::class, 'movimentos']);
 
 	// ========== NOVAS ROTAS ==========
 
@@ -106,25 +108,77 @@ Route::middleware('auth:sanctum')->group(function () {
 	// Endpoints específicos para tipos
 	Route::get('tipos-cliente', [ConfiguracaoController::class, 'tiposCliente']);
 	Route::post('tipos-cliente', [ConfiguracaoController::class, 'storeTipoCliente']);
+	Route::get('tipos-cliente/{tipoCliente}', [ConfiguracaoController::class, 'showTipoCliente']);
+	Route::put('tipos-cliente/{tipoCliente}', [ConfiguracaoController::class, 'updateTipoCliente']);
+	Route::delete('tipos-cliente/{tipoCliente}', [ConfiguracaoController::class, 'destroyTipoCliente']);
 	Route::get('tipos-conta', [ConfiguracaoController::class, 'tiposConta']);
+	Route::post('tipos-conta', [ConfiguracaoController::class, 'storeTipoConta']);
+	Route::get('tipos-conta/{tipoConta}', [ConfiguracaoController::class, 'showTipoConta']);
+	Route::put('tipos-conta/{tipoConta}', [ConfiguracaoController::class, 'updateTipoConta']);
+	Route::delete('tipos-conta/{tipoConta}', [ConfiguracaoController::class, 'destroyTipoConta']);
 	Route::get('tipos-cartao', [ConfiguracaoController::class, 'tiposCartao']);
+	Route::post('tipos-cartao', [ConfiguracaoController::class, 'storeTipoCartao']);
+	Route::get('tipos-cartao/{tipoCartao}', [ConfiguracaoController::class, 'showTipoCartao']);
+	Route::put('tipos-cartao/{tipoCartao}', [ConfiguracaoController::class, 'updateTipoCartao']);
+	Route::delete('tipos-cartao/{tipoCartao}', [ConfiguracaoController::class, 'destroyTipoCartao']);
 	Route::get('tipos-seguro', [ConfiguracaoController::class, 'tiposSeguro']);
+	Route::post('tipos-seguro', [ConfiguracaoController::class, 'storeTipoSeguro']);
+	Route::get('tipos-seguro/{tipoSeguro}', [ConfiguracaoController::class, 'showTipoSeguro']);
+	Route::put('tipos-seguro/{tipoSeguro}', [ConfiguracaoController::class, 'updateTipoSeguro']);
+	Route::delete('tipos-seguro/{tipoSeguro}', [ConfiguracaoController::class, 'destroyTipoSeguro']);
 	Route::get('tipos-transacao', [ConfiguracaoController::class, 'tiposTransacao']);
+	Route::post('tipos-transacao', [ConfiguracaoController::class, 'storeTipoTransacao']);
+	Route::get('tipos-transacao/{tipoTransacao}', [ConfiguracaoController::class, 'showTipoTransacao']);
+	Route::put('tipos-transacao/{tipoTransacao}', [ConfiguracaoController::class, 'updateTipoTransacao']);
+	Route::delete('tipos-transacao/{tipoTransacao}', [ConfiguracaoController::class, 'destroyTipoTransacao']);
 
 	// Endpoints específicos para status
 	Route::get('status-cliente', [ConfiguracaoController::class, 'statusCliente']);
 	Route::post('status-cliente', [ConfiguracaoController::class, 'storeStatusCliente']);
+	Route::get('status-cliente/{statusCliente}', [ConfiguracaoController::class, 'showStatusCliente']);
+	Route::put('status-cliente/{statusCliente}', [ConfiguracaoController::class, 'updateStatusCliente']);
+	Route::delete('status-cliente/{statusCliente}', [ConfiguracaoController::class, 'destroyStatusCliente']);
 	Route::get('status-conta', [ConfiguracaoController::class, 'statusConta']);
+	Route::post('status-conta', [ConfiguracaoController::class, 'storeStatusConta']);
+	Route::get('status-conta/{statusConta}', [ConfiguracaoController::class, 'showStatusConta']);
+	Route::put('status-conta/{statusConta}', [ConfiguracaoController::class, 'updateStatusConta']);
+	Route::delete('status-conta/{statusConta}', [ConfiguracaoController::class, 'destroyStatusConta']);
 	Route::get('status-cartao', [ConfiguracaoController::class, 'statusCartao']);
+	Route::post('status-cartao', [ConfiguracaoController::class, 'storeStatusCartao']);
+	Route::get('status-cartao/{statusCartao}', [ConfiguracaoController::class, 'showStatusCartao']);
+	Route::put('status-cartao/{statusCartao}', [ConfiguracaoController::class, 'updateStatusCartao']);
+	Route::delete('status-cartao/{statusCartao}', [ConfiguracaoController::class, 'destroyStatusCartao']);
 	Route::get('status-pagamento', [ConfiguracaoController::class, 'statusPagamento']);
+	Route::post('status-pagamento', [ConfiguracaoController::class, 'storeStatusPagamento']);
+	Route::get('status-pagamento/{statusPagamento}', [ConfiguracaoController::class, 'showStatusPagamento']);
+	Route::put('status-pagamento/{statusPagamento}', [ConfiguracaoController::class, 'updateStatusPagamento']);
+	Route::delete('status-pagamento/{statusPagamento}', [ConfiguracaoController::class, 'destroyStatusPagamento']);
 	Route::get('status-sinistro', [ConfiguracaoController::class, 'statusSinistro']);
+	Route::post('status-sinistro', [ConfiguracaoController::class, 'storeStatusSinistro']);
+	Route::get('status-sinistro/{statusSinistro}', [ConfiguracaoController::class, 'showStatusSinistro']);
+	Route::put('status-sinistro/{statusSinistro}', [ConfiguracaoController::class, 'updateStatusSinistro']);
+	Route::delete('status-sinistro/{statusSinistro}', [ConfiguracaoController::class, 'destroyStatusSinistro']);
 	Route::get('status-transacao', [ConfiguracaoController::class, 'statusTransacao']);
+	Route::post('status-transacao', [ConfiguracaoController::class, 'storeStatusTransacao']);
+	Route::get('status-transacao/{statusTransacao}', [ConfiguracaoController::class, 'showStatusTransacao']);
+	Route::put('status-transacao/{statusTransacao}', [ConfiguracaoController::class, 'updateStatusTransacao']);
+	Route::delete('status-transacao/{statusTransacao}', [ConfiguracaoController::class, 'destroyStatusTransacao']);
 	Route::get('status-apolice', [ConfiguracaoController::class, 'statusApolice']);
+	Route::post('status-apolice', [ConfiguracaoController::class, 'storeStatusApolice']);
+	Route::get('status-apolice/{statusApolice}', [ConfiguracaoController::class, 'showStatusApolice']);
+	Route::put('status-apolice/{statusApolice}', [ConfiguracaoController::class, 'updateStatusApolice']);
+	Route::delete('status-apolice/{statusApolice}', [ConfiguracaoController::class, 'destroyStatusApolice']);
 
 	// Pagamentos
 	Route::apiResource('pagamentos', PagamentoController::class);
 	Route::post('pagamentos/{pagamento}/processar', [PagamentoController::class, 'processar']);
 	Route::post('pagamentos/{pagamento}/cancelar', [PagamentoController::class, 'cancelar']);
+
+	// Seguros - atualizar/excluir
+	Route::put('seguros/apolices/{apolice}', [SeguroController::class, 'updateApolice']);
+	Route::delete('seguros/apolices/{apolice}', [SeguroController::class, 'destroyApolice']);
+	Route::put('seguros/sinistros/{sinistro}', [SeguroController::class, 'updateSinistro']);
+	Route::delete('seguros/sinistros/{sinistro}', [SeguroController::class, 'destroySinistro']);
 
 	// Auditoria - Logs de Ação
 	Route::get('logs', [LogAcaoController::class, 'index']);
