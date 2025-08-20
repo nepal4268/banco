@@ -96,7 +96,15 @@ class UsuarioSeeder extends Seeder
                     'senha' => bcrypt($userData['senha']),
                     'perfil_id' => $perfil->id,
                     'agencia_id' => $userData['agencia_id'],
-                    'status_usuario' => 'ativo'
+                    'status_usuario' => 'ativo',
+                    // Campos opcionais para alinhar com a migration
+                    'bi' => fake()->unique()->numerify('#########'),
+                    'sexo' => fake()->randomElement(['M', 'F']),
+                    'telefone' => [fake()->numerify('9########')],
+                    'data_nascimento' => fake()->date('Y-m-d'),
+                    'endereco' => fake()->streetAddress(),
+                    'cidade' => fake()->city(),
+                    'provincia' => fake()->state(),
                 ]
             );
         }

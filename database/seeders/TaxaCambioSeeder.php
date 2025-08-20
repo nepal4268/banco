@@ -31,6 +31,7 @@ class TaxaCambioSeeder extends Seeder
                 'taxa_compra' => 825.50,  // Banco compra USD
                 'taxa_venda' => 830.00,   // Banco vende USD
                 'ativa' => true,
+                'data_taxa' => now()->toDateString(),
             ],
             // AOA para USD
             [
@@ -39,6 +40,7 @@ class TaxaCambioSeeder extends Seeder
                 'taxa_compra' => 0.001205,  // 1/830 (inverso da venda)
                 'taxa_venda' => 0.001212,   // 1/825.50 (inverso da compra)
                 'ativa' => true,
+                'data_taxa' => now()->toDateString(),
             ],
             // EUR para AOA
             [
@@ -47,6 +49,7 @@ class TaxaCambioSeeder extends Seeder
                 'taxa_compra' => 890.75,
                 'taxa_venda' => 896.25,
                 'ativa' => true,
+                'data_taxa' => now()->toDateString(),
             ],
             // AOA para EUR
             [
@@ -55,6 +58,7 @@ class TaxaCambioSeeder extends Seeder
                 'taxa_compra' => 0.001116,  // 1/896.25
                 'taxa_venda' => 0.001123,   // 1/890.75
                 'ativa' => true,
+                'data_taxa' => now()->toDateString(),
             ],
             // USD para EUR
             [
@@ -63,6 +67,7 @@ class TaxaCambioSeeder extends Seeder
                 'taxa_compra' => 0.9245,
                 'taxa_venda' => 0.9285,
                 'ativa' => true,
+                'data_taxa' => now()->toDateString(),
             ],
             // EUR para USD
             [
@@ -71,6 +76,7 @@ class TaxaCambioSeeder extends Seeder
                 'taxa_compra' => 1.0770,
                 'taxa_venda' => 1.0815,
                 'ativa' => true,
+                'data_taxa' => now()->toDateString(),
             ],
         ];
 
