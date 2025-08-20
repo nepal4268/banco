@@ -76,6 +76,19 @@ class ConfiguracaoController extends Controller
     public function statusApolice(): JsonResponse { return response()->json(StatusApolice::all()); }
 
     // Criação mínima existente
+    /**
+     * @OA\Post(
+     *     path="/api/tipos-cliente",
+     *     summary="Criar tipo de cliente",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeTipoCliente(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -85,6 +98,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Tipo de cliente criado com sucesso', 'tipo' => $tipo], 201);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-cliente",
+     *     summary="Criar status de cliente",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusCliente(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -95,6 +121,19 @@ class ConfiguracaoController extends Controller
     }
 
     // ========== CRUD completo - Tipos ==========
+    /**
+     * @OA\Post(
+     *     path="/api/tipos-conta",
+     *     summary="Criar tipo de conta",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeTipoConta(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -107,6 +146,19 @@ class ConfiguracaoController extends Controller
 
     public function showTipoConta(TipoConta $tipoConta): JsonResponse { return response()->json($tipoConta); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/tipos-conta/{id}",
+     *     summary="Atualizar tipo de conta",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateTipoConta(Request $request, TipoConta $tipoConta): JsonResponse
     {
         $validated = $request->validate([
@@ -124,6 +176,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Tipo de conta excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/tipos-cartao",
+     *     summary="Criar tipo de cartão",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeTipoCartao(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -136,6 +201,19 @@ class ConfiguracaoController extends Controller
 
     public function showTipoCartao(TipoCartao $tipoCartao): JsonResponse { return response()->json($tipoCartao); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/tipos-cartao/{id}",
+     *     summary="Atualizar tipo de cartão",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateTipoCartao(Request $request, TipoCartao $tipoCartao): JsonResponse
     {
         $validated = $request->validate([
@@ -153,6 +231,21 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Tipo de cartão excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/tipos-seguro",
+     *     summary="Criar tipo de seguro",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=50),
+     *         @OA\Property(property="descricao", type="string", maxLength=255),
+     *         @OA\Property(property="cobertura", type="number", format="float"),
+     *         @OA\Property(property="premio_mensal", type="number", format="float")
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeTipoSeguro(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -167,6 +260,21 @@ class ConfiguracaoController extends Controller
 
     public function showTipoSeguro(TipoSeguro $tipoSeguro): JsonResponse { return response()->json($tipoSeguro); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/tipos-seguro/{id}",
+     *     summary="Atualizar tipo de seguro",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=50),
+     *         @OA\Property(property="descricao", type="string", maxLength=255),
+     *         @OA\Property(property="cobertura", type="number", format="float"),
+     *         @OA\Property(property="premio_mensal", type="number", format="float")
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateTipoSeguro(Request $request, TipoSeguro $tipoSeguro): JsonResponse
     {
         $validated = $request->validate([
@@ -186,6 +294,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Tipo de seguro excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/tipos-transacao",
+     *     summary="Criar tipo de transação",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeTipoTransacao(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -198,6 +319,19 @@ class ConfiguracaoController extends Controller
 
     public function showTipoTransacao(TipoTransacao $tipoTransacao): JsonResponse { return response()->json($tipoTransacao); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/tipos-transacao/{id}",
+     *     summary="Atualizar tipo de transação",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateTipoTransacao(Request $request, TipoTransacao $tipoTransacao): JsonResponse
     {
         $validated = $request->validate([
@@ -217,6 +351,19 @@ class ConfiguracaoController extends Controller
 
     public function showTipoCliente(TipoCliente $tipoCliente): JsonResponse { return response()->json($tipoCliente); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/tipos-cliente/{id}",
+     *     summary="Atualizar tipo de cliente",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=30),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateTipoCliente(Request $request, TipoCliente $tipoCliente): JsonResponse
     {
         $validated = $request->validate([
@@ -237,6 +384,19 @@ class ConfiguracaoController extends Controller
     // ========== CRUD completo - Status ==========
     public function showStatusCliente(StatusCliente $statusCliente): JsonResponse { return response()->json($statusCliente); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-cliente/{id}",
+     *     summary="Atualizar status de cliente",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusCliente(Request $request, StatusCliente $statusCliente): JsonResponse
     {
         $validated = $request->validate([
@@ -254,6 +414,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Status de cliente excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-conta",
+     *     summary="Criar status de conta",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusConta(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -266,6 +439,19 @@ class ConfiguracaoController extends Controller
 
     public function showStatusConta(StatusConta $statusConta): JsonResponse { return response()->json($statusConta); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-conta/{id}",
+     *     summary="Atualizar status de conta",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusConta(Request $request, StatusConta $statusConta): JsonResponse
     {
         $validated = $request->validate([
@@ -283,6 +469,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Status de conta excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-cartao",
+     *     summary="Criar status de cartão",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusCartao(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -295,6 +494,19 @@ class ConfiguracaoController extends Controller
 
     public function showStatusCartao(StatusCartao $statusCartao): JsonResponse { return response()->json($statusCartao); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-cartao/{id}",
+     *     summary="Atualizar status de cartão",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusCartao(Request $request, StatusCartao $statusCartao): JsonResponse
     {
         $validated = $request->validate([
@@ -312,6 +524,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Status de cartão excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-pagamento",
+     *     summary="Criar status de pagamento",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusPagamento(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -324,6 +549,19 @@ class ConfiguracaoController extends Controller
 
     public function showStatusPagamento(StatusPagamento $statusPagamento): JsonResponse { return response()->json($statusPagamento); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-pagamento/{id}",
+     *     summary="Atualizar status de pagamento",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusPagamento(Request $request, StatusPagamento $statusPagamento): JsonResponse
     {
         $validated = $request->validate([
@@ -341,6 +579,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Status de pagamento excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-sinistro",
+     *     summary="Criar status de sinistro",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusSinistro(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -353,6 +604,19 @@ class ConfiguracaoController extends Controller
 
     public function showStatusSinistro(StatusSinistro $statusSinistro): JsonResponse { return response()->json($statusSinistro); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-sinistro/{id}",
+     *     summary="Atualizar status de sinistro",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusSinistro(Request $request, StatusSinistro $statusSinistro): JsonResponse
     {
         $validated = $request->validate([
@@ -370,6 +634,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Status de sinistro excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-transacao",
+     *     summary="Criar status de transação",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusTransacao(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -382,6 +659,19 @@ class ConfiguracaoController extends Controller
 
     public function showStatusTransacao(StatusTransacao $statusTransacao): JsonResponse { return response()->json($statusTransacao); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-transacao/{id}",
+     *     summary="Atualizar status de transação",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusTransacao(Request $request, StatusTransacao $statusTransacao): JsonResponse
     {
         $validated = $request->validate([
@@ -399,6 +689,19 @@ class ConfiguracaoController extends Controller
         return response()->json(['message' => 'Status de transação excluído com sucesso']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/status-apolice",
+     *     summary="Criar status de apólice",
+     *     tags={"Configuração"},
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         required={"nome"},
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=201, description="Criado")
+     * )
+     */
     public function storeStatusApolice(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -411,6 +714,19 @@ class ConfiguracaoController extends Controller
 
     public function showStatusApolice(StatusApolice $statusApolice): JsonResponse { return response()->json($statusApolice); }
 
+    /**
+     * @OA\Put(
+     *     path="/api/status-apolice/{id}",
+     *     summary="Atualizar status de apólice",
+     *     tags={"Configuração"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(@OA\JsonContent(
+     *         @OA\Property(property="nome", type="string", maxLength=20),
+     *         @OA\Property(property="descricao", type="string", maxLength=255)
+     *     )),
+     *     @OA\Response(response=200, description="Atualizado")
+     * )
+     */
     public function updateStatusApolice(Request $request, StatusApolice $statusApolice): JsonResponse
     {
         $validated = $request->validate([

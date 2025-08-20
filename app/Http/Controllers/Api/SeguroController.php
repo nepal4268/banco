@@ -60,6 +60,22 @@ class SeguroController extends Controller
      *     @OA\Response(response=201, description="Apólice criada com sucesso")
      * )
      */
+    /**
+     * @OA\RequestBody(
+     *   request="ApoliceRequest",
+     *   required=true,
+     *   @OA\JsonContent(
+     *     required={"cliente_id","tipo_seguro_id","numero_apolice","inicio_vigencia","fim_vigencia","status_apolice_id","premio_mensal"},
+     *     @OA\Property(property="cliente_id", type="integer"),
+     *     @OA\Property(property="tipo_seguro_id", type="integer"),
+     *     @OA\Property(property="numero_apolice", type="string", maxLength=50),
+     *     @OA\Property(property="inicio_vigencia", type="string", format="date"),
+     *     @OA\Property(property="fim_vigencia", type="string", format="date"),
+     *     @OA\Property(property="status_apolice_id", type="integer"),
+     *     @OA\Property(property="premio_mensal", type="number", format="float")
+     *   )
+     * )
+     */
     public function storeApolice(ApoliceRequest $request): JsonResponse
     {
         $apolice = Apolice::create($request->validated());
@@ -188,6 +204,20 @@ class SeguroController extends Controller
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(ref="#/components/requestBodies/SinistroRequest"),
      *     @OA\Response(response=200, description="Sinistro atualizado")
+     * )
+     */
+    /**
+     * @OA\RequestBody(
+     *   request="SinistroRequest",
+     *   required=true,
+     *   @OA\JsonContent(
+     *     required={"apolice_id","descricao","valor_sinistro"},
+     *     @OA\Property(property="apolice_id", type="integer"),
+     *     @OA\Property(property="descricao", type="string"),
+     *     @OA\Property(property="valor_sinistro", type="number", format="float"),
+     *     @OA\Property(property="data_ocorrencia", type="string", format="date"),
+     *     @OA\Property(property="status_sinistro_id", type="integer")
+     *   )
      * )
      */
     public function updateSinistro(SinistroRequest $request, Sinistro $sinistro): JsonResponse
