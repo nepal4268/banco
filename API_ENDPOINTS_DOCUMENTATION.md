@@ -447,6 +447,37 @@ The API will be available at: `http://localhost:8000/api/`
 Swagger documentation is available at:
 `http://localhost:8000/api/documentation`
 
+## Branch Management (Agências)
+
+### List Branches
+**GET** `/api/agencias`
+Query parameters:
+- `ativa`: Filter by active branches
+- `codigo_agencia`: Filter by branch code
+
+### Create Branch
+**POST** `/api/agencias`
+```json
+{
+    "codigo_banco": "0042",
+    "codigo_agencia": "0001",
+    "nome": "Agência Central",
+    "endereco": "Rua da Independência, 123",
+    "telefone": ["+244 222 123 456"],
+    "email": "central@banco.ao",
+    "ativa": true
+}
+```
+
+### Get Branch
+**GET** `/api/agencias/{id}`
+
+### Update Branch
+**PUT** `/api/agencias/{id}`
+
+### Delete Branch
+**DELETE** `/api/agencias/{id}`
+
 ## Configuration Management (Configuração)
 
 ### List All Lookups
@@ -486,37 +517,6 @@ Query parameters:
 
 #### Delete Currency
 **DELETE** `/api/moedas/{id}`
-
-### Branch Management (Agências)
-
-#### List Branches
-**GET** `/api/agencias`
-Query parameters:
-- `ativa`: Filter by active branches
-- `codigo_agencia`: Filter by branch code
-
-#### Create Branch
-**POST** `/api/agencias`
-```json
-{
-    "codigo_banco": "0042",
-    "codigo_agencia": "0001",
-    "nome": "Agência Central",
-    "endereco": "Rua da Independência, 123",
-    "telefone": ["+244 222 123 456"],
-    "email": "central@banco.ao",
-    "ativa": true
-}
-```
-
-#### Get Branch
-**GET** `/api/agencias/{id}`
-
-#### Update Branch
-**PUT** `/api/agencias/{id}`
-
-#### Delete Branch
-**DELETE** `/api/agencias/{id}`
 
 ## User Management (Gestão de Usuários)
 
@@ -711,7 +711,7 @@ Query parameters:
 
 ## Summary of All Available Endpoints
 
-The system now includes **108 endpoints** organized in these categories:
+The system now includes **105 endpoints** organized in these categories:
 
 ### 🔐 **Authentication (4 endpoints)**
 - Login, Logout, User Info, Change Password
@@ -722,11 +722,11 @@ The system now includes **108 endpoints** organized in these categories:
 ### 🏦 **Account Management (8 endpoints)**
 - Full CRUD + deposit/withdraw/payment operations
 
-### 💳 **Card Management (6 endpoints)**
-- Full CRUD + block functionality
-
 ### 🔄 **Transaction Management (5 endpoints)**
 - List, view, internal/external transfers, currency exchange
+
+### 💳 **Card Management (6 endpoints)**
+- Full CRUD + block functionality
 
 ### 🛡️ **Insurance Management (6 endpoints)**
 - Policies and claims management
@@ -737,8 +737,11 @@ The system now includes **108 endpoints** organized in these categories:
 ### 📊 **Reports (5 endpoints)**
 - Dashboard, statements, audit reports
 
-### ⚙️ **Configuration (23 endpoints)**
-- Currencies, branches, types, status, lookups
+### 🏢 **Branch Management (5 endpoints)**
+- Full CRUD for bank branches
+
+### ⚙️ **Configuration (18 endpoints)**
+- Currencies, types, status, lookups
 
 ### 👤 **User Management (12 endpoints)**
 - Profiles, permissions, user roles
@@ -749,7 +752,7 @@ The system now includes **108 endpoints** organized in these categories:
 ### 📋 **Audit Management (7 endpoints)**
 - Action logs, statistics, cleanup
 
-### 🔍 **Lookup Endpoints (15 endpoints)**
+### 🔍 **Lookup Endpoints (12 endpoints)**
 - All types and status for dropdowns
 
 ## Notes
