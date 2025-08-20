@@ -301,4 +301,104 @@ class RelatorioController extends Controller
         $perPage = $request->get('per_page', 50);
         return response()->json($query->paginate($perPage));
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/clientes/{cliente}/contas",
+     *     summary="Resumo de contas do cliente",
+     *     tags={"Relatórios"},
+     *     @OA\Parameter(name="cliente", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Resumo de contas do cliente")
+     * )
+     */
+    public function contasDoCliente(Cliente $cliente): JsonResponse
+    {
+        $contas = $cliente->contas()->with(['moeda', 'statusConta', 'tipoConta', 'agencia'])->get();
+        $saldoTotal = $contas->sum('saldo');
+        $porMoeda = $contas->groupBy(fn($c) => $c->moeda->codigo)->map(fn($items) => [
+            'quantidade' => $items->count(),
+            'saldo' => $items->sum('saldo')
+        ]);
+        return response()->json([
+            'cliente' => $cliente->only(['id','nome','bi','email']),
+            'contas' => $contas,
+            'saldo_total' => $saldoTotal,
+            'por_moeda' => $porMoeda,
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/movimentos",
+     *     summary="Relatório de movimentos (entradas/saídas) agregado",
+     *     tags={"Relatórios"},
+     *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="conta_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="cliente_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Resumo de movimentos")
+     * )
+     */
+    public function movimentos(Request $request): JsonResponse
+    {
+        $dataInicio = $request->get('data_inicio');
+        $dataFim = $request->get('data_fim');
+        $contaId = $request->get('conta_id');
+        $clienteId = $request->get('cliente_id');
+
+        $query = Transacao::query();
+        if ($dataInicio) $query->whereDate('created_at', '>=', $dataInicio);
+        if ($dataFim) $query->whereDate('created_at', '<=', $dataFim);
+        if ($contaId) {
+            $query->where(function($q) use ($contaId) {
+                $q->where('conta_origem_id', $contaId)->orWhere('conta_destino_id', $contaId);
+            });
+        }
+        if ($clienteId) {
+            $query->where(function($q) use ($clienteId) {
+                $q->whereHas('contaOrigem', function($qq) use ($clienteId) { $qq->where('cliente_id', $clienteId); })
+                  ->orWhereHas('contaDestino', function($qq) use ($clienteId) { $qq->where('cliente_id', $clienteId); });
+            });
+        }
+
+        $dados = $query->with(['moeda'])->get()->map(function($t) use ($contaId, $clienteId) {
+            $tipo = 'entrada';
+            if ($contaId) {
+                $tipo = ($t->conta_origem_id == $contaId) ? 'saida' : 'entrada';
+            } elseif ($clienteId) {
+                $origemDoCliente = optional($t->contaOrigem)->cliente_id === (int)$clienteId;
+                $tipo = $origemDoCliente ? 'saida' : 'entrada';
+            }
+            return [
+                'id' => $t->id,
+                'data' => $t->created_at,
+                'valor' => $t->valor,
+                'moeda' => optional($t->moeda)->codigo,
+                'tipo' => $tipo,
+            ];
+        });
+
+        $resumo = [
+            'entradas' => $dados->where('tipo', 'entrada')->sum('valor'),
+            'saidas' => $dados->where('tipo', 'saida')->sum('valor'),
+            'por_moeda' => $dados->groupBy('moeda')->map(function($items) {
+                return [
+                    'entradas' => $items->where('tipo', 'entrada')->sum('valor'),
+                    'saidas' => $items->where('tipo', 'saida')->sum('valor'),
+                    'quantidade' => $items->count(),
+                ];
+            })
+        ];
+
+        return response()->json([
+            'filtros' => [
+                'data_inicio' => $dataInicio,
+                'data_fim' => $dataFim,
+                'conta_id' => $contaId,
+                'cliente_id' => $clienteId,
+            ],
+            'resumo' => $resumo,
+            'registos' => $dados->sortByDesc('data')->values(),
+        ]);
+    }
 }

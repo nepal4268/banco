@@ -81,6 +81,40 @@ class SeguroController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *     path="/api/seguros/apolices/{id}",
+     *     summary="Atualizar apólice",
+     *     tags={"Seguros"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(ref="#/components/requestBodies/ApoliceRequest"),
+     *     @OA\Response(response=200, description="Apólice atualizada")
+     * )
+     */
+    public function updateApolice(ApoliceRequest $request, Apolice $apolice): JsonResponse
+    {
+        $apolice->update($request->validated());
+        return response()->json($apolice->load(['cliente', 'tipoSeguro', 'statusApolice']));
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/seguros/apolices/{id}",
+     *     summary="Excluir apólice",
+     *     tags={"Seguros"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Apólice excluída")
+     * )
+     */
+    public function destroyApolice(Apolice $apolice): JsonResponse
+    {
+        if ($apolice->sinistros()->exists()) {
+            return response()->json(['message' => 'Não é possível excluir apólice com sinistros associados'], 422);
+        }
+        $apolice->delete();
+        return response()->json(['message' => 'Apólice excluída com sucesso']);
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/seguros/sinistros",
      *     summary="Listar sinistros",
@@ -144,5 +178,36 @@ class SeguroController extends Controller
     public function showSinistro(Sinistro $sinistro): JsonResponse
     {
         return response()->json($sinistro->load(['apolice.cliente', 'statusSinistro']));
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/seguros/sinistros/{id}",
+     *     summary="Atualizar sinistro",
+     *     tags={"Seguros"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(ref="#/components/requestBodies/SinistroRequest"),
+     *     @OA\Response(response=200, description="Sinistro atualizado")
+     * )
+     */
+    public function updateSinistro(SinistroRequest $request, Sinistro $sinistro): JsonResponse
+    {
+        $sinistro->update($request->validated());
+        return response()->json($sinistro->load(['apolice.cliente', 'statusSinistro']));
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/seguros/sinistros/{id}",
+     *     summary="Excluir sinistro",
+     *     tags={"Seguros"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Sinistro excluído")
+     * )
+     */
+    public function destroySinistro(Sinistro $sinistro): JsonResponse
+    {
+        $sinistro->delete();
+        return response()->json(['message' => 'Sinistro excluído com sucesso']);
     }
 }
