@@ -98,7 +98,7 @@ class UsuarioSeeder extends Seeder
                     'agencia_id' => $userData['agencia_id'],
                     'status_usuario' => 'ativo',
                     // Campos opcionais para alinhar com a migration
-                    'bi' => fake()->unique()->numerify('#########'),
+                    'bi' => fake()->unique()->regexify('\\d{9}[A-Z]{2}\\d{3}'),
                     'sexo' => fake()->randomElement(['M', 'F']),
                     'telefone' => [fake()->numerify('9########')],
                     'data_nascimento' => fake()->date('Y-m-d'),
