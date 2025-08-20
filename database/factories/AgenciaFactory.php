@@ -35,7 +35,7 @@ class AgenciaFactory extends Factory
             'cidade' => $this->faker->city(),
             'provincia' => $this->faker->state(),
             'gerente' => $this->faker->name(),
-            'telefones' => json_encode([$this->faker->numerify('935362625')]),
+            'telefone' => [$this->faker->numerify('935362625')],
             'email' => strtolower(str_replace([' ', 'ê', 'ã'], ['', 'e', 'a'], $agencia['nome'])) . '@banco.ao',
         ];
     }

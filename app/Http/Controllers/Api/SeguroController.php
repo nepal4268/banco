@@ -7,6 +7,7 @@ use App\Http\Requests\ApoliceRequest;
 use App\Models\Apolice;
 use App\Models\Sinistro;
 use Illuminate\Http\Request;
+use App\Http\Requests\SinistroRequest;
 use Illuminate\Http\JsonResponse;
 
 class SeguroController extends Controller
@@ -125,15 +126,8 @@ class SeguroController extends Controller
      *     @OA\Response(response=201, description="Sinistro registrado com sucesso")
      * )
      */
-    public function storeSinistro(Request $request): JsonResponse
+    public function storeSinistro(SinistroRequest $request): JsonResponse
     {
-        $request->validate([
-            'apolice_id' => 'required|integer|exists:apolices,id',
-            'descricao' => 'required|string|max:500',
-            'valor_sinistro' => 'required|numeric|min:0',
-            'data_ocorrencia' => 'required|date'
-        ]);
-
         $sinistro = Sinistro::create($request->validated());
         return response()->json($sinistro->load(['apolice.cliente', 'statusSinistro']), 201);
     }

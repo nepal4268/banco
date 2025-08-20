@@ -34,8 +34,8 @@ class AgenciaRequest extends FormRequest
             ],
             'nome' => ['required', 'string', 'max:100'],
             'endereco' => ['required', 'string', 'max:255'],
-            'telefones' => ['nullable', 'array'],
-            'telefones.*' => ['string', 'regex:/^[0-9]{9}$/', 'distinct'],
+            'telefone' => ['nullable', 'array'],
+            'telefone.*' => ['string', 'regex:/^[0-9]{9}$/', 'distinct'],
             'email' => ['nullable', 'email', 'max:100'],
             'ativa' => ['boolean'],
         ];
@@ -56,9 +56,9 @@ class AgenciaRequest extends FormRequest
             'nome.max' => 'O nome não pode ter mais de 100 caracteres.',
             'endereco.required' => 'O endereço é obrigatório.',
             'endereco.max' => 'O endereço não pode ter mais de 255 caracteres.',
-            'telefones.array' => 'Os telefones devem ser fornecidos como uma lista.',
-            'telefones.*.regex' => 'O telefone deve ter exatamente 9 dígitos (formato: 930202034).',
-            'telefones.*.distinct' => 'Não é possível ter telefones duplicados.',
+            'telefone.array' => 'Os telefones devem ser fornecidos como uma lista.',
+            'telefone.*.regex' => 'O telefone deve ter exatamente 9 dígitos (formato: 930202034).',
+            'telefone.*.distinct' => 'Não é possível ter telefones duplicados.',
             'email.email' => 'O email deve ser um endereço válido.',
             'email.max' => 'O email não pode ter mais de 100 caracteres.',
             'ativa.boolean' => 'O status ativo deve ser verdadeiro ou falso.',
@@ -71,8 +71,8 @@ class AgenciaRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // Garantir que telefones seja um array se não for fornecido
-        if (!$this->has('telefones') || is_null($this->telefones)) {
-            $this->merge(['telefones' => []]);
+        if (!$this->has('telefone') || is_null($this->telefone)) {
+            $this->merge(['telefone' => []]);
         }
 
         // Garantir que ativa seja boolean

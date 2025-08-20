@@ -115,7 +115,7 @@ class TaxaCambioController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'moeda_origem_id' => 'required|integer|exists:moedas,id',
             'moeda_destino_id' => 'required|integer|exists:moedas,id|different:moeda_origem_id',
             'taxa_compra' => 'required|numeric|min:0',
@@ -128,7 +128,7 @@ class TaxaCambioController extends Controller
             ->where('moeda_destino_id', $request->moeda_destino_id)
             ->update(['ativa' => false]);
 
-        $taxa = TaxaCambio::create($request->validated());
+        $taxa = TaxaCambio::create($validated);
         
         return response()->json($taxa->load(['moedaOrigem', 'moedaDestino']), 201);
     }

@@ -18,13 +18,13 @@ class Agencia extends Model
         'codigo_agencia',
         'nome',
         'endereco',
-        'telefones',
+        'telefone',
         'email',
         'ativa',
     ];
 
     protected $casts = [
-        'telefones' => 'array',
+        'telefone' => 'array',
         'ativa' => 'boolean',
     ];
 

@@ -36,6 +36,7 @@ class ClienteRequest extends FormRequest
                 'max:25',
                 Rule::unique('clientes', 'bi')->ignore($clienteId)
             ],
+            'email' => ['nullable', 'email', Rule::unique('clientes', 'email')->ignore($clienteId)],
             'tipo_cliente_id' => [$requiredOrSometimes, 'exists:tipos_cliente,id'],
             'status_cliente_id' => [$requiredOrSometimes, 'exists:status_cliente,id'],
         ];

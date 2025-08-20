@@ -20,10 +20,17 @@ class Usuario extends Authenticatable
 	protected $fillable = [
 		'nome',
 		'email',
+		'bi',
+		'sexo',
+		'data_nascimento',
+		'telefone',
 		'senha',
 		'perfil_id',
 		'agencia_id',
 		'status_usuario',
+		'endereco',
+		'cidade',
+		'provincia',
 	];
 
 	protected $hidden = [
@@ -32,6 +39,8 @@ class Usuario extends Authenticatable
 
 	protected $casts = [
 		'senha' => 'hashed',
+		'telefone' => 'array',
+		'data_nascimento' => 'date',
 	];
 
         // Override password field for Laravel authentication
