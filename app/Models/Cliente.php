@@ -30,6 +30,7 @@ class Cliente extends Model
 
     protected $casts = [
         'sexo' => 'string',
+        'telefone' => 'array',
         'data_nascimento' => 'date',
     ];
 
@@ -51,7 +52,7 @@ class Cliente extends Model
 
     public function operacoesCambio(): HasMany
     {
-        return $this->belongsTo(OperacaoCambio::class, 'cliente_id');
+        return $this->hasMany(OperacaoCambio::class, 'cliente_id');
     }
 
     public function apolices(): HasMany

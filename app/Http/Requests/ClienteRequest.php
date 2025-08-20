@@ -22,19 +22,22 @@ class ClienteRequest extends FormRequest
      */
     public function rules(): array
     {
-        $clienteId = $this->route('cliente') ? $this->route('cliente')->id : null;
+        $clienteId = $this->route('cliente') ? ($this->route('cliente')->id ?? $this->route('cliente')) : null;
+
+        $requiredOrSometimes = $this->isMethod('post') ? 'required' : 'sometimes';
 
         return [
-            'nome' => ['required', 'string', 'max:100'],
-            'sexo' => ['required', 'in:masculino,feminino,outro'],
+            'nome' => [$requiredOrSometimes, 'string', 'max:100'],
+            // Migration usa enum('M','F'); alinhar validação para valores aceitos pelo banco
+            'sexo' => [$requiredOrSometimes, 'in:M,F'],
             'bi' => [
-                'required',
+                $requiredOrSometimes,
                 'string',
                 'max:25',
                 Rule::unique('clientes', 'bi')->ignore($clienteId)
             ],
-            'tipo_cliente_id' => ['required', 'exists:tipos_cliente,id'],
-            'status_cliente_id' => ['required', 'exists:status_cliente,id'],
+            'tipo_cliente_id' => [$requiredOrSometimes, 'exists:tipos_cliente,id'],
+            'status_cliente_id' => [$requiredOrSometimes, 'exists:status_cliente,id'],
         ];
     }
 
@@ -47,7 +50,7 @@ class ClienteRequest extends FormRequest
             'nome.required' => 'O nome é obrigatório.',
             'nome.max' => 'O nome não pode ter mais de 100 caracteres.',
             'sexo.required' => 'O sexo é obrigatório.',
-            'sexo.in' => 'O sexo deve ser masculino, feminino ou outro.',
+            'sexo.in' => 'O sexo deve ser M ou F.',
             'bi.required' => 'O BI é obrigatório.',
             'bi.unique' => 'Este BI já está cadastrado.',
             'bi.max' => 'O BI não pode ter mais de 25 caracteres.',

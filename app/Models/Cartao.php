@@ -27,6 +27,7 @@ class Cartao extends Model
         'validade' => 'date',
         'numero_cartao' => 'encrypted',
         'limite' => 'decimal:2',
+        'numero_cartao_hash' => 'string',
     ];
 
     protected static function boot()

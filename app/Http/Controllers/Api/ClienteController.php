@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use App\Models\TipoCliente;
 use App\Models\StatusCliente;
 use Illuminate\Http\Request;
+use App\Http\Requests\ClienteRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 
@@ -46,15 +47,9 @@ class ClienteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(ClienteRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'nome' => 'required|string|max:100',
-            'sexo' => 'required|in:masculino,feminino,outro',
-            'bi' => 'required|string|max:25|unique:clientes,bi',
-            'tipo_cliente_id' => 'required|exists:tipos_cliente,id',
-            'status_cliente_id' => 'required|exists:status_cliente,id',
-        ]);
+        $validated = $request->validated();
 
         $cliente = Cliente::create($validated);
         $cliente->load(['tipoCliente', 'statusCliente']);
@@ -78,15 +73,9 @@ class ClienteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Cliente $cliente): JsonResponse
+    public function update(ClienteRequest $request, Cliente $cliente): JsonResponse
     {
-        $validated = $request->validate([
-            'nome' => 'sometimes|string|max:100',
-            'sexo' => 'sometimes|in:masculino,feminino,outro',
-            'bi' => ['sometimes', 'string', 'max:25', Rule::unique('clientes')->ignore($cliente->id)],
-            'tipo_cliente_id' => 'sometimes|exists:tipos_cliente,id',
-            'status_cliente_id' => 'sometimes|exists:status_cliente,id',
-        ]);
+        $validated = $request->validated();
 
         $cliente->update($validated);
         $cliente->load(['tipoCliente', 'statusCliente']);
