@@ -40,7 +40,7 @@ class AuthController extends Controller
      *                 @OA\Property(property="perfil", type="string", example="Administrador"),
      *                 @OA\Property(property="status", type="string", example="ativo")
      *             ),
-     *             @OA\Property(property="token", type="string", example="1|abc123def456...", description="Token Bearer para autenticação")
+     *             @OA\Property(property="token", type="string", example="1|eyJ0eXAiOiJKV1QiLCJhbGciOi...fulltokenvalue", description="Token Bearer para autenticação (valor completo, use no header Authorization: Bearer {token})")
      *         )
      *     ),
      *     @OA\Response(

@@ -13,6 +13,7 @@ use App\Http\Requests\RelatorioExtratoRequest;
 use App\Http\Requests\RelatorioAuditoriaRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
 class RelatorioController extends Controller
 {
@@ -141,33 +142,45 @@ class RelatorioController extends Controller
         $dataFim = $request->data_fim ?? now()->toDateString();
 
         // Transações da conta
-        $transacoes = Transacao::where(function($q) use ($conta) {
+        $transacoesQuery = Transacao::where(function($q) use ($conta) {
                 $q->where('conta_origem_id', $conta->id)
                   ->orWhere('conta_destino_id', $conta->id);
             })
             ->whereDate('created_at', '>=', $dataInicio)
             ->whereDate('created_at', '<=', $dataFim)
             ->with(['contaOrigem', 'contaDestino', 'tipoTransacao', 'statusTransacao'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function($transacao) use ($conta) {
-                $tipo = 'entrada';
-                if ($transacao->conta_origem_id == $conta->id) {
-                    $tipo = 'saida';
-                }
-                
-                return [
-                    'id' => $transacao->id,
-                    'data' => $transacao->created_at,
-                    'descricao' => $transacao->descricao,
-                    'tipo' => $tipo,
-                    'valor' => $transacao->valor,
-                    'saldo_anterior' => null, // Pode ser calculado se necessário
-                    'tipo_transacao' => $transacao->tipoTransacao->nome,
-                    'status' => $transacao->statusTransacao->nome,
-                    'referencia' => $transacao->referencia_externa
-                ];
-            });
+            ->orderBy('created_at', 'asc');
+
+        $transacoesRaw = $transacoesQuery->get();
+
+        // Calcular saldo corrente (running balance)
+        $saldo = (float) $conta->saldo;
+        // Para calcular saldo anterior por linha, iteramos do fim para o início
+        $linhas = [];
+        for ($i = $transacoesRaw->count() - 1; $i >= 0; $i--) {
+            $t = $transacoesRaw[$i];
+            $isSaida = ($t->conta_origem_id == $conta->id);
+            $valor = (float) $t->valor;
+            $saldoAnterior = $saldo;
+            if ($isSaida) {
+                $saldo = round($saldo + $valor, 2); // invertendo para obter saldo anterior
+            } else {
+                $saldo = round($saldo - $valor, 2);
+            }
+            $linhas[$i] = [
+                'id' => $t->id,
+                'data' => $t->created_at,
+                'descricao' => $t->descricao,
+                'tipo' => $isSaida ? 'saida' : 'entrada',
+                'valor' => $t->valor,
+                'saldo_anterior' => $saldo,
+                'tipo_transacao' => $t->tipoTransacao->nome,
+                'status' => $t->statusTransacao->nome,
+                'referencia' => $t->referencia_externa
+            ];
+        }
+        ksort($linhas);
+        $transacoes = collect(array_values($linhas))->sortByDesc('data')->values();
 
         $resumo = [
             'conta' => $conta->load(['cliente', 'agencia', 'tipoConta', 'moeda']),
@@ -184,6 +197,74 @@ class RelatorioController extends Controller
         return response()->json([
             'resumo' => $resumo,
             'transacoes' => $transacoes->values()
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/relatorios/clientes/{cliente}/extrato",
+     *     summary="Extrato agregado de todas as contas do cliente",
+     *     tags={"Relatórios"},
+     *     @OA\Parameter(name="cliente", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="data_inicio", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="data_fim", in="query", @OA\Schema(type="string", format="date")),
+     *     @OA\Response(response=200, description="Extrato agregado")
+     * )
+     */
+    public function extratoCliente(RelatorioExtratoRequest $request, Cliente $cliente): JsonResponse
+    {
+        $request->validated();
+
+        $dataInicio = $request->data_inicio ?? now()->subMonth()->toDateString();
+        $dataFim = $request->data_fim ?? now()->toDateString();
+
+        $contas = $cliente->contas()->with('moeda')->get();
+        $contaIds = $contas->pluck('id')->all();
+
+        $transacoes = Transacao::where(function($q) use ($contaIds) {
+                $q->whereIn('conta_origem_id', $contaIds)
+                  ->orWhereIn('conta_destino_id', $contaIds);
+            })
+            ->whereDate('created_at', '>=', $dataInicio)
+            ->whereDate('created_at', '<=', $dataFim)
+            ->with(['contaOrigem', 'contaDestino', 'tipoTransacao', 'statusTransacao', 'moeda'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($t) use ($contaIds) {
+                $tipo = in_array($t->conta_origem_id, $contaIds) ? 'saida' : 'entrada';
+                return [
+                    'id' => $t->id,
+                    'data' => $t->created_at,
+                    'descricao' => $t->descricao,
+                    'tipo' => $tipo,
+                    'valor' => $t->valor,
+                    'moeda' => $t->moeda->codigo,
+                    'conta_origem_id' => $t->conta_origem_id,
+                    'conta_destino_id' => $t->conta_destino_id,
+                    'tipo_transacao' => $t->tipoTransacao->nome,
+                    'status' => $t->statusTransacao->nome,
+                    'referencia' => $t->referencia_externa
+                ];
+            });
+
+        // Resumo por moeda
+        $porMoeda = $transacoes->groupBy('moeda')->map(function(Collection $items) {
+            return [
+                'entradas' => $items->where('tipo', 'entrada')->sum('valor'),
+                'saidas' => $items->where('tipo', 'saida')->sum('valor'),
+                'quantidade' => $items->count(),
+            ];
+        });
+
+        return response()->json([
+            'cliente' => $cliente->only(['id','nome','bi','email']),
+            'periodo' => [
+                'inicio' => $dataInicio,
+                'fim' => $dataFim,
+            ],
+            'contas' => $contas,
+            'por_moeda' => $porMoeda,
+            'transacoes' => $transacoes,
         ]);
     }
 

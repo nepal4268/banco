@@ -47,7 +47,11 @@ class OperacaoCambioSeeder extends Seeder
             }
 
             $valorOrigem = fake()->randomFloat(2, 1000, 100000);
-            $valorDestino = (float) bcmul((string)$valorOrigem, (string)$taxa->taxa_venda, 2);
+            if (function_exists('bcmul')) {
+                $valorDestino = (float) bcmul((string) $valorOrigem, (string) $taxa->taxa_venda, 2);
+            } else {
+                $valorDestino = round($valorOrigem * (float) $taxa->taxa_venda, 2);
+            }
 
             OperacaoCambio::create([
                 'cliente_id' => $contaOrigem->cliente_id,

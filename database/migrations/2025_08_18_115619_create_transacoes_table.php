@@ -30,7 +30,6 @@ return new class extends Migration
             $table->string('descricao', 255)->nullable();
             $table->string('referencia_externa', 100)->nullable();
             $table->timestamps();
-            $table->softDeletes();
             
             $table->index('conta_origem_id');
             $table->index('conta_destino_id');
@@ -38,6 +37,7 @@ return new class extends Migration
             $table->index('destino_externa');
             
             // Note: Check constraint (conta_origem_id <> conta_destino_id) will be handled at application level
+            $table->unique(['referencia_externa'], 'uniq_transacoes_referencia_externa');
         });
     }
 

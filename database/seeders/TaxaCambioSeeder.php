@@ -81,7 +81,14 @@ class TaxaCambioSeeder extends Seeder
         ];
 
         foreach ($taxas as $taxaData) {
-            TaxaCambio::create($taxaData);
+            TaxaCambio::updateOrCreate(
+                [
+                    'moeda_origem_id' => $taxaData['moeda_origem_id'],
+                    'moeda_destino_id' => $taxaData['moeda_destino_id'],
+                    'data_taxa' => $taxaData['data_taxa'],
+                ],
+                $taxaData
+            );
         }
 
         $this->command->info('✅ Taxas de câmbio criadas com sucesso!');

@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Conta;
 use App\Http\Requests\ContaRequest;
 use App\Services\TransactionService;
+use App\Models\Pagamento;
 use Illuminate\Validation\Rule;
 
 class ContaController extends Controller
@@ -186,5 +187,44 @@ class ContaController extends Controller
         $data = $request->validated();
         $transacao = $service->withdraw($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null);
         return response()->json(['message' => 'Levantamento efetuado', 'transacao' => $transacao]);
+    }
+
+    /**
+     * @OA\Post(
+     *   path="/api/contas/{id}/pagar",
+     *   summary="Efetuar pagamento a parceiro",
+     *   tags={"Contas"},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\RequestBody(@OA\JsonContent(
+     *       required={"parceiro","referencia","valor","moeda_id"},
+     *       @OA\Property(property="parceiro", type="string"),
+     *       @OA\Property(property="referencia", type="string"),
+     *       @OA\Property(property="valor", type="number", format="float"),
+     *       @OA\Property(property="moeda_id", type="integer"),
+     *       @OA\Property(property="descricao", type="string")
+     *   )),
+     *   @OA\Response(response=200, description="Pagamento efetuado")
+     * )
+     */
+    public function pagar(Conta $conta, Request $request, TransactionService $service): JsonResponse
+    {
+        $data = $request->validate([
+            'parceiro' => ['required', 'string', 'max:100'],
+            'referencia' => ['required', 'string', 'max:100'],
+            'valor' => ['required', 'numeric', 'gt:0'],
+            'moeda_id' => ['required', 'integer'],
+            'descricao' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $pagamento = $service->pay(
+            $conta,
+            $data['parceiro'],
+            $data['referencia'],
+            (float)$data['valor'],
+            (int)$data['moeda_id'],
+            $data['descricao'] ?? null
+        );
+
+        return response()->json(['message' => 'Pagamento efetuado', 'pagamento' => $pagamento]);
     }
 }

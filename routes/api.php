@@ -27,12 +27,16 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
 	Route::post('/logout', [AuthController::class, 'logout']);
 	Route::get('/me', [AuthController::class, 'me']);
+	// Alteração de senha do usuário autenticado
+	Route::post('/change-password', [AuthController::class, 'changePassword']);
 
 	Route::get('/user', function (Request $request) {
 		return $request->user();
 	});
 
 	Route::apiResource('clientes', ClienteController::class);
+	// Lookups de clientes
+	Route::get('clientes/lookups', [ClienteController::class, 'lookups']);
 	Route::apiResource('contas', ContaController::class);
 
 	Route::get('transacoes', [TransacaoController::class, 'index']);
@@ -43,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 	Route::post('contas/{conta}/depositar', [ContaController::class, 'depositar']);
 	Route::post('contas/{conta}/levantar', [ContaController::class, 'levantar']);
+	Route::post('contas/{conta}/pagar', [ContaController::class, 'pagar']);
 
 	// Cartões
 	Route::apiResource('cartoes', CartaoController::class);
@@ -66,5 +71,6 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::get('relatorios/dashboard', [RelatorioController::class, 'dashboard']);
 	Route::get('relatorios/transacoes', [RelatorioController::class, 'transacoes']);
 	Route::get('relatorios/contas/{conta}/extrato', [RelatorioController::class, 'extrato']);
+	Route::get('relatorios/clientes/{cliente}/extrato', [RelatorioController::class, 'extratoCliente']);
 	Route::get('relatorios/auditoria', [RelatorioController::class, 'auditoria']);
 });

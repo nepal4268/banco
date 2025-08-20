@@ -8,6 +8,7 @@ use App\Models\OperacaoCambio;
 use App\Models\TaxaCambio;
 use App\Models\TipoTransacao;
 use App\Models\StatusTransacao;
+use App\Models\Pagamento;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
@@ -21,7 +22,7 @@ class TransactionService
 
         return DB::transaction(function () use ($conta, $valor, $moedaId, $descricao, $referenciaExterna) {
             $contaLocked = Conta::whereKey($conta->id)->lockForUpdate()->firstOrFail();
-            $contaLocked->saldo = bcadd((string)$contaLocked->saldo, (string)$valor, 2);
+            $contaLocked->saldo = round(((float)$contaLocked->saldo) + $valor, 2);
             $contaLocked->save();
 
             return $this->criarTransacao(
@@ -46,7 +47,7 @@ class TransactionService
         return DB::transaction(function () use ($conta, $valor, $moedaId, $descricao, $referenciaExterna) {
             $contaLocked = Conta::whereKey($conta->id)->lockForUpdate()->firstOrFail();
             $this->assertSufficientFunds($contaLocked->saldo, $valor);
-            $contaLocked->saldo = bcsub((string)$contaLocked->saldo, (string)$valor, 2);
+            $contaLocked->saldo = round(((float)$contaLocked->saldo) - $valor, 2);
             $contaLocked->save();
 
             return $this->criarTransacao(
@@ -78,8 +79,8 @@ class TransactionService
 
             $this->assertSufficientFunds($origem->saldo, $valor);
 
-            $origem->saldo = bcsub((string)$origem->saldo, (string)$valor, 2);
-            $destino->saldo = bcadd((string)$destino->saldo, (string)$valor, 2);
+            $origem->saldo = round(((float)$origem->saldo) - $valor, 2);
+            $destino->saldo = round(((float)$destino->saldo) + $valor, 2);
 
             $origem->save();
             $destino->save();
@@ -101,6 +102,13 @@ class TransactionService
         $this->assertPositiveAmount($valor);
 
         return DB::transaction(function () use ($contaOrigem, $contaDestino, $valor, $moedaId, $externo, $descricao, $referenciaExterna) {
+            // Idempotência por referência externa
+            if (!empty($referenciaExterna)) {
+                $existente = Transacao::where('referencia_externa', $referenciaExterna)->first();
+                if ($existente) {
+                    return $existente;
+                }
+            }
             $origemExterna = empty($contaOrigem);
             $destinoExterna = empty($contaDestino);
 
@@ -112,14 +120,14 @@ class TransactionService
                 $this->assertSameCurrency($contaOrigem->moeda_id, $moedaId, 'Moeda inválida na conta de origem.');
                 $contaOrigem = Conta::whereKey($contaOrigem->id)->lockForUpdate()->firstOrFail();
                 $this->assertSufficientFunds($contaOrigem->saldo, $valor);
-                $contaOrigem->saldo = bcsub((string)$contaOrigem->saldo, (string)$valor, 2);
+                $contaOrigem->saldo = round(((float)$contaOrigem->saldo) - $valor, 2);
                 $contaOrigem->save();
             }
 
             if (!$destinoExterna) {
                 $this->assertSameCurrency($contaDestino->moeda_id, $moedaId, 'Moeda inválida na conta de destino.');
                 $contaDestino = Conta::whereKey($contaDestino->id)->lockForUpdate()->firstOrFail();
-                $contaDestino->saldo = bcadd((string)$contaDestino->saldo, (string)$valor, 2);
+                $contaDestino->saldo = round(((float)$contaDestino->saldo) + $valor, 2);
                 $contaDestino->save();
             }
 
@@ -171,12 +179,12 @@ class TransactionService
             // Debita origem na moeda de origem
             $this->assertSameCurrency($origem->moeda_id, $moedaOrigemId, 'Moeda de origem da conta não corresponde.');
             $this->assertSufficientFunds($origem->saldo, $valorOrigem);
-            $origem->saldo = bcsub((string)$origem->saldo, (string)$valorOrigem, 2);
+            $origem->saldo = round(((float)$origem->saldo) - $valorOrigem, 2);
             $origem->save();
 
             // Credita destino na moeda de destino
             $this->assertSameCurrency($destino->moeda_id, $moedaDestinoId, 'Moeda de destino da conta não corresponde.');
-            $destino->saldo = bcadd((string)$destino->saldo, (string)$valorDestino, 2);
+            $destino->saldo = round(((float)$destino->saldo) + $valorDestino, 2);
             $destino->save();
 
             // Registrar operação de câmbio
@@ -192,12 +200,102 @@ class TransactionService
             $op->data_operacao = Carbon::now();
             $op->save();
 
+            // Criar lançamentos em transacoes para refletir no extrato
+            // 1) Débito na conta de origem na moeda de origem
+            $debito = new Transacao();
+            $debito->conta_origem_id = $origem->id;
+            $debito->conta_destino_id = null;
+            $debito->origem_externa = false;
+            $debito->destino_externa = true;
+            $debito->tipo_transacao_id = $this->tipoIdPorNome('Câmbio - Débito');
+            $debito->valor = $valorOrigem;
+            $debito->moeda_id = $moedaOrigemId;
+            $debito->status_transacao_id = $this->statusIdPorNome('Concluída');
+            $debito->descricao = $descricao ?: 'Débito por operação de câmbio';
+            $debito->referencia_externa = 'CAMBIO:' . $op->id . ':DEB';
+            $debito->save();
+
+            // 2) Crédito na conta de destino na moeda de destino
+            $credito = new Transacao();
+            $credito->conta_origem_id = null;
+            $credito->conta_destino_id = $destino->id;
+            $credito->origem_externa = true;
+            $credito->destino_externa = false;
+            $credito->tipo_transacao_id = $this->tipoIdPorNome('Câmbio - Crédito');
+            $credito->valor = $valorDestino;
+            $credito->moeda_id = $moedaDestinoId;
+            $credito->status_transacao_id = $this->statusIdPorNome('Concluída');
+            $credito->descricao = $descricao ?: 'Crédito por operação de câmbio';
+            $credito->referencia_externa = 'CAMBIO:' . $op->id . ':CRED';
+            $credito->save();
+
             return $op->fresh();
+        });
+    }
+
+    public function pay(Conta $conta, string $parceiro, string $referencia, float $valor, int $moedaId, ?string $descricao = null): Pagamento
+    {
+        $this->assertPositiveAmount($valor);
+        $this->assertSameCurrency($conta->moeda_id, $moedaId, 'Pagamento deve utilizar a mesma moeda da conta.');
+
+        return DB::transaction(function () use ($conta, $parceiro, $referencia, $valor, $moedaId, $descricao) {
+            // Idempotência por referência do parceiro
+            $refExterna = 'PAY:' . $referencia;
+            $transacaoExistente = Transacao::where('referencia_externa', $refExterna)->first();
+            if ($transacaoExistente) {
+                $pagamentoExistente = Pagamento::where('conta_id', $conta->id)->where('referencia', $referencia)->first();
+                if ($pagamentoExistente) {
+                    return $pagamentoExistente;
+                }
+            }
+            $contaLocked = Conta::whereKey($conta->id)->lockForUpdate()->firstOrFail();
+            $this->assertSufficientFunds($contaLocked->saldo, $valor);
+            $contaLocked->saldo = round(((float)$contaLocked->saldo) - $valor, 2);
+            $contaLocked->save();
+
+            $pagamento = new Pagamento();
+            $pagamento->conta_id = $contaLocked->id;
+            $pagamento->parceiro = $parceiro;
+            $pagamento->referencia = $referencia;
+            $pagamento->valor = $valor;
+            $pagamento->moeda_id = $moedaId;
+            // status_pagamento: buscar/ criar "Concluído"
+            $statusPagamentoId = \App\Models\StatusPagamento::firstOrCreate(
+                ['nome' => 'Concluído'],
+                ['descricao' => 'Pagamento concluído']
+            )->id;
+            $pagamento->status_pagamento_id = (int) $statusPagamentoId;
+            $pagamento->data_pagamento = Carbon::now();
+            $pagamento->save();
+
+            // Registrar transação para refletir no extrato
+            $transacao = new Transacao();
+            $transacao->conta_origem_id = $contaLocked->id;
+            $transacao->conta_destino_id = null;
+            $transacao->origem_externa = false;
+            $transacao->destino_externa = true;
+            $transacao->conta_externa_destino = $parceiro;
+            $transacao->banco_externo_destino = null;
+            $transacao->tipo_transacao_id = $this->tipoIdPorNome('Pagamento');
+            $transacao->valor = $valor;
+            $transacao->moeda_id = $moedaId;
+            $transacao->status_transacao_id = $this->statusIdPorNome('Concluída');
+            $transacao->descricao = $descricao ?: ('Pagamento para ' . $parceiro);
+            $transacao->referencia_externa = $refExterna;
+            $transacao->save();
+
+            return $pagamento->fresh();
         });
     }
 
     private function criarTransacao(?int $contaOrigemId, ?int $contaDestinoId, string $tipo, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null, bool $origemExterna = false, bool $destinoExterna = false): Transacao
     {
+        if (!empty($referenciaExterna)) {
+            $existente = Transacao::where('referencia_externa', $referenciaExterna)->first();
+            if ($existente) {
+                return $existente;
+            }
+        }
         $transacao = new Transacao();
         $transacao->conta_origem_id = $contaOrigemId;
         $transacao->conta_destino_id = $contaDestinoId;

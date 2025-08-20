@@ -1,0 +1,2067 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sistema Bancário API",
+        "description": "API completa para sistema bancário com operações de contas, transações, cartões, seguros e relatórios",
+        "contact": {
+            "name": "Suporte Técnico",
+            "email": "admin@banco.ao"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Servidor de Desenvolvimento"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Autenticar usuário",
+                "description": "Realiza login no sistema e retorna token de autenticação",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "senha"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email do usuário",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@banco.ao"
+                                    },
+                                    "senha": {
+                                        "description": "Senha do usuário",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "admin123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login realizado com sucesso"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nome": {
+                                                    "type": "string",
+                                                    "example": "Administrador do Sistema"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "admin@banco.ao"
+                                                },
+                                                "perfil": {
+                                                    "type": "string",
+                                                    "example": "Administrador"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "ativo"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "description": "Token Bearer para autenticação (valor completo, use no header Authorization: Bearer {token})",
+                                            "type": "string",
+                                            "example": "1|eyJ0eXAiOiJKV1QiLCJhbGciOi...fulltokenvalue"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Credenciais inválidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "As credenciais fornecidas estão incorretas."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Logout do usuário",
+                "description": "Invalida o token atual e realiza logout",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Logout realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout realizado com sucesso"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/cartoes": {
+            "get": {
+                "tags": [
+                    "Cartões"
+                ],
+                "summary": "Listar cartões",
+                "operationId": "a9de3cc0c9688bec1bf1d06064bf7b70",
+                "parameters": [
+                    {
+                        "name": "conta_id",
+                        "in": "query",
+                        "description": "Filtrar por conta",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada de cartões"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Cartões"
+                ],
+                "summary": "Criar novo cartão",
+                "operationId": "bbca177ad64e8d3afa88f5bb5242ec80",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "conta_id",
+                                    "tipo_cartao_id"
+                                ],
+                                "properties": {
+                                    "conta_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tipo_cartao_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "limite": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 50000
+                                    },
+                                    "validade": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2027-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Cartão criado com sucesso"
+                    }
+                }
+            }
+        },
+        "/api/cartoes/{id}": {
+            "get": {
+                "tags": [
+                    "Cartões"
+                ],
+                "summary": "Obter detalhes do cartão",
+                "operationId": "9cd2b70a59f5d88ea45b740c291ee351",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes do cartão"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Cartões"
+                ],
+                "summary": "Atualizar cartão",
+                "operationId": "90edbf4b6086906fe6f2f04b131e02d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "limite": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 75000
+                                    },
+                                    "status_cartao_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "validade": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2028-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cartão atualizado com sucesso"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Cartões"
+                ],
+                "summary": "Excluir cartão",
+                "operationId": "f50c006d3da2d76c6078effaf88dfa23",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Cartão excluído com sucesso"
+                    }
+                }
+            }
+        },
+        "/api/cartoes/{id}/bloquear": {
+            "post": {
+                "tags": [
+                    "Cartões"
+                ],
+                "summary": "Bloquear cartão",
+                "operationId": "01bf04e2209a8f625e14e112004b79fd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "motivo": {
+                                        "type": "string",
+                                        "example": "Solicitação do cliente"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cartão bloqueado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cartão bloqueado com sucesso"
+                                        },
+                                        "cartao": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/clientes": {
+            "get": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Listar clientes",
+                "operationId": "f8eafbc2e9500413091c7f84a4470b84",
+                "parameters": [
+                    {
+                        "name": "nome",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bi",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tipo_cliente_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status_cliente_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada de clientes"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Criar cliente",
+                "operationId": "2a8a28c7aec782e1af95193a65053e68",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome",
+                                    "sexo",
+                                    "bi",
+                                    "tipo_cliente_id",
+                                    "status_cliente_id"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "sexo": {
+                                        "type": "string",
+                                        "enum": [
+                                            "M",
+                                            "F"
+                                        ]
+                                    },
+                                    "bi": {
+                                        "type": "string",
+                                        "maxLength": 25
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "telefone": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "data_nascimento": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "endereco": {
+                                        "type": "string"
+                                    },
+                                    "cidade": {
+                                        "type": "string"
+                                    },
+                                    "provincia": {
+                                        "type": "string"
+                                    },
+                                    "tipo_cliente_id": {
+                                        "type": "integer"
+                                    },
+                                    "status_cliente_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Cliente criado"
+                    }
+                }
+            }
+        },
+        "/api/clientes/{id}": {
+            "get": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Obter cliente",
+                "operationId": "7be647ff4c2ab71c5a1f042133b13428",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cliente"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Atualizar cliente",
+                "operationId": "1cc735d14964cb4b25557d546e807a9c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "sexo": {
+                                        "type": "string",
+                                        "enum": [
+                                            "M",
+                                            "F"
+                                        ]
+                                    },
+                                    "bi": {
+                                        "type": "string",
+                                        "maxLength": 25
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "telefone": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "data_nascimento": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "endereco": {
+                                        "type": "string"
+                                    },
+                                    "cidade": {
+                                        "type": "string"
+                                    },
+                                    "provincia": {
+                                        "type": "string"
+                                    },
+                                    "tipo_cliente_id": {
+                                        "type": "integer"
+                                    },
+                                    "status_cliente_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cliente atualizado"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Excluir cliente",
+                "operationId": "fae533cf0841c3ece1414287d89ef42b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Excluído"
+                    }
+                }
+            }
+        },
+        "/api/clientes/lookups": {
+            "get": {
+                "tags": [
+                    "Clientes"
+                ],
+                "summary": "Listas de apoio para cliente",
+                "operationId": "ff5ef6d6de7c3019625b23250a3aa89c",
+                "responses": {
+                    "200": {
+                        "description": "Listas de apoio"
+                    }
+                }
+            }
+        },
+        "/api/contas": {
+            "get": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Listar contas",
+                "operationId": "17f5f71e68d179d6fae0dcdc28d08e82",
+                "parameters": [
+                    {
+                        "name": "cliente_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "agencia_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status_conta_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Criar conta",
+                "operationId": "7a99dd180e0adf67a82eb4c4035a4abc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cliente_id",
+                                    "agencia_id",
+                                    "tipo_conta_id",
+                                    "moeda_id",
+                                    "status_conta_id"
+                                ],
+                                "properties": {
+                                    "cliente_id": {
+                                        "type": "integer"
+                                    },
+                                    "agencia_id": {
+                                        "type": "integer"
+                                    },
+                                    "tipo_conta_id": {
+                                        "type": "integer"
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer"
+                                    },
+                                    "saldo": {
+                                        "description": "Opcional. Normalmente 0",
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "status_conta_id": {
+                                        "type": "integer"
+                                    },
+                                    "numero_conta": {
+                                        "type": "string",
+                                        "readOnly": true
+                                    },
+                                    "iban": {
+                                        "type": "string",
+                                        "readOnly": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Conta criada"
+                    }
+                }
+            }
+        },
+        "/api/contas/{id}": {
+            "get": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Obter conta",
+                "operationId": "fb871d41824a6ecea8db26e29fe5cc1a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Conta"
+                    },
+                    "404": {
+                        "description": "Não encontrada"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Atualizar conta",
+                "operationId": "0aaadb162fbf4f5bf1d89a8e65ecf16e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "agencia_id": {
+                                        "type": "integer",
+                                        "readOnly": true
+                                    },
+                                    "tipo_conta_id": {
+                                        "type": "integer"
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer"
+                                    },
+                                    "status_conta_id": {
+                                        "type": "integer"
+                                    },
+                                    "numero_conta": {
+                                        "type": "string",
+                                        "readOnly": true
+                                    },
+                                    "iban": {
+                                        "type": "string",
+                                        "readOnly": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Conta atualizada"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Remover conta",
+                "operationId": "6b33997d8dcf861a5bb49b5a5be729eb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Excluída"
+                    }
+                }
+            }
+        },
+        "/api/contas/{id}/depositar": {
+            "post": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Depositar em conta",
+                "operationId": "63baddbaca7a7e57aca32dc0dcec24b5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "valor",
+                                    "moeda_id"
+                                ],
+                                "properties": {
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100.5
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Depósito em numerário"
+                                    },
+                                    "referencia_externa": {
+                                        "type": "string",
+                                        "example": "EXT-12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Depósito efetuado"
+                                        },
+                                        "transacao": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/contas/{id}/levantar": {
+            "post": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Levantamento em conta",
+                "operationId": "cae765e31ca16ab2bd2dc32ec833fd96",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "valor",
+                                    "moeda_id"
+                                ],
+                                "properties": {
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Levantamento no balcão"
+                                    },
+                                    "referencia_externa": {
+                                        "type": "string",
+                                        "example": "EXT-98765"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Levantamento efetuado"
+                                        },
+                                        "transacao": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/contas/{id}/pagar": {
+            "post": {
+                "tags": [
+                    "Contas"
+                ],
+                "summary": "Efetuar pagamento a parceiro",
+                "operationId": "7cf215d4e731b81ddd26ff26d887a90a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "parceiro",
+                                    "referencia",
+                                    "valor",
+                                    "moeda_id"
+                                ],
+                                "properties": {
+                                    "parceiro": {
+                                        "type": "string"
+                                    },
+                                    "referencia": {
+                                        "type": "string"
+                                    },
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer"
+                                    },
+                                    "descricao": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pagamento efetuado"
+                    }
+                }
+            }
+        },
+        "/api/relatorios/dashboard": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Dashboard com métricas gerais",
+                "operationId": "6908557fc7c05178b0155abeceb5b979",
+                "responses": {
+                    "200": {
+                        "description": "Métricas do dashboard"
+                    }
+                }
+            }
+        },
+        "/api/relatorios/transacoes": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Relatório detalhado de transações",
+                "operationId": "0cd9f5bfbae7e29d60f3b1294459ab83",
+                "parameters": [
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "description": "Data início",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "description": "Data fim",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "tipo",
+                        "in": "query",
+                        "description": "Tipo de transação",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "moeda",
+                        "in": "query",
+                        "description": "Código da moeda",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Relatório de transações"
+                    }
+                }
+            }
+        },
+        "/api/relatorios/contas/{id}/extrato": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Extrato detalhado da conta",
+                "operationId": "72a4fcdaca649326a3d0928648428aa1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Extrato da conta"
+                    }
+                }
+            }
+        },
+        "/api/relatorios/clientes/{cliente}/extrato": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Extrato agregado de todas as contas do cliente",
+                "operationId": "a75d2e6bad3b713609a0eb43bf8336ed",
+                "parameters": [
+                    {
+                        "name": "cliente",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Extrato agregado"
+                    }
+                }
+            }
+        },
+        "/api/relatorios/auditoria": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Relatório de auditoria (logs de ações)",
+                "operationId": "21d9ef1493cbfc56dc056a932e08e351",
+                "parameters": [
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "acao",
+                        "in": "query",
+                        "description": "Filtrar por ação",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logs de auditoria"
+                    }
+                }
+            }
+        },
+        "/api/seguros/apolices": {
+            "get": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Listar apólices de seguro",
+                "operationId": "2492469ef6291b470b47f85ccbc01828",
+                "parameters": [
+                    {
+                        "name": "cliente_id",
+                        "in": "query",
+                        "description": "Filtrar por cliente",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada de apólices"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Criar nova apólice",
+                "operationId": "61e6ed7d5c653c5d5f0f9bcc377e7892",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cliente_id",
+                                    "tipo_seguro_id",
+                                    "valor_segurado",
+                                    "premio"
+                                ],
+                                "properties": {
+                                    "cliente_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tipo_seguro_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "valor_segurado": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 100000
+                                    },
+                                    "premio": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 5000
+                                    },
+                                    "data_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-01"
+                                    },
+                                    "data_fim": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Apólice criada com sucesso"
+                    }
+                }
+            }
+        },
+        "/api/seguros/apolices/{id}": {
+            "get": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Obter detalhes da apólice",
+                "operationId": "30a7332cf1f684ae2447c39cbe9f9a12",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes da apólice"
+                    }
+                }
+            }
+        },
+        "/api/seguros/sinistros": {
+            "get": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Listar sinistros",
+                "operationId": "0817b6fb40a80a73393a87f43b65a13a",
+                "parameters": [
+                    {
+                        "name": "apolice_id",
+                        "in": "query",
+                        "description": "Filtrar por apólice",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada de sinistros"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Registrar novo sinistro",
+                "operationId": "214d432f0f1608e090321f066ae3f9c4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "apolice_id",
+                                    "descricao",
+                                    "valor_sinistro"
+                                ],
+                                "properties": {
+                                    "apolice_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Acidente de trânsito"
+                                    },
+                                    "valor_sinistro": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 25000
+                                    },
+                                    "data_ocorrencia": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-01-15"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sinistro registrado com sucesso"
+                    }
+                }
+            }
+        },
+        "/api/seguros/sinistros/{id}": {
+            "get": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Obter detalhes do sinistro",
+                "operationId": "0159ed55daff149285663c01ade84579",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes do sinistro"
+                    }
+                }
+            }
+        },
+        "/api/taxas-cambio": {
+            "get": {
+                "tags": [
+                    "Câmbio"
+                ],
+                "summary": "Listar taxas de câmbio atuais",
+                "operationId": "94cec8ca829ad1658646c8ab5399a042",
+                "parameters": [
+                    {
+                        "name": "moeda_origem",
+                        "in": "query",
+                        "description": "Código da moeda origem",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "moeda_destino",
+                        "in": "query",
+                        "description": "Código da moeda destino",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de taxas de câmbio"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Câmbio"
+                ],
+                "summary": "Criar/atualizar taxa de câmbio",
+                "operationId": "9bd4e48b2524e9f4fd55af42f25cb955",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "moeda_origem_id",
+                                    "moeda_destino_id",
+                                    "taxa_compra",
+                                    "taxa_venda"
+                                ],
+                                "properties": {
+                                    "moeda_origem_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "moeda_destino_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "taxa_compra": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 825.5
+                                    },
+                                    "taxa_venda": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 830
+                                    },
+                                    "ativa": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Taxa criada/atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "moeda_origem_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "moeda_destino_id": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "taxa_compra": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 825.5
+                                        },
+                                        "taxa_venda": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 830
+                                        },
+                                        "ativa": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                }
+            }
+        },
+        "/api/taxas-cambio/cotacao": {
+            "get": {
+                "tags": [
+                    "Câmbio"
+                ],
+                "summary": "Obter cotação específica",
+                "operationId": "09e02c43c08d6780998b8e92fdc5a522",
+                "parameters": [
+                    {
+                        "name": "moeda_origem",
+                        "in": "query",
+                        "description": "Código da moeda origem",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "moeda_destino",
+                        "in": "query",
+                        "description": "Código da moeda destino",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "valor",
+                        "in": "query",
+                        "description": "Valor para conversão",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cotação atual",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "moeda_origem": {
+                                            "type": "string",
+                                            "example": "USD"
+                                        },
+                                        "moeda_destino": {
+                                            "type": "string",
+                                            "example": "AOA"
+                                        },
+                                        "taxa_compra": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 825.5
+                                        },
+                                        "taxa_venda": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 830
+                                        },
+                                        "data_atualizacao": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "conversao": {
+                                            "properties": {
+                                                "valor_origem": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                },
+                                                "valor_convertido_compra": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 82550
+                                                },
+                                                "valor_convertido_venda": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 83000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Parâmetros inválidos"
+                    }
+                }
+            }
+        },
+        "/api/operacoes-cambio": {
+            "get": {
+                "tags": [
+                    "Câmbio"
+                ],
+                "summary": "Histórico de operações de câmbio",
+                "operationId": "246143731c55bf9746d7a9e28e21db24",
+                "parameters": [
+                    {
+                        "name": "conta_id",
+                        "in": "query",
+                        "description": "Filtrar por conta",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "description": "Data início",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "description": "Data fim",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Histórico de operações"
+                    }
+                }
+            }
+        },
+        "/api/transacoes": {
+            "get": {
+                "tags": [
+                    "Transações"
+                ],
+                "summary": "Listar transações",
+                "operationId": "957de1cd13a207f165507cc826d2d112",
+                "parameters": [
+                    {
+                        "name": "conta_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada"
+                    }
+                }
+            }
+        },
+        "/api/transacoes/{id}": {
+            "get": {
+                "tags": [
+                    "Transações"
+                ],
+                "summary": "Obter transação",
+                "operationId": "cbb1875b45eb03c4c97daf3d537cdbac",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transação"
+                    }
+                }
+            }
+        },
+        "/api/transacoes/transferir": {
+            "post": {
+                "tags": [
+                    "Transações"
+                ],
+                "summary": "Transferência interna",
+                "operationId": "db9fe5799ff68e403d306a02abec967e",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "conta_origem_id",
+                                    "conta_destino_id",
+                                    "valor",
+                                    "moeda_id"
+                                ],
+                                "properties": {
+                                    "conta_origem_id": {
+                                        "type": "integer"
+                                    },
+                                    "conta_destino_id": {
+                                        "type": "integer"
+                                    },
+                                    "iban_destino": {
+                                        "description": "Opcional: IBAN do destino ao invés de conta interna",
+                                        "type": "string",
+                                        "maxLength": 34
+                                    },
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer"
+                                    },
+                                    "descricao": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/transacoes/transferir-externo": {
+            "post": {
+                "tags": [
+                    "Transações"
+                ],
+                "summary": "Transferência de/para externo",
+                "operationId": "2b9e0d3be8714e8ef51647f85b542ba9",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "valor",
+                                    "moeda_id"
+                                ],
+                                "properties": {
+                                    "conta_origem_id": {
+                                        "type": "integer"
+                                    },
+                                    "conta_destino_id": {
+                                        "type": "integer"
+                                    },
+                                    "origem_externa": {
+                                        "type": "boolean"
+                                    },
+                                    "destino_externa": {
+                                        "type": "boolean"
+                                    },
+                                    "conta_externa_origem": {
+                                        "type": "string"
+                                    },
+                                    "banco_externo_origem": {
+                                        "type": "string"
+                                    },
+                                    "conta_externa_destino": {
+                                        "type": "string"
+                                    },
+                                    "banco_externo_destino": {
+                                        "type": "string"
+                                    },
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer"
+                                    },
+                                    "descricao": {
+                                        "type": "string"
+                                    },
+                                    "referencia_externa": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/transacoes/cambio": {
+            "post": {
+                "tags": [
+                    "Transações"
+                ],
+                "summary": "Operação de câmbio entre contas internas",
+                "operationId": "36fca42f74a1681b5786b1a8d3dd042b",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "conta_origem_id",
+                                    "conta_destino_id",
+                                    "moeda_origem_id",
+                                    "moeda_destino_id",
+                                    "valor_origem"
+                                ],
+                                "properties": {
+                                    "cliente_id": {
+                                        "type": "integer"
+                                    },
+                                    "conta_origem_id": {
+                                        "type": "integer"
+                                    },
+                                    "conta_destino_id": {
+                                        "type": "integer"
+                                    },
+                                    "moeda_origem_id": {
+                                        "type": "integer"
+                                    },
+                                    "moeda_destino_id": {
+                                        "type": "integer"
+                                    },
+                                    "valor_origem": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    },
+                                    "descricao": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Operação de câmbio concluída"
+                                        },
+                                        "operacao": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Token de autenticação Bearer obtido via endpoint /api/login",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autenticação",
+            "description": "Endpoints para login, logout e gestão de tokens"
+        },
+        {
+            "name": "Clientes",
+            "description": "Gestão de clientes do banco"
+        },
+        {
+            "name": "Contas",
+            "description": "Gestão de contas bancárias, depósitos e levantamentos"
+        },
+        {
+            "name": "Transações",
+            "description": "Transferências, histórico e operações financeiras"
+        },
+        {
+            "name": "Cartões",
+            "description": "Gestão de cartões de débito e crédito"
+        },
+        {
+            "name": "Seguros",
+            "description": "Apólices de seguro e gestão de sinistros"
+        },
+        {
+            "name": "Câmbio",
+            "description": "Taxas de câmbio e operações de conversão"
+        },
+        {
+            "name": "Relatórios",
+            "description": "Relatórios, extratos e dashboards"
+        }
+    ]
+}

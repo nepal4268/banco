@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamp('data_pagamento')->useCurrent();
             $table->foreignId('status_pagamento_id')->constrained('status_pagamento')->onDelete('restrict');
             $table->timestamps();
-            $table->softDeletes();
             
             $table->index('conta_id');
             $table->index('referencia');

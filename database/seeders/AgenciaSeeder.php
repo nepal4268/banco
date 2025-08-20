@@ -57,7 +57,10 @@ class AgenciaSeeder extends Seeder
         ];
 
         foreach ($agencias as $agenciaData) {
-            Agencia::create($agenciaData);
+            Agencia::updateOrCreate(
+                ['codigo_agencia' => $agenciaData['codigo_agencia']],
+                $agenciaData
+            );
         }
 
         $this->command->info('✅ Agências criadas com sucesso!');

@@ -126,7 +126,10 @@ class ClienteSeeder extends Seeder
         ];
 
         foreach ($clientes as $clienteData) {
-            Cliente::create($clienteData);
+            Cliente::firstOrCreate(
+                ['email' => $clienteData['email']],
+                $clienteData
+            );
         }
 
         // Criar alguns clientes adicionais usando factory para variedade
