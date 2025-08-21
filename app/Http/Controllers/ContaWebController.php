@@ -45,7 +45,7 @@ class ContaWebController extends Controller
     public function create()
     {
         $clientes = Cliente::where('status_cliente_id', function($query) {
-            $query->select('id')->from('status_clientes')->where('nome', 'ativo');
+            $query->select('id')->from('status_cliente')->where('nome', 'ativo');
         })->get();
         $tiposConta = TipoConta::all();
         $statusConta = StatusConta::all();
@@ -85,7 +85,7 @@ class ContaWebController extends Controller
     public function edit(Conta $conta)
     {
         $clientes = Cliente::where('status_cliente_id', function($query) {
-            $query->select('id')->from('status_clientes')->where('nome', 'ativo');
+            $query->select('id')->from('status_cliente')->where('nome', 'ativo');
         })->get();
         $tiposConta = TipoConta::all();
         $statusConta = StatusConta::all();

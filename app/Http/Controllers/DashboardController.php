@@ -35,15 +35,15 @@ class DashboardController extends Controller
         ->get();
 
         // Clientes por tipo
-        $clientesPorTipo = Cliente::select('tipo_clientes.nome', DB::raw('COUNT(*) as total'))
-            ->join('tipo_clientes', 'clientes.tipo_cliente_id', '=', 'tipo_clientes.id')
-            ->groupBy('tipo_clientes.id', 'tipo_clientes.nome')
+        $clientesPorTipo = Cliente::select('tipos_cliente.nome', DB::raw('COUNT(*) as total'))
+            ->join('tipos_cliente', 'clientes.tipo_cliente_id', '=', 'tipos_cliente.id')
+            ->groupBy('tipos_cliente.id', 'tipos_cliente.nome')
             ->get();
 
-        // Contas por status
-        $contasPorStatus = Conta::select('status_contas.nome', DB::raw('COUNT(*) as total'))
-            ->join('status_contas', 'contas.status_conta_id', '=', 'status_contas.id')
-            ->groupBy('status_contas.id', 'status_contas.nome')
+        // Contas por status (ajustado para status_conta no singular)
+        $contasPorStatus = Conta::select('status_conta.nome', DB::raw('COUNT(*) as total'))
+            ->join('status_conta', 'contas.status_conta_id', '=', 'status_conta.id')
+            ->groupBy('status_conta.id', 'status_conta.nome')
             ->get();
 
         // Últimas transações
@@ -62,7 +62,7 @@ class DashboardController extends Controller
 
         // Apólices ativas
         $apolicesAtivas = Apolice::whereHas('statusApolice', function($q) {
-            $q->where('nome', 'ativa');
+            $q->where('nome', 'Ativa'); // cuidado com maiúsculas/minúsculas
         })->count();
 
         return view('dashboard', compact(

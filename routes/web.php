@@ -47,8 +47,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Seguros
     Route::prefix('seguros')->name('seguros.')->group(function () {
-        Route::resource('apolices', SeguroWebController::class, ['as' => 'apolices']);
-        Route::resource('sinistros', SeguroWebController::class, ['as' => 'sinistros']);
+        Route::resource('apolices', SeguroWebController::class);
+        Route::resource('sinistros', SeguroWebController::class);
     });
 
     // Relatórios
@@ -60,8 +60,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Administração
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('usuarios', AdminWebController::class, ['as' => 'usuarios']);
-        Route::resource('agencias', AdminWebController::class, ['as' => 'agencias']);
-        Route::resource('perfis', AdminWebController::class, ['as' => 'perfis']);
+        Route::resource('usuarios', AdminWebController::class);
+        Route::resource('agencias', AdminWebController::class);
+        Route::resource('perfis', AdminWebController::class);
     });
 });

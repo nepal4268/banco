@@ -26,14 +26,14 @@ class RelatorioWebController extends Controller
 
         // Estatísticas
         $totalClientes = $query->count();
-        $clientesPorTipo = Cliente::select('tipo_clientes.nome', DB::raw('COUNT(*) as total'))
-            ->join('tipo_clientes', 'clientes.tipo_cliente_id', '=', 'tipo_clientes.id')
-            ->groupBy('tipo_clientes.id', 'tipo_clientes.nome')
+        $clientesPorTipo = Cliente::select('tipos_cliente.nome', DB::raw('COUNT(*) as total'))
+            ->join('tipos_cliente', 'clientes.tipo_cliente_id', '=', 'tipos_cliente.id')
+            ->groupBy('tipos_cliente.id', 'tipos_cliente.nome')
             ->get();
 
-        $clientesPorStatus = Cliente::select('status_clientes.nome', DB::raw('COUNT(*) as total'))
-            ->join('status_clientes', 'clientes.status_cliente_id', '=', 'status_clientes.id')
-            ->groupBy('status_clientes.id', 'status_clientes.nome')
+        $clientesPorStatus = Cliente::select('status_cliente.nome', DB::raw('COUNT(*) as total'))
+            ->join('status_cliente', 'clientes.status_cliente_id', '=', 'status_cliente.id')
+            ->groupBy('status_cliente.id', 'status_cliente.nome')
             ->get();
 
         $clientes = $query->orderBy('created_at', 'desc')->paginate(20);
@@ -62,9 +62,9 @@ class RelatorioWebController extends Controller
         // Estatísticas
         $totalTransacoes = $query->count();
         $valorTotal = $query->sum('valor');
-        $transacoesPorTipo = Transacao::select('tipo_transacoes.nome', DB::raw('COUNT(*) as total'), DB::raw('SUM(valor) as valor_total'))
-            ->join('tipo_transacoes', 'transacoes.tipo_transacao_id', '=', 'tipo_transacoes.id')
-            ->groupBy('tipo_transacoes.id', 'tipo_transacoes.nome')
+        $transacoesPorTipo = Transacao::select('tipos_transacao.nome', DB::raw('COUNT(*) as total'), DB::raw('SUM(valor) as valor_total'))
+            ->join('tipos_transacao', 'transacoes.tipo_transacao_id', '=', 'tipos_transacao.id')
+            ->groupBy('tipos_transacao.id', 'tipos_transacao.nome')
             ->get();
 
         $transacoesPorMes = Transacao::select(
@@ -106,14 +106,14 @@ class RelatorioWebController extends Controller
         // Estatísticas
         $totalContas = $query->count();
         $saldoTotal = $query->sum('saldo');
-        $contasPorTipo = Conta::select('tipo_contas.nome', DB::raw('COUNT(*) as total'), DB::raw('SUM(saldo) as saldo_total'))
-            ->join('tipo_contas', 'contas.tipo_conta_id', '=', 'tipo_contas.id')
-            ->groupBy('tipo_contas.id', 'tipo_contas.nome')
+        $contasPorTipo = Conta::select('tipos_conta.nome', DB::raw('COUNT(*) as total'), DB::raw('SUM(saldo) as saldo_total'))
+            ->join('tipos_conta', 'contas.tipo_conta_id', '=', 'tipos_conta.id')
+            ->groupBy('tipos_conta.id', 'tipos_conta.nome')
             ->get();
 
-        $contasPorStatus = Conta::select('status_contas.nome', DB::raw('COUNT(*) as total'))
-            ->join('status_contas', 'contas.status_conta_id', '=', 'status_contas.id')
-            ->groupBy('status_contas.id', 'status_contas.nome')
+        $contasPorStatus = Conta::select('status_conta.nome', DB::raw('COUNT(*) as total'))
+            ->join('status_conta', 'contas.status_conta_id', '=', 'status_conta.id')
+            ->groupBy('status_conta.id', 'status_conta.nome')
             ->get();
 
         $contas = $query->orderBy('created_at', 'desc')->paginate(20);

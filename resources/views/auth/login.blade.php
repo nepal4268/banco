@@ -38,7 +38,9 @@
     </div>
 </form>
 
+@if (Route::has('password.request'))
 <p class="mb-1">
     <a href="{{ route('password.request') }}">Esqueci minha senha</a>
 </p>
+@endif
 @endsection

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('referencia', 100);
             $table->decimal('valor', 20, 2);
             $table->foreignId('moeda_id')->constrained('moedas')->onDelete('restrict');
-            $table->timestamp('data_pagamento')->useCurrent();
+            $table->dateTime('data_pagamento');
             $table->foreignId('status_pagamento_id')->constrained('status_pagamento')->onDelete('restrict');
             $table->timestamps();
             

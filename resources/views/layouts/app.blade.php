@@ -206,13 +206,13 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('apolices.index') }}" class="nav-link {{ request()->routeIs('apolices.*') ? 'active' : '' }}">
+                                <a href="{{ route('seguros.apolices.index') }}" class="nav-link {{ request()->routeIs('seguros.apolices.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Apólices</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('sinistros.index') }}" class="nav-link {{ request()->routeIs('sinistros.*') ? 'active' : '' }}">
+                                <a href="{{ route('seguros.sinistros.index') }}" class="nav-link {{ request()->routeIs('seguros.sinistros.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Sinistros</p>
                                 </a>
@@ -256,13 +256,13 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.usuarios.index') }}" class="nav-link {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.usuarios.index') }}" class="nav-link {{ request()->routeIs('admin.usuarios.index') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Usuários</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.agencias.index') }}" class="nav-link {{ request()->routeIs('admin.agencias.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.agencias.index') }}" class="nav-link {{ request()->routeIs('admin.agencias.index') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Agências</p>
                                 </a>

@@ -46,6 +46,12 @@ class Transacao extends Model
         return $this->belongsTo(Conta::class, 'conta_destino_id');
     }
 
+    // Alias para usar no DashboardController
+    public function conta(): BelongsTo
+    {
+        return $this->contaOrigem();
+    }
+
     public function tipoTransacao(): BelongsTo
     {
         return $this->belongsTo(TipoTransacao::class, 'tipo_transacao_id');

@@ -29,7 +29,7 @@ class PagamentoSeeder extends Seeder
                     'referencia' => strtoupper(fake()->bothify('REF-######')),
                     'valor' => fake()->randomFloat(2, 500, 200000),
                     'moeda_id' => $conta->moeda_id,
-                    'data_pagamento' => fake()->dateTimeBetween('-6 months', 'now')->format('Y-m-d H:i:s'),
+                    'data_pagamento' => fake()->dateTimeBetween('-6 months', 'now'),
                     'status_pagamento_id' => fake()->boolean(80) ? $statusPago->id : $statusPendente->id,
                 ]);
             }
