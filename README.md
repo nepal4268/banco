@@ -1,66 +1,337 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema Bancário - Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema completo de gestão bancária desenvolvido em Laravel com interface responsiva e sistema de permissões avançado.
 
-## About Laravel
+## 🚀 Funcionalidades
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Gestão de Clientes
+- Cadastro completo de clientes
+- Gestão de informações pessoais e bancárias
+- Histórico de transações por cliente
+- Relatórios detalhados
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Gestão de Contas
+- Criação e gestão de contas bancárias
+- Diferentes tipos de conta (Corrente, Poupança, etc.)
+- Controle de saldos e movimentações
+- Histórico de transações
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Gestão de Cartões
+- Emissão e gestão de cartões
+- Diferentes tipos de cartão
+- Controle de status (Ativo, Bloqueado, etc.)
+- Histórico de transações
 
-## Learning Laravel
+### Transações
+- Transferências internas e externas
+- Depósitos e levantamentos
+- Operações de câmbio
+- Histórico completo de transações
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Seguros
+- Gestão de apólices de seguro
+- Controle de sinistros
+- Diferentes tipos de seguro
+- Relatórios de sinistros
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Relatórios
+- Relatórios de clientes
+- Relatórios de transações
+- Relatórios de contas
+- Relatórios de auditoria
+- Exportação em PDF/Excel
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Administração
+- Gestão de usuários
+- Gestão de agências
+- Gestão de perfis e permissões
+- Configurações do sistema
+- Logs de auditoria
 
-## Laravel Sponsors
+### Sistema de Permissões
+- Controle granular de acesso
+- Perfis predefinidos (Administrador, Gerente, Atendente, Consultor)
+- Permissões personalizadas por usuário
+- Auditoria de ações
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Requisitos do Sistema
 
-### Premium Partners
+- PHP 8.1 ou superior
+- Composer 2.0 ou superior
+- MySQL 8.0 ou MariaDB 10.5 ou superior
+- Node.js 16.0 ou superior (para assets)
+- Git
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 📦 Instalação
 
-## Contributing
+### 1. Clone o repositório
+```bash
+git clone <url-do-repositorio>
+cd sistema-bancario
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Instale as dependências do PHP
+```bash
+composer install
+```
 
-## Code of Conduct
+### 3. Configure o ambiente
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Configure o banco de dados
+Edite o arquivo `.env` e configure as credenciais do banco de dados:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sistema_bancario
+DB_USERNAME=seu_usuario
+DB_PASSWORD=sua_senha
+```
 
-## Security Vulnerabilities
+### 5. Execute as migrações
+```bash
+php artisan migrate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 6. Execute os seeders
+```bash
+php artisan db:seed
+```
 
-## License
+### 7. Configure o servidor web
+```bash
+# Para desenvolvimento
+php artisan serve
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Para produção, configure o servidor web (Apache/Nginx) para apontar para a pasta public/
+```
+
+## 🔑 Credenciais de Acesso
+
+Após executar os seeders, você terá acesso com as seguintes credenciais:
+
+### Administrador
+- **Email:** admin@banco.ao
+- **Senha:** admin123
+- **Perfil:** Administrador (acesso total)
+
+### Perfis Disponíveis
+1. **Administrador** - Acesso total ao sistema
+2. **Gerente** - Acesso amplo a operações bancárias
+3. **Atendente** - Acesso básico para atendimento
+4. **Consultor** - Apenas visualização
+
+## 🌐 Acesso ao Sistema
+
+### Desenvolvimento
+```
+http://localhost:8000
+```
+
+### Produção
+```
+http://seu-dominio.com
+```
+
+## 📱 Interface Responsiva
+
+O sistema é totalmente responsivo e funciona em:
+- Desktop (Windows, macOS, Linux)
+- Tablet (iPad, Android)
+- Mobile (iPhone, Android)
+
+## 🔐 Segurança
+
+- Autenticação segura com Laravel
+- Sistema de permissões granular
+- Logs de auditoria completos
+- Validação de dados em todas as operações
+- Proteção CSRF
+- Sanitização de inputs
+
+## 📊 Estrutura do Banco de Dados
+
+### Tabelas Principais
+- `usuarios` - Usuários do sistema
+- `perfis` - Perfis de usuário
+- `permissoes` - Permissões do sistema
+- `agencias` - Agências bancárias
+- `clientes` - Clientes do banco
+- `contas` - Contas bancárias
+- `cartoes` - Cartões bancários
+- `transacoes` - Transações bancárias
+- `apolices` - Apólices de seguro
+- `sinistros` - Sinistros de seguro
+
+### Tabelas de Suporte
+- `tipos_cliente` - Tipos de cliente
+- `status_cliente` - Status de clientes
+- `tipos_conta` - Tipos de conta
+- `status_conta` - Status de contas
+- `tipos_cartao` - Tipos de cartão
+- `status_cartao` - Status de cartões
+- `tipos_transacao` - Tipos de transação
+- `status_transacao` - Status de transações
+- `moedas` - Moedas disponíveis
+- `taxas_cambio` - Taxas de câmbio
+
+## 🚀 Comandos Úteis
+
+### Desenvolvimento
+```bash
+# Iniciar servidor de desenvolvimento
+php artisan serve
+
+# Limpar cache
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# Gerar chave da aplicação
+php artisan key:generate
+
+# Verificar rotas
+php artisan route:list
+```
+
+### Banco de Dados
+```bash
+# Executar migrações
+php artisan migrate
+
+# Reverter migrações
+php artisan migrate:rollback
+
+# Executar seeders
+php artisan db:seed
+
+# Resetar banco e executar seeders
+php artisan migrate:fresh --seed
+```
+
+### Produção
+```bash
+# Otimizar para produção
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Limpar otimizações
+php artisan optimize:clear
+```
+
+## 📁 Estrutura do Projeto
+
+```
+sistema-bancario/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/     # Controladores
+│   │   ├── Middleware/      # Middlewares
+│   │   └── Requests/        # Form Requests
+│   ├── Models/              # Modelos Eloquent
+│   └── Services/            # Serviços
+├── database/
+│   ├── migrations/          # Migrações
+│   └── seeders/            # Seeders
+├── resources/
+│   └── views/              # Views Blade
+├── routes/
+│   ├── web.php             # Rotas web
+│   └── api.php             # Rotas API
+├── public/                 # Arquivos públicos
+└── storage/                # Arquivos de storage
+```
+
+## 🔧 Configurações Adicionais
+
+### Configurar Storage
+```bash
+php artisan storage:link
+```
+
+### Configurar Queue (opcional)
+```bash
+# Configurar driver de fila no .env
+QUEUE_CONNECTION=database
+
+# Criar tabela de jobs
+php artisan queue:table
+php artisan migrate
+
+# Processar filas
+php artisan queue:work
+```
+
+### Configurar Cache (opcional)
+```bash
+# Configurar driver de cache no .env
+CACHE_DRIVER=redis
+
+# Instalar Redis (Ubuntu/Debian)
+sudo apt-get install redis-server
+```
+
+## 🐛 Solução de Problemas
+
+### Erro de Permissões
+```bash
+# Dar permissões de escrita
+chmod -R 775 storage/
+chmod -R 775 bootstrap/cache/
+```
+
+### Erro de Composer
+```bash
+# Limpar cache do Composer
+composer clear-cache
+composer install --no-cache
+```
+
+### Erro de Banco de Dados
+```bash
+# Verificar conexão
+php artisan tinker
+DB::connection()->getPdo();
+
+# Resetar banco
+php artisan migrate:fresh --seed
+```
+
+## 📞 Suporte
+
+Para suporte técnico ou dúvidas:
+- Email: suporte@banco.ao
+- Telefone: +244 123 456 789
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 🤝 Contribuição
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📈 Roadmap
+
+- [ ] Integração com APIs bancárias
+- [ ] Sistema de notificações push
+- [ ] App mobile nativo
+- [ ] Integração com WhatsApp Business
+- [ ] Sistema de chat em tempo real
+- [ ] Dashboard com gráficos avançados
+- [ ] Relatórios automatizados
+- [ ] Sistema de backup automático
+
+---
+
+**Desenvolvido com ❤️ usando Laravel**
