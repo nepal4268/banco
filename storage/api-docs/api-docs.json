@@ -20,6 +20,207 @@
         }
     ],
     "paths": {
+        "/api/agencias": {
+            "get": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Listar agências",
+                "operationId": "90c3f4ad10dbebeb89491333c314a762",
+                "parameters": [
+                    {
+                        "name": "ativa",
+                        "in": "query",
+                        "description": "Filtrar por agências ativas",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "codigo_agencia",
+                        "in": "query",
+                        "description": "Filtrar por código",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de agências"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar agência",
+                "operationId": "81d04b1f16844676c2e6255ea2a6a0fb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "codigo_agencia",
+                                    "nome",
+                                    "endereco"
+                                ],
+                                "properties": {
+                                    "codigo_banco": {
+                                        "type": "string",
+                                        "maxLength": 4,
+                                        "example": "0042"
+                                    },
+                                    "codigo_agencia": {
+                                        "type": "string",
+                                        "maxLength": 4,
+                                        "example": "0001"
+                                    },
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Agência Central"
+                                    },
+                                    "endereco": {
+                                        "type": "string",
+                                        "example": "Rua da Independência, 123"
+                                    },
+                                    "telefone": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "ativa": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Agência criada"
+                    }
+                }
+            }
+        },
+        "/api/agencias/{id}": {
+            "get": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Obter agência",
+                "operationId": "da1a098f8fe5c45b4a439969c62e7da7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Agência"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar agência",
+                "operationId": "24d6352d41f8802dd29cd42d1bfd4f56",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo_banco": {
+                                        "type": "string",
+                                        "maxLength": 4
+                                    },
+                                    "codigo_agencia": {
+                                        "type": "string",
+                                        "maxLength": 4
+                                    },
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "endereco": {
+                                        "type": "string"
+                                    },
+                                    "telefone": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "ativa": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Agência atualizada"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Excluir agência",
+                "operationId": "ea36c403da978f2cead63a8d0e9d37a0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Agência excluída"
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
@@ -674,6 +875,970 @@
                 }
             }
         },
+        "/api/tipos-cliente": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar tipo de cliente",
+                "operationId": "08c91adb20e788268bd4ba9b7c0aa9d8",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-cliente": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de cliente",
+                "operationId": "34c6260c18527de9cf230d98bf760c07",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-conta": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar tipo de conta",
+                "operationId": "87b5c92433a3eb58811b870e71409711",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-conta/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar tipo de conta",
+                "operationId": "230762e2eec195998eba189d2ef6d3e1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-cartao": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar tipo de cartão",
+                "operationId": "a647ea7bd3079571f06887cc327c0143",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-cartao/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar tipo de cartão",
+                "operationId": "fe79f03f398ebbd31db797259ed692b2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-seguro": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar tipo de seguro",
+                "operationId": "a532e60184b59a71c9e11da5d05b8882",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "cobertura": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "premio_mensal": {
+                                        "type": "number",
+                                        "format": "float"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-seguro/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar tipo de seguro",
+                "operationId": "e887d52f0574ce3ced057afef156e2b5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "cobertura": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "premio_mensal": {
+                                        "type": "number",
+                                        "format": "float"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-transacao": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar tipo de transação",
+                "operationId": "60f7da391c3a2e9e9dcc3c258c8c09cf",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-transacao/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar tipo de transação",
+                "operationId": "dc1c22c3158c9267fce0e957eebc5c4b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/tipos-cliente/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar tipo de cliente",
+                "operationId": "aadda1ca18d9e5cfe7805a1260c3e0d6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-cliente/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de cliente",
+                "operationId": "ca7b4506fb7f48443d611093ecde6d3b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-conta": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de conta",
+                "operationId": "fb4fb88a719508dc8fe4713513874573",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-conta/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de conta",
+                "operationId": "ab5021c8329ee9694a5470b0e9e83498",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-cartao": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de cartão",
+                "operationId": "25f6f842dc81f450811fdc8ef8d3731b",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-cartao/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de cartão",
+                "operationId": "531d5b4382581f497ae35336b9cc9d36",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-pagamento": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de pagamento",
+                "operationId": "fc819b6caf3754b890a1abae94752c15",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-pagamento/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de pagamento",
+                "operationId": "0c90c25f525422a0356dcb89bc9ccaa8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-sinistro": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de sinistro",
+                "operationId": "c5deb23e907b15fa7f028fc49dbd3c75",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-sinistro/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de sinistro",
+                "operationId": "02f0651aebca7b03f064014ffffbede9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-transacao": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de transação",
+                "operationId": "37d07c4c7921f7c9f51bc961e60c1b64",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-transacao/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de transação",
+                "operationId": "dceb368411be9907e8b506eba0dc5d92",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
+        "/api/status-apolice": {
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar status de apólice",
+                "operationId": "ef9f9624e8c3a7209f54a9f157394e5c",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Criado"
+                    }
+                }
+            }
+        },
+        "/api/status-apolice/{id}": {
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar status de apólice",
+                "operationId": "edbf8bd2a4d8aa195559222615b6b50e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado"
+                    }
+                }
+            }
+        },
         "/api/contas": {
             "get": {
                 "tags": [
@@ -1085,6 +2250,1065 @@
                 }
             }
         },
+        "/api/logs": {
+            "get": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Listar logs de ações",
+                "operationId": "73553fb68dd7829ff24bf0f5a0084dd5",
+                "parameters": [
+                    {
+                        "name": "usuario_id",
+                        "in": "query",
+                        "description": "Filtrar por usuário",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "acao",
+                        "in": "query",
+                        "description": "Filtrar por ação",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tabela",
+                        "in": "query",
+                        "description": "Filtrar por tabela",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "description": "Data início",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "description": "Data fim",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de logs"
+                    }
+                }
+            }
+        },
+        "/api/logs/{id}": {
+            "get": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Obter log específico",
+                "operationId": "a10d9a274787ae6eca3563ca938d9d59",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log de ação"
+                    }
+                }
+            }
+        },
+        "/api/logs/estatisticas": {
+            "get": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Estatísticas dos logs",
+                "operationId": "1c6d9f4c37a36b3b2e2fac5fe5482770",
+                "parameters": [
+                    {
+                        "name": "periodo",
+                        "in": "query",
+                        "description": "Período das estatísticas",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "hoje",
+                                "semana",
+                                "mes",
+                                "ano"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estatísticas dos logs"
+                    }
+                }
+            }
+        },
+        "/api/logs/acoes": {
+            "get": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Listar tipos de ações registradas",
+                "operationId": "c4de3d089c6ce934e1712d53797ac856",
+                "responses": {
+                    "200": {
+                        "description": "Tipos de ações"
+                    }
+                }
+            }
+        },
+        "/api/logs/tabelas": {
+            "get": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Listar tabelas monitoradas",
+                "operationId": "67ec165a4acbac655b5df5d850648bd4",
+                "responses": {
+                    "200": {
+                        "description": "Tabelas monitoradas"
+                    }
+                }
+            }
+        },
+        "/api/logs/usuario/{usuario_id}": {
+            "get": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Logs de um usuário específico",
+                "operationId": "34dac405da529721681fbfda64106a97",
+                "parameters": [
+                    {
+                        "name": "usuario_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logs do usuário"
+                    }
+                }
+            }
+        },
+        "/api/logs/limpar": {
+            "delete": {
+                "tags": [
+                    "Auditoria"
+                ],
+                "summary": "Limpar logs antigos",
+                "operationId": "4e86d6a0fdfe79889cbe80ada54d6c97",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "dias": {
+                                        "description": "Logs mais antigos que X dias serão removidos",
+                                        "type": "integer",
+                                        "example": 90
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Logs limpos"
+                    }
+                }
+            }
+        },
+        "/api/moedas": {
+            "get": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Listar moedas",
+                "operationId": "6b721d641a5b5c2bf0c797bdcb133e0a",
+                "parameters": [
+                    {
+                        "name": "ativa",
+                        "in": "query",
+                        "description": "Filtrar por moedas ativas",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de moedas"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Criar moeda",
+                "operationId": "19a15f398f8f7046d01f12956c879476",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "codigo",
+                                    "nome",
+                                    "simbolo"
+                                ],
+                                "properties": {
+                                    "codigo": {
+                                        "type": "string",
+                                        "maxLength": 3,
+                                        "example": "USD"
+                                    },
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "Dólar Americano"
+                                    },
+                                    "simbolo": {
+                                        "type": "string",
+                                        "maxLength": 5,
+                                        "example": "$"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Moeda criada"
+                    }
+                }
+            }
+        },
+        "/api/moedas/{id}": {
+            "get": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Obter moeda",
+                "operationId": "a6adaf9b9965adec32f77aa9107d3e36",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Moeda"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Atualizar moeda",
+                "operationId": "769d088cc176943ebcd8e8dfd5267f79",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "codigo": {
+                                        "type": "string",
+                                        "maxLength": 3
+                                    },
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "simbolo": {
+                                        "type": "string",
+                                        "maxLength": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Moeda atualizada"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Configuração"
+                ],
+                "summary": "Excluir moeda",
+                "operationId": "58c38d663184aedd0ed80fa45f7e4655",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Moeda excluída"
+                    }
+                }
+            }
+        },
+        "/api/pagamentos": {
+            "get": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Listar pagamentos",
+                "operationId": "aad1ee9bbaf6dfb2c9f6a3d552ce54e3",
+                "parameters": [
+                    {
+                        "name": "conta_id",
+                        "in": "query",
+                        "description": "Filtrar por conta",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "parceiro",
+                        "in": "query",
+                        "description": "Filtrar por parceiro",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "description": "Data início",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "description": "Data fim",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de pagamentos"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Criar pagamento",
+                "operationId": "d5079fdccc372ef356fbbaaf74ea1ec4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "conta_id",
+                                    "parceiro",
+                                    "referencia",
+                                    "valor",
+                                    "moeda_id"
+                                ],
+                                "properties": {
+                                    "conta_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "parceiro": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "UNITEL"
+                                    },
+                                    "referencia": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "244912345678"
+                                    },
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "decimal",
+                                        "example": 50
+                                    },
+                                    "moeda_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "data_pagamento": {
+                                        "type": "string",
+                                        "format": "datetime",
+                                        "example": "2025-01-15 14:30:00"
+                                    },
+                                    "status_pagamento_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pagamento criado"
+                    }
+                }
+            }
+        },
+        "/api/pagamentos/{id}": {
+            "get": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Obter pagamento",
+                "operationId": "d0331b56874c68001c09f03e96f59a9e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pagamento"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Atualizar pagamento",
+                "operationId": "5b92aa9a30b7d72062091d5e5bfd3bbd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "parceiro": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "referencia": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "valor": {
+                                        "type": "number",
+                                        "format": "decimal"
+                                    },
+                                    "status_pagamento_id": {
+                                        "type": "integer"
+                                    },
+                                    "data_pagamento": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pagamento atualizado"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Excluir pagamento",
+                "operationId": "40d7cf9149d1bb33c3f56ceb511124f3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pagamento excluído"
+                    }
+                }
+            }
+        },
+        "/api/pagamentos/{id}/processar": {
+            "post": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Processar pagamento",
+                "operationId": "d50b213db5123d4905c81ea459290e76",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pagamento processado"
+                    }
+                }
+            }
+        },
+        "/api/pagamentos/{id}/cancelar": {
+            "post": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Cancelar pagamento",
+                "operationId": "a96c54333ec7f1805955f1edad028a5e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pagamento cancelado"
+                    }
+                }
+            }
+        },
+        "/api/perfis": {
+            "get": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Listar perfis de usuário",
+                "operationId": "a0d9ca73487df83b715d1e6b6921d2d5",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de perfis"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Criar perfil",
+                "operationId": "e53844e4601981d939ccb8e8fd3e9423",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "Gerente"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Perfil para gerentes de agência"
+                                    },
+                                    "permissoes": {
+                                        "description": "IDs das permissões",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Perfil criado"
+                    }
+                }
+            }
+        },
+        "/api/perfis/{id}": {
+            "get": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Obter perfil",
+                "operationId": "81791b101f7254f870b57c193180eafe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Atualizar perfil",
+                "operationId": "d80b022d565639abcd7368a28f24f80a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "descricao": {
+                                        "type": "string"
+                                    },
+                                    "permissoes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perfil atualizado"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Excluir perfil",
+                "operationId": "ece61c4ab475880a9f277d1439adeb10",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil excluído"
+                    }
+                }
+            }
+        },
+        "/api/perfis/{id}/permissoes": {
+            "post": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Adicionar permissões ao perfil",
+                "operationId": "ecbc5fe374596780f617c2fed35e1808",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "permissoes"
+                                ],
+                                "properties": {
+                                    "permissoes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permissões adicionadas"
+                    }
+                }
+            }
+        },
+        "/api/perfis/{id}/permissoes/{permissao}": {
+            "delete": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Remover permissão do perfil",
+                "operationId": "351a2123af55215bf2ec39d4cdfa43ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "permissao",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permissão removida"
+                    }
+                }
+            }
+        },
+        "/api/permissoes": {
+            "get": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Listar permissões",
+                "operationId": "e019cc5ddf9da1318e5c2854e10b9757",
+                "parameters": [
+                    {
+                        "name": "grupo",
+                        "in": "query",
+                        "description": "Filtrar por grupo",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de permissões"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Criar permissão",
+                "operationId": "c5eaead9e97bd4d7ba8ddc0a8d28b389",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome",
+                                    "code",
+                                    "grupo"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "Criar Cliente"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "cliente.create"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Permite criar novos clientes"
+                                    },
+                                    "grupo": {
+                                        "type": "string",
+                                        "maxLength": 30,
+                                        "example": "Clientes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Permissão criada"
+                    }
+                }
+            }
+        },
+        "/api/permissoes/{id}": {
+            "get": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Obter permissão",
+                "operationId": "3270b62ca96fb083223e25056ed0f800",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permissão"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Atualizar permissão",
+                "operationId": "f5afc341f1effd9144e584242a42d5c8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "descricao": {
+                                        "type": "string"
+                                    },
+                                    "grupo": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Permissão atualizada"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Excluir permissão",
+                "operationId": "b52394d4b6d019372a30be43a42471d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Permissão excluída"
+                    }
+                }
+            }
+        },
+        "/api/permissoes/grupos": {
+            "get": {
+                "tags": [
+                    "Gestão de Usuários"
+                ],
+                "summary": "Listar grupos de permissões",
+                "operationId": "6db6022567bfe5e5d29d3ebbbad3a589",
+                "responses": {
+                    "200": {
+                        "description": "Lista de grupos"
+                    }
+                }
+            }
+        },
         "/api/relatorios/dashboard": {
             "get": {
                 "tags": [
@@ -1291,6 +3515,76 @@
                 }
             }
         },
+        "/api/relatorios/clientes/{cliente}/contas": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Resumo de contas do cliente",
+                "operationId": "33d3dcf02f5a3ce1e29e55aa20f82c28",
+                "parameters": [
+                    {
+                        "name": "cliente",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resumo de contas do cliente"
+                    }
+                }
+            }
+        },
+        "/api/relatorios/movimentos": {
+            "get": {
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Relatório de movimentos (entradas/saídas) agregado",
+                "operationId": "86d858660b1921e3c8b28f47b3ca2bee",
+                "parameters": [
+                    {
+                        "name": "data_inicio",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "data_fim",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "conta_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "cliente_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resumo de movimentos"
+                    }
+                }
+            }
+        },
         "/api/seguros/apolices": {
             "get": {
                 "tags": [
@@ -1321,64 +3615,6 @@
                         "description": "Lista paginada de apólices"
                     }
                 }
-            },
-            "post": {
-                "tags": [
-                    "Seguros"
-                ],
-                "summary": "Criar nova apólice",
-                "operationId": "61e6ed7d5c653c5d5f0f9bcc377e7892",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "cliente_id",
-                                    "tipo_seguro_id",
-                                    "valor_segurado",
-                                    "premio"
-                                ],
-                                "properties": {
-                                    "cliente_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "tipo_seguro_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "valor_segurado": {
-                                        "type": "number",
-                                        "format": "decimal",
-                                        "example": 100000
-                                    },
-                                    "premio": {
-                                        "type": "number",
-                                        "format": "decimal",
-                                        "example": 5000
-                                    },
-                                    "data_inicio": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-01-01"
-                                    },
-                                    "data_fim": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-12-31"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Apólice criada com sucesso"
-                    }
-                }
             }
         },
         "/api/seguros/apolices/{id}": {
@@ -1401,6 +3637,53 @@
                 "responses": {
                     "200": {
                         "description": "Detalhes da apólice"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Atualizar apólice",
+                "operationId": "8d43c0c605c3db5bc4b8e668ee2fbe95",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/ApoliceRequest"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Apólice atualizada"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Excluir apólice",
+                "operationId": "7d1864ceb08d03fc37c288d03331677c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Apólice excluída"
                     }
                 }
             }
@@ -1504,6 +3787,28 @@
                 "responses": {
                     "200": {
                         "description": "Detalhes do sinistro"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Seguros"
+                ],
+                "summary": "Excluir sinistro",
+                "operationId": "c877a276139424ea87289290fcbce426",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sinistro excluído"
                     }
                 }
             }
@@ -2021,6 +4326,88 @@
         }
     },
     "components": {
+        "requestBodies": {
+            "ApoliceRequest": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "required": [
+                                "cliente_id",
+                                "tipo_seguro_id",
+                                "numero_apolice",
+                                "inicio_vigencia",
+                                "fim_vigencia",
+                                "status_apolice_id",
+                                "premio_mensal"
+                            ],
+                            "properties": {
+                                "cliente_id": {
+                                    "type": "integer"
+                                },
+                                "tipo_seguro_id": {
+                                    "type": "integer"
+                                },
+                                "numero_apolice": {
+                                    "type": "string",
+                                    "maxLength": 50
+                                },
+                                "inicio_vigencia": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fim_vigencia": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "status_apolice_id": {
+                                    "type": "integer"
+                                },
+                                "premio_mensal": {
+                                    "type": "number",
+                                    "format": "float"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "SinistroRequest": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "required": [
+                                "apolice_id",
+                                "descricao",
+                                "valor_sinistro"
+                            ],
+                            "properties": {
+                                "apolice_id": {
+                                    "type": "integer"
+                                },
+                                "descricao": {
+                                    "type": "string"
+                                },
+                                "valor_sinistro": {
+                                    "type": "number",
+                                    "format": "float"
+                                },
+                                "data_ocorrencia": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "status_sinistro_id": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "securitySchemes": {
             "sanctum": {
                 "type": "http",
@@ -2062,6 +4449,22 @@
         {
             "name": "Relatórios",
             "description": "Relatórios, extratos e dashboards"
+        },
+        {
+            "name": "Configuração",
+            "description": "Configuração"
+        },
+        {
+            "name": "Auditoria",
+            "description": "Auditoria"
+        },
+        {
+            "name": "Pagamentos",
+            "description": "Pagamentos"
+        },
+        {
+            "name": "Gestão de Usuários",
+            "description": "Gestão de Usuários"
         }
     ]
 }
