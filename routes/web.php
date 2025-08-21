@@ -1,6 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthWebController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ClienteWebController;
+use App\Http\Controllers\ContaWebController;
+use App\Http\Controllers\CartaoWebController;
+use App\Http\Controllers\TransacaoWebController;
+use App\Http\Controllers\SeguroWebController;
+use App\Http\Controllers\RelatorioWebController;
+use App\Http\Controllers\AdminWebController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +22,46 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Rotas de autenticação
+Route::get('/login', [AuthWebController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthWebController::class, 'login']);
+Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
+
+// Rotas protegidas por autenticação
+Route::middleware(['auth'])->group(function () {
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    // Clientes
+    Route::resource('clientes', ClienteWebController::class);
+
+    // Contas
+    Route::resource('contas', ContaWebController::class);
+
+    // Cartões
+    Route::resource('cartoes', CartaoWebController::class);
+
+    // Transações
+    Route::resource('transacoes', TransacaoWebController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
+
+    // Seguros
+    Route::prefix('seguros')->name('seguros.')->group(function () {
+        Route::resource('apolices', SeguroWebController::class, ['as' => 'apolices']);
+        Route::resource('sinistros', SeguroWebController::class, ['as' => 'sinistros']);
+    });
+
+    // Relatórios
+    Route::prefix('relatorios')->name('relatorios.')->group(function () {
+        Route::get('/clientes', [RelatorioWebController::class, 'clientes'])->name('clientes');
+        Route::get('/transacoes', [RelatorioWebController::class, 'transacoes'])->name('transacoes');
+        Route::get('/contas', [RelatorioWebController::class, 'contas'])->name('contas');
+    });
+
+    // Administração
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('usuarios', AdminWebController::class, ['as' => 'usuarios']);
+        Route::resource('agencias', AdminWebController::class, ['as' => 'agencias']);
+        Route::resource('perfis', AdminWebController::class, ['as' => 'perfis']);
+    });
 });

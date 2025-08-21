@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cliente;
+use App\Models\Conta;
+use App\Models\Transacao;
+use App\Models\Cartao;
+use App\Models\Apolice;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class DashboardController extends Controller
+{
+    public function index()
+    {
+        // Estatísticas principais
+        $totalClientes = Cliente::count();
+        $totalContas = Conta::count();
+        $totalTransacoes = Transacao::count();
+        $totalCartoes = Cartao::count();
+
+        // Transações por mês (últimos 6 meses)
+        $transacoesPorMes = Transacao::select(
+            DB::raw('MONTH(created_at) as mes'),
+            DB::raw('YEAR(created_at) as ano'),
+            DB::raw('COUNT(*) as total'),
+            DB::raw('SUM(valor) as valor_total')
+        )
+        ->where('created_at', '>=', Carbon::now()->subMonths(6))
+        ->groupBy('ano', 'mes')
+        ->orderBy('ano', 'desc')
+        ->orderBy('mes', 'desc')
+        ->get();
+
+        // Clientes por tipo
+        $clientesPorTipo = Cliente::select('tipo_clientes.nome', DB::raw('COUNT(*) as total'))
+            ->join('tipo_clientes', 'clientes.tipo_cliente_id', '=', 'tipo_clientes.id')
+            ->groupBy('tipo_clientes.id', 'tipo_clientes.nome')
+            ->get();
+
+        // Contas por status
+        $contasPorStatus = Conta::select('status_contas.nome', DB::raw('COUNT(*) as total'))
+            ->join('status_contas', 'contas.status_conta_id', '=', 'status_contas.id')
+            ->groupBy('status_contas.id', 'status_contas.nome')
+            ->get();
+
+        // Últimas transações
+        $ultimasTransacoes = Transacao::with(['conta.cliente', 'tipoTransacao'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Saldo total das contas
+        $saldoTotal = Conta::sum('saldo');
+
+        // Novos clientes este mês
+        $novosClientesMes = Cliente::whereMonth('created_at', Carbon::now()->month)
+            ->whereYear('created_at', Carbon::now()->year)
+            ->count();
+
+        // Apólices ativas
+        $apolicesAtivas = Apolice::whereHas('statusApolice', function($q) {
+            $q->where('nome', 'ativa');
+        })->count();
+
+        return view('dashboard', compact(
+            'totalClientes',
+            'totalContas', 
+            'totalTransacoes',
+            'totalCartoes',
+            'transacoesPorMes',
+            'clientesPorTipo',
+            'contasPorStatus',
+            'ultimasTransacoes',
+            'saldoTotal',
+            'novosClientesMes',
+            'apolicesAtivas'
+        ));
+    }
+}
