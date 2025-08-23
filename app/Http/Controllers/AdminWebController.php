@@ -7,6 +7,8 @@ use App\Models\Agencia;
 use App\Models\Perfil;
 use App\Models\Permissao;
 use Illuminate\Http\Request;
+use App\Http\Requests\UsuarioStoreRequest;
+use App\Http\Requests\UsuarioUpdateRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -119,120 +121,7 @@ class AdminWebController extends Controller
     }
 
     // Métodos para Usuários
-    private function usuariosIndex(Request $request)
-    {
-        $query = Usuario::with(['perfil', 'agencia']);
-
-        if ($request->filled('nome')) {
-            $query->where('nome', 'like', '%' . $request->nome . '%');
-        }
-
-        if ($request->filled('email')) {
-            $query->where('email', 'like', '%' . $request->email . '%');
-        }
-
-        if ($request->filled('perfil_id')) {
-            $query->where('perfil_id', $request->perfil_id);
-        }
-
-        $usuarios = $query->paginate(15);
-        $perfis = Perfil::all();
-        $agencias = Agencia::all();
-
-        return view('admin.usuarios.index', compact('usuarios', 'perfis', 'agencias'));
-    }
-
-    private function usuariosCreate()
-    {
-        $perfis = Perfil::all();
-        $agencias = Agencia::all();
-        
-        return view('admin.usuarios.create', compact('perfis', 'agencias'));
-    }
-
-    private function usuariosStore(Request $request)
-    {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'required|email|unique:usuarios,email',
-            'senha' => 'required|string|min:6',
-            'perfil_id' => 'required|exists:perfis,id',
-            'agencia_id' => 'nullable|exists:agencias,id',
-            'bi' => 'required|string|max:20|unique:usuarios,bi',
-            'sexo' => 'required|in:M,F',
-            'telefone' => 'required|string|max:20',
-            'data_nascimento' => 'required|date',
-            'endereco' => 'nullable|string|max:500',
-            'cidade' => 'nullable|string|max:100',
-            'provincia' => 'nullable|string|max:100',
-        ]);
-
-        $data = $request->all();
-        $data['senha'] = Hash::make($data['senha']);
-        $data['usuario_criacao'] = Auth::id();
-
-        Usuario::create($data);
-
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuário criado com sucesso!');
-    }
-
-    private function usuariosShow(Usuario $usuario)
-    {
-        $usuario->load(['perfil', 'agencia']);
-        
-        return view('admin.usuarios.show', compact('usuario'));
-    }
-
-    private function usuariosEdit(Usuario $usuario)
-    {
-        $perfis = Perfil::all();
-        $agencias = Agencia::all();
-        
-        return view('admin.usuarios.edit', compact('usuario', 'perfis', 'agencias'));
-    }
-
-    private function usuariosUpdate(Request $request, Usuario $usuario)
-    {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'required|email|unique:usuarios,email,' . $usuario->id,
-            'senha' => 'nullable|string|min:6',
-            'perfil_id' => 'required|exists:perfis,id',
-            'agencia_id' => 'nullable|exists:agencias,id',
-            'bi' => 'required|string|max:20|unique:usuarios,bi,' . $usuario->id,
-            'sexo' => 'required|in:M,F',
-            'telefone' => 'required|string|max:20',
-            'data_nascimento' => 'required|date',
-            'endereco' => 'nullable|string|max:500',
-            'cidade' => 'nullable|string|max:100',
-            'provincia' => 'nullable|string|max:100',
-        ]);
-
-        $data = $request->all();
-        
-        if ($request->filled('senha')) {
-            $data['senha'] = Hash::make($data['senha']);
-        } else {
-            unset($data['senha']);
-        }
-        
-        $data['usuario_atualizacao'] = Auth::id();
-
-        $usuario->update($data);
-
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuário atualizado com sucesso!');
-    }
-
-    private function usuariosDestroy(Usuario $usuario)
-    {
-        if ($usuario->id === Auth::id()) {
-            return redirect()->route('admin.usuarios.index')->with('error', 'Não é possível excluir seu próprio usuário!');
-        }
-
-        $usuario->delete();
-        
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuário excluído com sucesso!');
-    }
+    // Os handlers de usuário foram movidos para um controller dedicado: AdminUsuarioController
 
     // Métodos para Agências
     private function agenciasIndex(Request $request)
@@ -264,12 +153,20 @@ class AdminWebController extends Controller
             'endereco' => 'required|string|max:500',
             'cidade' => 'required|string|max:100',
             'provincia' => 'required|string|max:100',
-            'telefone' => 'required|string|max:20',
+            'telefone' => 'required|string|max:500',
             'email' => 'required|email|unique:agencias,email',
         ]);
 
         $data = $request->all();
         $data['usuario_criacao'] = Auth::id();
+
+        // Normalize telefone: accept comma-separated string and store as array to match cast
+        if (isset($data['telefone'])) {
+            if (is_string($data['telefone'])) {
+                $telefones = array_filter(array_map('trim', explode(',', $data['telefone'])));
+                $data['telefone'] = array_values($telefones);
+            }
+        }
 
         Agencia::create($data);
 
@@ -279,6 +176,145 @@ class AdminWebController extends Controller
     private function agenciasShow(Agencia $agencia)
     {
         return view('admin.agencias.show', compact('agencia'));
+    }
+
+    // Dashboard por agência: resumo e métricas
+    public function agenciasDashboard(Request $request, Agencia $agencia)
+    {
+        // resumo simples
+        $totalContas = $agencia->contas()->count();
+        $saldoTotal = $agencia->contas()->sum('saldo');
+
+        // preparar filtros: período (start, end) e tipo (opcional)
+    $end = $request->query('end') ? \Carbon\Carbon::parse($request->query('end'))->endOfDay() : \Carbon\Carbon::now()->endOfDay();
+    $start = $request->query('start') ? \Carbon\Carbon::parse($request->query('start'))->startOfDay() : (clone $end)->subMonths(11)->startOfMonth();
+
+        $contaIds = $agencia->contas()->pluck('id')->toArray();
+
+        // base query para transacoes envolvendo a agência
+        $baseQuery = \App\Models\Transacao::query()
+            ->where(function ($q) use ($contaIds) {
+                $q->whereIn('conta_origem_id', $contaIds)
+                  ->orWhereIn('conta_destino_id', $contaIds);
+            })
+            ->whereBetween('created_at', [$start, $end]);
+
+        // métricas agregadas
+        $totalTransacoes = (clone $baseQuery)->count();
+        $totalEntradas = (clone $baseQuery)->whereIn('conta_destino_id', $contaIds)->sum('valor');
+        $totalSaidas = (clone $baseQuery)->whereIn('conta_origem_id', $contaIds)->sum('valor');
+
+        // série mensal para os últimos 12 meses no intervalo solicitado
+        $periodStart = (clone $start)->startOfMonth();
+        $periodEnd = (clone $end)->endOfMonth();
+
+        $months = [];
+        $cursor = (clone $periodStart);
+        while ($cursor->lte($periodEnd)) {
+            $months[] = $cursor->format('Y-m');
+            $cursor->addMonth();
+        }
+
+        $seriesTotal = [];
+        $seriesEntradas = [];
+        $seriesSaidas = [];
+
+        foreach ($months as $m) {
+            [$y, $mo] = explode('-', $m);
+            $from = \Carbon\Carbon::createFromDate($y, $mo, 1)->startOfDay();
+            $to = (clone $from)->endOfMonth()->endOfDay();
+
+            $q = \App\Models\Transacao::query()
+                ->where(function ($q2) use ($contaIds) {
+                    $q2->whereIn('conta_origem_id', $contaIds)
+                       ->orWhereIn('conta_destino_id', $contaIds);
+                })
+                ->whereBetween('created_at', [$from, $to]);
+
+            $seriesTotal[] = $q->count();
+            $seriesEntradas[] = (clone $q)->whereIn('conta_destino_id', $contaIds)->sum('valor');
+            $seriesSaidas[] = (clone $q)->whereIn('conta_origem_id', $contaIds)->sum('valor');
+        }
+
+        return view('admin.agencias.dashboard', compact(
+            'agencia', 'totalContas', 'saldoTotal', 'totalTransacoes', 'totalEntradas', 'totalSaidas',
+            'months', 'seriesTotal', 'seriesEntradas', 'seriesSaidas', 'start', 'end'
+        ));
+    }
+
+    // Retorna dados do dashboard em JSON usando agregações otimizadas
+    public function agenciasDashboardData(Request $request, Agencia $agencia)
+    {
+    $end = $request->query('end') ? \Carbon\Carbon::parse($request->query('end'))->endOfDay() : \Carbon\Carbon::now()->endOfDay();
+    $start = $request->query('start') ? \Carbon\Carbon::parse($request->query('start'))->startOfDay() : (clone $end)->subMonths(11)->startOfMonth();
+
+        $contaIds = $agencia->contas()->pluck('id')->toArray();
+        if (empty($contaIds)) {
+            return response()->json([
+                'months' => [], 'total' => 0, 'entradas' => 0, 'saidas' => 0,
+                'seriesTotal' => [], 'seriesEntradas' => [], 'seriesSaidas' => [],
+            ]);
+        }
+
+        // Usar query raw para agrupar por ano-mês e agregar counts/sums para origem/destino
+        $bindings = [implode(',', $contaIds), $start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')];
+
+        // MySQL specific: use DATE_FORMAT on created_at to bucket by year-month
+        $sql = "SELECT DATE_FORMAT(created_at, '%Y-%m') as ym,
+                        COUNT(*) as total,
+                        SUM(CASE WHEN conta_destino_id IN (?) THEN valor ELSE 0 END) as entradas,
+                        SUM(CASE WHEN conta_origem_id IN (?) THEN valor ELSE 0 END) as saidas
+                 FROM transacoes
+                 WHERE (conta_origem_id IN (?) OR conta_destino_id IN (?))
+                   AND created_at BETWEEN ? AND ?
+                 GROUP BY ym
+                 ORDER BY ym ASC";
+
+        // Note: bindings repeated for the IN (?) placeholders; we'll pass arrays as string and rely on cast in SQL expression
+        // To keep it simple and compatible, fallback to Eloquent grouping if raw approach fails for the DB driver
+        try {
+            $rows = \DB::select($sql, [$contaIds, $contaIds, $contaIds, $contaIds, $start->format('Y-m-d H:i:s'), $end->format('Y-m-d H:i:s')]);
+        } catch (\Exception $e) {
+            // Fallback: build month buckets via Eloquent (less efficient)
+            $periodStart = (clone $start)->startOfMonth();
+            $periodEnd = (clone $end)->endOfMonth();
+            $months = [];
+            $cursor = (clone $periodStart);
+            $seriesTotal = $seriesEntradas = $seriesSaidas = [];
+            while ($cursor->lte($periodEnd)) {
+                $from = (clone $cursor)->startOfMonth();
+                $to = (clone $cursor)->endOfMonth();
+                $q = \App\Models\Transacao::where(function($q2) use ($contaIds){
+                    $q2->whereIn('conta_origem_id', $contaIds)->orWhereIn('conta_destino_id', $contaIds);
+                })->whereBetween('created_at', [$from, $to]);
+                $months[] = $cursor->format('Y-m');
+                $seriesTotal[] = $q->count();
+                $seriesEntradas[] = (clone $q)->whereIn('conta_destino_id', $contaIds)->sum('valor');
+                $seriesSaidas[] = (clone $q)->whereIn('conta_origem_id', $contaIds)->sum('valor');
+                $cursor->addMonth();
+            }
+
+            $total = array_sum($seriesTotal);
+            $entradas = array_sum($seriesEntradas);
+            $saidas = array_sum($seriesSaidas);
+
+            return response()->json(compact('months','seriesTotal','seriesEntradas','seriesSaidas','total','entradas','saidas'));
+        }
+
+        $months = [];
+        $seriesTotal = $seriesEntradas = $seriesSaidas = [];
+        $total = 0; $entradas = 0; $saidas = 0;
+        foreach ($rows as $r) {
+            $months[] = $r->ym;
+            $seriesTotal[] = (int) $r->total;
+            $seriesEntradas[] = (float) $r->entradas;
+            $seriesSaidas[] = (float) $r->saidas;
+            $total += (int) $r->total;
+            $entradas += (float) $r->entradas;
+            $saidas += (float) $r->saidas;
+        }
+
+        return response()->json(compact('months','seriesTotal','seriesEntradas','seriesSaidas','total','entradas','saidas'));
     }
 
     private function agenciasEdit(Agencia $agencia)
@@ -293,12 +329,20 @@ class AdminWebController extends Controller
             'endereco' => 'required|string|max:500',
             'cidade' => 'required|string|max:100',
             'provincia' => 'required|string|max:100',
-            'telefone' => 'required|string|max:20',
+            'telefone' => 'required|string|max:500',
             'email' => 'required|email|unique:agencias,email,' . $agencia->id,
         ]);
 
         $data = $request->all();
         $data['usuario_atualizacao'] = Auth::id();
+
+        // Normalize telefone before update
+        if (isset($data['telefone'])) {
+            if (is_string($data['telefone'])) {
+                $telefones = array_filter(array_map('trim', explode(',', $data['telefone'])));
+                $data['telefone'] = array_values($telefones);
+            }
+        }
 
         $agencia->update($data);
 

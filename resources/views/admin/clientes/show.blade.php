@@ -5,7 +5,7 @@
 
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-<li class="breadcrumb-item"><a href="{{ route('clientes.index') }}">Clientes</a></li>
+<li class="breadcrumb-item"><a href="{{ route('admin.clientes.index') }}">Clientes</a></li>
 <li class="breadcrumb-item active">{{ $cliente->nome }}</li>
 @endsection
 
@@ -16,7 +16,7 @@
             <div class="card-header">
                 <h3 class="card-title">Informações do Cliente</h3>
                 <div class="card-tools">
-                    <a href="{{ route('clientes.edit', $cliente) }}" class="btn btn-warning btn-sm">
+                    <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-warning btn-sm">
                         <i class="fas fa-edit"></i> Editar
                     </a>
                 </div>
@@ -27,7 +27,7 @@
                         <strong>Nome:</strong> {{ $cliente->nome }}<br>
                         <strong>Email:</strong> {{ $cliente->email }}<br>
                         <strong>BI:</strong> {{ $cliente->bi }}<br>
-                        <strong>Telefone:</strong> {{ $cliente->telefone }}<br>
+                        <strong>Telefone:</strong> {{ is_array($cliente->telefone) ? implode(', ', $cliente->telefone) : $cliente->telefone }}<br>
                         <strong>Data de Nascimento:</strong> {{ $cliente->data_nascimento->format('d/m/Y') }}<br>
                         <strong>Sexo:</strong> {{ $cliente->sexo == 'M' ? 'Masculino' : 'Feminino' }}
                     </div>
@@ -52,7 +52,7 @@
             <div class="card-header">
                 <h3 class="card-title">Contas do Cliente</h3>
                 <div class="card-tools">
-                    <a href="{{ route('contas.create', ['cliente_id' => $cliente->id]) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.contas.create', ['cliente_id' => $cliente->id]) }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Nova Conta
                     </a>
                 </div>
@@ -84,7 +84,7 @@
                                     </td>
                                     <td>{{ number_format($conta->saldo, 2, ',', '.') }} AOA</td>
                                     <td>
-                                        <a href="{{ route('contas.show', $conta) }}" class="btn btn-info btn-sm">
+                                        <a href="{{ route('admin.contas.show', $conta) }}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -139,13 +139,13 @@
                 <h3 class="card-title">Ações Rápidas</h3>
             </div>
             <div class="card-body">
-                <a href="{{ route('contas.create', ['cliente_id' => $cliente->id]) }}" class="btn btn-primary btn-block">
+                <a href="{{ route('admin.contas.create', ['cliente_id' => $cliente->id]) }}" class="btn btn-primary btn-block">
                     <i class="fas fa-university"></i> Nova Conta
                 </a>
-                <a href="{{ route('clientes.edit', $cliente) }}" class="btn btn-warning btn-block">
+                <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-warning btn-block">
                     <i class="fas fa-edit"></i> Editar Cliente
                 </a>
-                <a href="{{ route('clientes.index') }}" class="btn btn-secondary btn-block">
+                <a href="{{ route('admin.clientes.index') }}" class="btn btn-secondary btn-block">
                     <i class="fas fa-list"></i> Voltar à Lista
                 </a>
             </div>

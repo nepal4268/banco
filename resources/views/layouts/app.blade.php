@@ -102,8 +102,8 @@
                     </li>
 
                     <!-- Clientes -->
-                    <li class="nav-item {{ request()->routeIs('clientes.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('clientes.*') ? 'active' : '' }}">
+                    <li class="nav-item {{ request()->routeIs('admin.clientes.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('admin.clientes.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users"></i>
                             <p>
                                 Clientes
@@ -112,13 +112,13 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('clientes.index') }}" class="nav-link {{ request()->routeIs('clientes.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.clientes.index') }}" class="nav-link {{ request()->routeIs('admin.clientes.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Listar Clientes</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('clientes.create') }}" class="nav-link {{ request()->routeIs('clientes.create') ? 'active' : '' }}">
+                                <a href="{{ route('admin.clientes.create') }}" class="nav-link {{ request()->routeIs('admin.clientes.create') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Novo Cliente</p>
                                 </a>
@@ -127,8 +127,8 @@
                     </li>
 
                     <!-- Contas -->
-                    <li class="nav-item {{ request()->routeIs('contas.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('contas.*') ? 'active' : '' }}">
+                    <li class="nav-item {{ request()->routeIs('admin.contas.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('admin.contas.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-university"></i>
                             <p>
                                 Contas
@@ -137,13 +137,13 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('contas.index') }}" class="nav-link {{ request()->routeIs('contas.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.contas.index') }}" class="nav-link {{ request()->routeIs('admin.contas.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Listar Contas</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('contas.create') }}" class="nav-link {{ request()->routeIs('contas.create') ? 'active' : '' }}">
+                                <a href="{{ route('admin.contas.create') }}" class="nav-link {{ request()->routeIs('admin.contas.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Nova Conta</p>
                                 </a>

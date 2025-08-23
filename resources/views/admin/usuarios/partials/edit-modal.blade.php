@@ -16,10 +16,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="edit_nome" class="form-label">Nome Completo *</label>
                             <input type="text" class="form-control" id="edit_nome" name="nome" required>
+                            <div class="invalid-feedback" id="error_edit_nome"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_email" class="form-label">Email *</label>
                             <input type="email" class="form-control" id="edit_email" name="email" required>
+                            <div class="invalid-feedback" id="error_edit_email"></div>
                         </div>
                     </div>
 
@@ -27,10 +29,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="edit_senha" class="form-label">Nova Senha (deixe em branco para manter)</label>
                             <input type="password" class="form-control" id="edit_senha" name="senha">
+                            <div class="invalid-feedback" id="error_edit_senha"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_senha_confirmation" class="form-label">Confirmar Nova Senha</label>
                             <input type="password" class="form-control" id="edit_senha_confirmation" name="senha_confirmation">
+                            <div class="invalid-feedback" id="error_edit_senha_confirmation"></div>
                         </div>
                     </div>
 
@@ -38,6 +42,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="edit_bi" class="form-label">Número do BI *</label>
                             <input type="text" class="form-control" id="edit_bi" name="bi" required>
+                            <div class="invalid-feedback" id="error_edit_bi"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_sexo" class="form-label">Sexo *</label>
@@ -46,6 +51,7 @@
                                 <option value="M">Masculino</option>
                                 <option value="F">Feminino</option>
                             </select>
+                            <div class="invalid-feedback" id="error_edit_sexo"></div>
                         </div>
                     </div>
 
@@ -53,10 +59,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="edit_telefone" class="form-label">Telefone *</label>
                             <input type="text" class="form-control" id="edit_telefone" name="telefone" required>
+                            <div class="invalid-feedback" id="error_edit_telefone"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_data_nascimento" class="form-label">Data de Nascimento *</label>
                             <input type="date" class="form-control" id="edit_data_nascimento" name="data_nascimento" required>
+                            <div class="invalid-feedback" id="error_edit_data_nascimento"></div>
                         </div>
                     </div>
 
@@ -69,6 +77,7 @@
                                     <option value="{{ $perfil->id }}">{{ $perfil->nome }}</option>
                                 @endforeach
                             </select>
+                            <div class="invalid-feedback" id="error_edit_perfil_id"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_agencia_id" class="form-label">Agência</label>
@@ -78,6 +87,7 @@
                                     <option value="{{ $agencia->id }}">{{ $agencia->nome }}</option>
                                 @endforeach
                             </select>
+                            <div class="invalid-feedback" id="error_edit_agencia_id"></div>
                         </div>
                     </div>
 
@@ -85,6 +95,7 @@
                         <div class="col-md-12 mb-3">
                             <label for="edit_endereco" class="form-label">Endereço</label>
                             <input type="text" class="form-control" id="edit_endereco" name="endereco">
+                            <div class="invalid-feedback" id="error_edit_endereco"></div>
                         </div>
                     </div>
 
@@ -92,20 +103,23 @@
                         <div class="col-md-6 mb-3">
                             <label for="edit_cidade" class="form-label">Cidade</label>
                             <input type="text" class="form-control" id="edit_cidade" name="cidade">
+                            <div class="invalid-feedback" id="error_edit_cidade"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="edit_provincia" class="form-label">Província</label>
                             <input type="text" class="form-control" id="edit_provincia" name="provincia">
+                            <div class="invalid-feedback" id="error_edit_provincia"></div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="edit_ativo" class="form-label">Status</label>
-                            <select class="form-select" id="edit_ativo" name="ativo">
-                                <option value="1">Ativo</option>
-                                <option value="0">Inativo</option>
+                            <label for="edit_status_usuario" class="form-label">Status</label>
+                            <select class="form-select" id="edit_status_usuario" name="status_usuario">
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
                             </select>
+                            <div class="invalid-feedback" id="error_edit_status_usuario"></div>
                         </div>
                     </div>
                 </div>

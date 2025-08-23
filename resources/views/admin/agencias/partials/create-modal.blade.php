@@ -1,4 +1,45 @@
 <!-- Modal Criar Agência -->
+<div class="modal fade" id="createAgenciaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nova Agência</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="createAgenciaForm" action="{{ route('admin.agencias.store') }}" method="POST">
+        @csrf
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input type="text" name="nome" id="create_nome" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Endereço</label>
+            <input type="text" name="endereco" id="create_endereco" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Telefone (vírgula separa)</label>
+            <input type="text" name="telefone" id="create_telefone" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" id="create_email" class="form-control">
+          </div>
+          <div class="form-check">
+            <input type="hidden" name="ativa" value="0">
+            <input type="checkbox" name="ativa" id="create_ativa" class="form-check-input" value="1" checked>
+            <label class="form-check-label" for="create_ativa">Ativa</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Modal Criar Agência -->
 <div class="modal fade" id="createAgenciaModal" tabindex="-1" aria-labelledby="createAgenciaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

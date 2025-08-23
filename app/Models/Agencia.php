@@ -18,9 +18,13 @@ class Agencia extends Model
         'codigo_agencia',
         'nome',
         'endereco',
+    'cidade',
+    'provincia',
         'telefone',
         'email',
         'ativa',
+    'usuario_criacao',
+    'usuario_atualizacao',
     ];
 
     protected $casts = [

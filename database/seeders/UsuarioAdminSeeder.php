@@ -16,16 +16,16 @@ class UsuarioAdminSeeder extends Seeder
     {
         // Criar agência padrão se não existir
         $agencia = Agencia::firstOrCreate(
-            ['codigo' => 'AG001'],
+            ['codigo_agencia' => 'AG01'],
             [
                 'nome' => 'Agência Central',
                 'endereco' => 'Rua Principal, 123',
-                'telefone' => '+244 123 456 789',
+                'telefone' => json_encode(['932454434', '923456789']),
                 'email' => 'central@banco.ao',
                 'cidade' => 'Luanda',
                 'provincia' => 'Luanda',
-                'descricao' => 'Agência central do sistema',
-                'ativo' => true
+                'gerente' => 'Administrador do Sistema',
+                'ativa' => true
             ]
         );
 
@@ -42,14 +42,14 @@ class UsuarioAdminSeeder extends Seeder
             ['email' => 'admin@banco.ao'],
             [
                 'nome' => 'Administrador do Sistema',
-                'bi' => '1234567890123456',
+                'bi' => '123456789LA012',
                 'sexo' => 'M',
                 'data_nascimento' => '1990-01-01',
-                'telefone' => '+244 123 456 789',
+                'telefone' => json_encode(['932454433', '923456211']),
                 'senha' => bcrypt('admin123'),
                 'perfil_id' => $perfilAdmin->id,
                 'agencia_id' => $agencia->id,
-                'ativo' => true,
+                'status_usuario' => 'ativo',
                 'endereco' => 'Rua Principal, 123',
                 'cidade' => 'Luanda',
                 'provincia' => 'Luanda'

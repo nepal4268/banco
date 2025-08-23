@@ -15,7 +15,7 @@
             <div class="card-header">
                 <h3 class="card-title">Lista de Clientes</h3>
                 <div class="card-tools">
-                    <a href="{{ route('clientes.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.clientes.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Novo Cliente
                     </a>
                 </div>
@@ -23,7 +23,7 @@
 
             <!-- Filtros -->
             <div class="card-body">
-                <form method="GET" action="{{ route('clientes.index') }}" class="mb-3">
+                <form method="GET" action="{{ route('admin.clientes.index') }}" class="mb-3">
                     <div class="row">
                         <div class="col-md-3">
                             <input type="text" name="nome" class="form-control" placeholder="Nome" value="{{ request('nome') }}">
@@ -55,7 +55,7 @@
                             <button type="submit" class="btn btn-info">
                                 <i class="fas fa-search"></i> Filtrar
                             </button>
-                            <a href="{{ route('clientes.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.clientes.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Limpar
                             </a>
                         </div>
@@ -84,7 +84,7 @@
                                 <td>{{ $cliente->nome }}</td>
                                 <td>{{ $cliente->email }}</td>
                                 <td>{{ $cliente->bi }}</td>
-                                <td>{{ $cliente->telefone }}</td>
+                                <td>{{ is_array($cliente->telefone) ? implode(', ', $cliente->telefone) : $cliente->telefone }}</td>
                                 <td>
                                     <span class="badge badge-info">{{ $cliente->tipoCliente->nome ?? 'N/A' }}</span>
                                 </td>
@@ -96,13 +96,13 @@
                                 <td>{{ $cliente->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{{ route('clientes.show', $cliente) }}" class="btn btn-info btn-sm">
+                                        <a href="{{ route('admin.clientes.show', $cliente) }}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('clientes.edit', $cliente) }}" class="btn btn-warning btn-sm">
+                                        <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form method="POST" action="{{ route('clientes.destroy', $cliente) }}" style="display: inline;">
+                                        <form method="POST" action="{{ route('admin.clientes.destroy', $cliente) }}" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este cliente?')">

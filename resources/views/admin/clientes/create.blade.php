@@ -5,7 +5,7 @@
 
 @section('breadcrumb')
 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-<li class="breadcrumb-item"><a href="{{ route('clientes.index') }}">Clientes</a></li>
+<li class="breadcrumb-item"><a href="{{ route('admin.clientes.index') }}">Clientes</a></li>
 <li class="breadcrumb-item active">Novo Cliente</li>
 @endsection
 
@@ -17,7 +17,7 @@
                 <h3 class="card-title">Cadastrar Novo Cliente</h3>
             </div>
 
-            <form method="POST" action="{{ route('clientes.store') }}">
+            <form method="POST" action="{{ route('admin.clientes.store') }}">
                 @csrf
                 <div class="card-body">
                     <div class="row">
@@ -172,7 +172,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Salvar
                     </button>
-                    <a href="{{ route('clientes.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('admin.clientes.index') }}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>

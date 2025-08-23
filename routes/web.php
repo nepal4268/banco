@@ -7,157 +7,80 @@ use App\Http\Controllers\ClienteWebController;
 use App\Http\Controllers\ContaWebController;
 use App\Http\Controllers\CartaoWebController;
 use App\Http\Controllers\TransacaoWebController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeguroWebController;
 use App\Http\Controllers\RelatorioWebController;
 use App\Http\Controllers\AdminWebController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 // Rotas de autenticação
 Route::get('/login', [AuthWebController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login']);
 Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
+// Rotas de reset de senha
+Route::get('/password/reset', [AuthWebController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [AuthWebController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [AuthWebController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [AuthWebController::class, 'reset'])->name('password.update');
+
 // Rotas protegidas por autenticação
 Route::middleware(['auth'])->group(function () {
-    // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+	// Perfil do usuário
+	Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+	Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+	Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+	// Relatórios
+	Route::prefix('relatorios')->name('relatorios.')->group(function () {
+		Route::get('/clientes', [RelatorioWebController::class, 'clientes'])->name('clientes');
+		Route::get('/transacoes', [RelatorioWebController::class, 'transacoes'])->name('transacoes');
+		Route::get('/contas', [RelatorioWebController::class, 'contas'])->name('contas');
+		Route::get('/cartoes', [RelatorioWebController::class, 'cartoes'])->name('cartoes');
+		Route::get('/seguros', [RelatorioWebController::class, 'seguros'])->name('seguros');
+		Route::get('/auditoria', [RelatorioWebController::class, 'auditoria'])->name('auditoria');
+	});
 
-    // Clientes
-    Route::middleware(['permission:clientes.view'])->group(function () {
-        Route::resource('clientes', ClienteWebController::class);
-    });
+	// Dashboard
+	Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+	Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // Contas
-    Route::middleware(['permission:contas.view'])->group(function () {
-        Route::resource('contas', ContaWebController::class);
-    });
+	// Recursos básicos referenciados pelo dashboard
+	Route::resource('cartoes', CartaoWebController::class);
+	Route::resource('transacoes', TransacaoWebController::class);
+	Route::resource('cartoes', CartaoWebController::class);
+	Route::resource('transacoes', TransacaoWebController::class);
 
-    // Cartões
-    Route::middleware(['permission:cartoes.view'])->group(function () {
-        Route::resource('cartoes', CartaoWebController::class);
-    });
+	// Seguros (prefix)
+	Route::prefix('seguros')->name('seguros.')->group(function () {
+		Route::resource('apolices', SeguroWebController::class);
+		Route::resource('sinistros', SeguroWebController::class);
+	});
 
-    // Transações
-    Route::middleware(['permission:transacoes.view'])->group(function () {
-        Route::resource('transacoes', TransacaoWebController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
-    });
+	// Administração (admin)
+	Route::prefix('admin')->name('admin.')->group(function () {
+		// Usuarios tem controller dedicado para permitir injeção de FormRequests e respostas JSON
+		Route::resource('usuarios', \App\Http\Controllers\AdminUsuarioController::class);
+		// Agencias e perfis continuam usando AdminWebController multiplexado
+	Route::resource('agencias', AdminWebController::class);
+	Route::resource('perfis', \App\Http\Controllers\AdminPerfilController::class);
+	Route::resource('permissoes', \App\Http\Controllers\AdminPermissaoController::class);
+	Route::resource('clientes', ClienteWebController::class);
+	Route::resource('contas', ContaWebController::class);
 
-    // Seguros
-    Route::middleware(['permission:seguros.view'])->group(function () {
-        Route::prefix('seguros')->name('seguros.')->group(function () {
-            Route::resource('apolices', SeguroWebController::class);
-            Route::resource('sinistros', SeguroWebController::class);
-        });
-    });
+	// Generic lookups manager: admin/lookups/{key}
+	Route::prefix('lookups')->name('lookups.')->group(function () {
+		Route::get('{key}', [\App\Http\Controllers\AdminLookupController::class, 'index'])->name('index');
+		Route::get('{key}/create', [\App\Http\Controllers\AdminLookupController::class, 'create'])->name('create');
+		Route::post('{key}', [\App\Http\Controllers\AdminLookupController::class, 'store'])->name('store');
+		Route::get('{key}/{id}/edit', [\App\Http\Controllers\AdminLookupController::class, 'edit'])->name('edit');
+		Route::put('{key}/{id}', [\App\Http\Controllers\AdminLookupController::class, 'update'])->name('update');
+		Route::delete('{key}/{id}', [\App\Http\Controllers\AdminLookupController::class, 'destroy'])->name('destroy');
+	});
 
-    // Relatórios
-    Route::middleware(['permission:relatorios.view'])->group(function () {
-        Route::prefix('relatorios')->name('relatorios.')->group(function () {
-            Route::get('/clientes', [RelatorioWebController::class, 'clientes'])->name('clientes');
-            Route::get('/transacoes', [RelatorioWebController::class, 'transacoes'])->name('transacoes');
-            Route::get('/contas', [RelatorioWebController::class, 'contas'])->name('contas');
-            Route::get('/cartoes', [RelatorioWebController::class, 'cartoes'])->name('cartoes');
-            Route::get('/seguros', [RelatorioWebController::class, 'seguros'])->name('seguros');
-            Route::get('/auditoria', [RelatorioWebController::class, 'auditoria'])->name('auditoria');
-        });
-    });
-
-    // Administração
-    Route::middleware(['permission:admin.view'])->group(function () {
-        Route::prefix('admin')->name('admin.')->group(function () {
-            // Usuários
-            Route::middleware(['permission:admin.usuarios'])->group(function () {
-                Route::resource('usuarios', AdminWebController::class);
-                Route::get('usuarios/{usuario}/permissoes', [AdminWebController::class, 'gerenciarPermissoes'])->name('usuarios.permissoes');
-                Route::post('usuarios/{usuario}/permissoes', [AdminWebController::class, 'salvarPermissoes'])->name('usuarios.permissoes.save');
-            });
-
-            // Agências
-            Route::middleware(['permission:admin.agencias'])->group(function () {
-                Route::resource('agencias', AdminWebController::class);
-            });
-
-            // Perfis
-            Route::middleware(['permission:admin.perfis'])->group(function () {
-                Route::resource('perfis', AdminWebController::class);
-                Route::get('perfis/{perfil}/permissoes', [AdminWebController::class, 'gerenciarPermissoesPerfil'])->name('perfis.permissoes');
-                Route::post('perfis/{perfil}/permissoes', [AdminWebController::class, 'salvarPermissoesPerfil'])->name('perfis.permissoes.save');
-            });
-
-            // Permissões
-            Route::middleware(['permission:admin.permissoes'])->group(function () {
-                Route::resource('permissoes', AdminWebController::class);
-            });
-
-            // Configurações do Sistema
-            Route::middleware(['permission:admin.config'])->group(function () {
-                Route::get('configuracoes', [AdminWebController::class, 'configuracoes'])->name('configuracoes');
-                Route::post('configuracoes', [AdminWebController::class, 'salvarConfiguracoes'])->name('configuracoes.save');
-            });
-
-            // Logs de Auditoria
-            Route::middleware(['permission:admin.auditoria'])->group(function () {
-                Route::get('logs', [AdminWebController::class, 'logs'])->name('logs');
-                Route::get('logs/export', [AdminWebController::class, 'exportarLogs'])->name('logs.export');
-            });
-        });
-    });
-
-    // Gestão de Tabelas Administrativas
-    Route::middleware(['permission:admin.tabelas'])->group(function () {
-        Route::prefix('admin/tabelas')->name('admin.tabelas.')->group(function () {
-            // Tipos de Cliente
-            Route::resource('tipos-cliente', AdminWebController::class);
-            
-            // Status de Cliente
-            Route::resource('status-cliente', AdminWebController::class);
-            
-            // Tipos de Conta
-            Route::resource('tipos-conta', AdminWebController::class);
-            
-            // Status de Conta
-            Route::resource('status-conta', AdminWebController::class);
-            
-            // Tipos de Cartão
-            Route::resource('tipos-cartao', AdminWebController::class);
-            
-            // Status de Cartão
-            Route::resource('status-cartao', AdminWebController::class);
-            
-            // Tipos de Transação
-            Route::resource('tipos-transacao', AdminWebController::class);
-            
-            // Status de Transação
-            Route::resource('status-transacao', AdminWebController::class);
-            
-            // Status de Pagamento
-            Route::resource('status-pagamento', AdminWebController::class);
-            
-            // Tipos de Seguro
-            Route::resource('tipos-seguro', AdminWebController::class);
-            
-            // Status de Apólice
-            Route::resource('status-apolice', AdminWebController::class);
-            
-            // Status de Sinistro
-            Route::resource('status-sinistro', AdminWebController::class);
-            
-            // Moedas
-            Route::resource('moedas', AdminWebController::class);
-            
-            // Taxas de Câmbio
-            Route::resource('taxas-cambio', AdminWebController::class);
-        });
-    });
+		// Dashboard por agência
+		Route::get('agencias/{agencia}/dashboard', [\App\Http\Controllers\AdminWebController::class, 'agenciasDashboard'])->name('agencias.dashboard');
+		// API: dados do dashboard (JSON) - consultas otimizadas
+		Route::get('agencias/{agencia}/dashboard/data', [\App\Http\Controllers\AdminWebController::class, 'agenciasDashboardData'])->name('agencias.dashboard.data');
+		// Outros recursos administrativos podem ser adicionados aqui
+	});
 });
+

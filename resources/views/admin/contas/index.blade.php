@@ -14,8 +14,8 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Lista de Contas</h3>
-                <div class="card-tools">
-                    <a href="{{ route('contas.create') }}" class="btn btn-primary btn-sm">
+                    <div class="card-tools">
+                    <a href="{{ route('admin.contas.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Nova Conta
                     </a>
                 </div>
@@ -23,7 +23,7 @@
 
             <!-- Filtros -->
             <div class="card-body">
-                <form method="GET" action="{{ route('contas.index') }}" class="mb-3">
+                <form method="GET" action="{{ route('admin.contas.index') }}" class="mb-3">
                     <div class="row">
                         <div class="col-md-3">
                             <input type="text" name="numero_conta" class="form-control" placeholder="Número da Conta" value="{{ request('numero_conta') }}">
@@ -55,7 +55,7 @@
                             <button type="submit" class="btn btn-info">
                                 <i class="fas fa-search"></i> Filtrar
                             </button>
-                            <a href="{{ route('contas.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.contas.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i>
                             </a>
                         </div>
@@ -96,13 +96,13 @@
                                 <td>{{ $conta->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{{ route('contas.show', $conta) }}" class="btn btn-info btn-sm">
+                                        <a href="{{ route('admin.contas.show', $conta) }}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('contas.edit', $conta) }}" class="btn btn-warning btn-sm">
+                                        <a href="{{ route('admin.contas.edit', $conta) }}" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form method="POST" action="{{ route('contas.destroy', $conta) }}" style="display: inline;">
+                                        <form method="POST" action="{{ route('admin.contas.destroy', $conta) }}" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir esta conta?')">

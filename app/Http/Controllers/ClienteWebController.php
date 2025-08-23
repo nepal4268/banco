@@ -56,7 +56,7 @@ class ClienteWebController extends Controller
             'data_nascimento' => 'required|date',
             'sexo' => 'required|in:M,F',
             'tipo_cliente_id' => 'required|exists:tipos_cliente,id',
-            'status_cliente_id' => 'required|exists:status_clientes,id',
+            'status_cliente_id' => 'required|exists:status_cliente,id',
             'endereco' => 'nullable|string|max:500',
             'cidade' => 'nullable|string|max:100',
             'provincia' => 'nullable|string|max:100',
@@ -67,7 +67,7 @@ class ClienteWebController extends Controller
 
         Cliente::create($data);
 
-        return redirect()->route('clientes.index')->with('success', 'Cliente criado com sucesso!');
+        return redirect()->route('admin.clientes.index')->with('success', 'Cliente criado com sucesso!');
     }
 
     public function show(Cliente $cliente)
@@ -95,7 +95,7 @@ class ClienteWebController extends Controller
             'data_nascimento' => 'required|date',
             'sexo' => 'required|in:M,F',
             'tipo_cliente_id' => 'required|exists:tipos_cliente,id',
-            'status_cliente_id' => 'required|exists:status_clientes,id',
+            'status_cliente_id' => 'required|exists:status_cliente,id',
             'endereco' => 'nullable|string|max:500',
             'cidade' => 'nullable|string|max:100',
             'provincia' => 'nullable|string|max:100',
@@ -106,13 +106,13 @@ class ClienteWebController extends Controller
 
         $cliente->update($data);
 
-        return redirect()->route('clientes.index')->with('success', 'Cliente atualizado com sucesso!');
+        return redirect()->route('admin.clientes.index')->with('success', 'Cliente atualizado com sucesso!');
     }
 
     public function destroy(Cliente $cliente)
     {
         $cliente->delete();
         
-        return redirect()->route('clientes.index')->with('success', 'Cliente excluído com sucesso!');
+        return redirect()->route('admin.clientes.index')->with('success', 'Cliente excluído com sucesso!');
     }
 }

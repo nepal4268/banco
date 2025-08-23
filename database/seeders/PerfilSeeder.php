@@ -17,7 +17,6 @@ class PerfilSeeder extends Seeder
             [
                 'nome' => 'Administrador',
                 'descricao' => 'Acesso total ao sistema',
-                'nivel' => 3,
                 'permissoes' => [
                     'admin.all',
                     'clientes.view', 'clientes.create', 'clientes.edit', 'clientes.delete',
@@ -33,7 +32,6 @@ class PerfilSeeder extends Seeder
             [
                 'nome' => 'Gerente',
                 'descricao' => 'Gerente de agência com acesso amplo',
-                'nivel' => 2,
                 'permissoes' => [
                     'clientes.view', 'clientes.create', 'clientes.edit',
                     'contas.view', 'contas.create', 'contas.edit',
@@ -47,7 +45,6 @@ class PerfilSeeder extends Seeder
             [
                 'nome' => 'Atendente',
                 'descricao' => 'Atendente de agência com acesso básico',
-                'nivel' => 1,
                 'permissoes' => [
                     'clientes.view', 'clientes.create',
                     'contas.view', 'contas.create',
@@ -60,7 +57,6 @@ class PerfilSeeder extends Seeder
             [
                 'nome' => 'Consultor',
                 'descricao' => 'Consultor com acesso apenas de visualização',
-                'nivel' => 1,
                 'permissoes' => [
                     'clientes.view',
                     'contas.view',

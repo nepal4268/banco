@@ -4,6 +4,48 @@
 
 @section('content')
 <div class="container-fluid">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Perfis</h4>
+            <a href="{{ route('admin.perfis.create') }}" class="btn btn-primary">Novo Perfil</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark"><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Permissões</th><th>Ações</th></tr></thead>
+                    <tbody>
+                        @foreach($perfis as $perfil)
+                        <tr>
+                            <td>{{ $perfil->id }}</td>
+                            <td>{{ $perfil->nome }}</td>
+                            <td>{{ $perfil->descricao }}</td>
+                            <td>{{ $perfil->permissoes->pluck('label')->join(', ') }}</td>
+                            <td>
+                                <a href="{{ route('admin.perfis.show', $perfil->id) }}" class="btn btn-sm btn-info">Ver</a>
+                                <a href="{{ route('admin.perfis.edit', $perfil->id) }}" class="btn btn-sm btn-warning">Editar</a>
+                                <form action="{{ route('admin.perfis.destroy', $perfil->id) }}" method="POST" style="display:inline-block" onsubmit="return confirm('Confirma exclusão?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-center">{{ $perfis->links() }}</div>
+        </div>
+    </div>
+</div>
+@endsection
+@extends('layouts.admin')
+
+@section('title', 'Gestão de Perfis')
+
+@section('content')
+<div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="card">

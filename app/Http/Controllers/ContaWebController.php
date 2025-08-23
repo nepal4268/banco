@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use App\Models\TipoConta;
 use App\Models\StatusConta;
 use App\Models\Moeda;
+use App\Models\Agencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,19 +48,20 @@ class ContaWebController extends Controller
         $clientes = Cliente::where('status_cliente_id', function($query) {
             $query->select('id')->from('status_cliente')->where('nome', 'ativo');
         })->get();
-        $tiposConta = TipoConta::all();
-        $statusConta = StatusConta::all();
-        $moedas = Moeda::all();
+    $tiposConta = TipoConta::all();
+    $statusConta = StatusConta::all();
+    $moedas = Moeda::all();
+    $agencias = Agencia::all();
         
-        return view('admin.contas.create', compact('clientes', 'tiposConta', 'statusConta', 'moedas'));
+    return view('admin.contas.create', compact('clientes', 'tiposConta', 'statusConta', 'moedas', 'agencias'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
-            'tipo_conta_id' => 'required|exists:tipo_contas,id',
-            'status_conta_id' => 'required|exists:status_contas,id',
+            'tipo_conta_id' => 'required|exists:tipos_conta,id',
+            'status_conta_id' => 'required|exists:status_conta,id',
             'moeda_id' => 'required|exists:moedas,id',
             'saldo_inicial' => 'required|numeric|min:0',
             'limite_credito' => 'nullable|numeric|min:0',
@@ -72,14 +74,24 @@ class ContaWebController extends Controller
 
         Conta::create($data);
 
-        return redirect()->route('contas.index')->with('success', 'Conta criada com sucesso!');
+    return redirect()->route('admin.contas.index')->with('success', 'Conta criada com sucesso!');
     }
 
     public function show(Conta $conta)
     {
-        $conta->load(['cliente', 'tipoConta', 'statusConta', 'moeda', 'transacoes.tipoTransacao']);
+        $conta->load([
+            'cliente', 
+            'tipoConta', 
+            'statusConta', 
+            'moeda', 
+            'transacoesOrigem.tipoTransacao',
+            'transacoesDestino.tipoTransacao'
+        ]);
         
-        return view('admin.contas.show', compact('conta'));
+        // Combine as transações de origem e destino para a view
+        $transacoes = $conta->transacoes()->get();
+        
+        return view('admin.contas.show', compact('conta', 'transacoes'));
     }
 
     public function edit(Conta $conta)
@@ -87,19 +99,20 @@ class ContaWebController extends Controller
         $clientes = Cliente::where('status_cliente_id', function($query) {
             $query->select('id')->from('status_cliente')->where('nome', 'ativo');
         })->get();
-        $tiposConta = TipoConta::all();
-        $statusConta = StatusConta::all();
-        $moedas = Moeda::all();
+    $tiposConta = TipoConta::all();
+    $statusConta = StatusConta::all();
+    $moedas = Moeda::all();
+    $agencias = Agencia::all();
         
-        return view('admin.contas.edit', compact('conta', 'clientes', 'tiposConta', 'statusConta', 'moedas'));
+    return view('admin.contas.edit', compact('conta', 'clientes', 'tiposConta', 'statusConta', 'moedas', 'agencias'));
     }
 
     public function update(Request $request, Conta $conta)
     {
         $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
-            'tipo_conta_id' => 'required|exists:tipo_contas,id',
-            'status_conta_id' => 'required|exists:status_contas,id',
+            'tipo_conta_id' => 'required|exists:tipos_conta,id',
+            'status_conta_id' => 'required|exists:status_conta,id',
             'moeda_id' => 'required|exists:moedas,id',
             'limite_credito' => 'nullable|numeric|min:0',
         ]);
@@ -109,14 +122,14 @@ class ContaWebController extends Controller
 
         $conta->update($data);
 
-        return redirect()->route('contas.index')->with('success', 'Conta atualizada com sucesso!');
+    return redirect()->route('admin.contas.index')->with('success', 'Conta atualizada com sucesso!');
     }
 
     public function destroy(Conta $conta)
     {
         $conta->delete();
         
-        return redirect()->route('contas.index')->with('success', 'Conta excluída com sucesso!');
+    return redirect()->route('admin.contas.index')->with('success', 'Conta excluída com sucesso!');
     }
 
     private function gerarNumeroConta()

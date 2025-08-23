@@ -74,7 +74,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Status:</label>
-                        <p id="show_ativo" class="form-control-plaintext"></p>
+                        <p id="show_status_usuario" class="form-control-plaintext"></p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Data de Criação:</label>

@@ -85,6 +85,11 @@ class Conta extends Model
         return $this->hasMany(OperacaoCambio::class, 'conta_destino_id');
     }
 
+    public function transacoes()
+    {
+        return $this->transacoesOrigem()->union($this->transacoesDestino()->toBase());
+    }
+
     // Métodos auxiliares para IBAN e número da conta
     public static function gerarNumeroConta(Agencia $agencia): string
     {

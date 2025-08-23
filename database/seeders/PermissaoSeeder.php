@@ -63,9 +63,8 @@ class PermissaoSeeder extends Seeder
             Permissao::updateOrCreate(
                 ['code' => $permissao['code']],
                 [
-                    'nome' => $permissao['nome'],
-                    'descricao' => $permissao['descricao'],
-                    'ativo' => true
+                    'label' => $permissao['nome'],
+                    'descricao' => $permissao['descricao']
                 ]
             );
         }

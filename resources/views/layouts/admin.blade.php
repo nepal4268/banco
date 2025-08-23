@@ -91,6 +91,13 @@
             border-left-color: var(--accent-color);
         }
 
+        /* Manter ativo quando estiver em sub-rotas */
+        .nav-item .nav-link[href*="contas"] { 
+            color: white;
+            background-color: rgba(255,255,255,0.15);
+            border-left-color: var(--accent-color);
+        }
+
         .nav-link i {
             width: 20px;
             margin-right: 10px;
@@ -374,7 +381,7 @@
 
             @if(auth()->user()->hasPermission('clientes.view'))
             <div class="nav-item">
-                <a href="{{ route('clientes.index') }}" class="nav-link {{ request()->routeIs('clientes.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.clientes.index') }}" class="nav-link {{ request()->routeIs('admin.clientes.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     Clientes
                 </a>
@@ -383,7 +390,7 @@
 
             @if(auth()->user()->hasPermission('contas.view'))
             <div class="nav-item">
-                <a href="{{ route('contas.index') }}" class="nav-link {{ request()->routeIs('contas.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.contas.index') }}" class="nav-link {{ request()->routeIs('admin.contas.*') ? 'active' : '' }}">
                     <i class="fas fa-credit-card"></i>
                     Contas
                 </a>
