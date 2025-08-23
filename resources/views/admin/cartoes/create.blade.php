@@ -35,7 +35,8 @@
                         <select name="tipo_cartao_id" id="tipo_cartao_id" class="form-control">
                             <option value="">-- selecione --</option>
                             @foreach($tiposCartao as $t)
-                                <option value="{{ $t->id }}" data-default-validade-years="{{ $t->validade_anos ?? 3 }}">{{ $t->nome }}</option>
+                                @php $disabled = in_array($t->id, $tiposAssociados ?? []) ? 'disabled' : ''; @endphp
+                                <option value="{{ $t->id }}" data-default-validade-years="{{ $t->validade_anos ?? 3 }}" {{ $disabled }}>{{ $t->nome }}@if($disabled) (já associado)@endif</option>
                             @endforeach
                         </select>
                     </div>
@@ -43,12 +44,10 @@
                     <div class="form-group">
                         <label>Número do Cartão</label>
                         <div class="input-group">
-                            <input type="text" name="numero_cartao" id="numero_cartao" class="form-control" readonly value="{{ old('numero_cartao') }}">
-                            <div class="input-group-append">
-                                <button type="button" id="btn_generate" class="btn btn-primary">Gerar</button>
-                            </div>
+                            <input type="text" name="numero_cartao" id="numero_cartao" class="form-control" value="{{ old('numero_cartao') }}">
+                            <input type="hidden" name="numero_cartao_clean" id="numero_cartao_clean" value="">
                         </div>
-                        <small id="mask_preview" class="form-text text-muted">Preview: ---- ---- ---- ----</small>
+                        <small class="form-text text-muted">Preencha o número do cartão manualmente.</small>
                         @error('numero_cartao')<span class="text-danger">{{ $message }}</span>@enderror
                     </div>
 
@@ -73,45 +72,36 @@
                     </div>
 
                     <div class="form-group">
-                        <button class="btn btn-success" type="submit">Salvar</button>
-                        <a href="{{ route('cartoes.index') }}" class="btn btn-secondary">Cancelar</a>
+                        <button id="btn_save" class="btn btn-success" type="submit">Salvar</button>
+                        @if(isset($conta) && isset($conta->id))
+                            <a href="{{ route('admin.contas.show', $conta->id) }}" class="btn btn-secondary">Cancelar</a>
+                        @else
+                            <a href="{{ route('cartoes.index') }}" class="btn btn-secondary">Cancelar</a>
+                        @endif
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-@endsection
-
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const btn = document.getElementById('btn_generate');
-    const numeroInput = document.getElementById('numero_cartao');
-    const maskPreview = document.getElementById('mask_preview');
     const tipoSelect = document.getElementById('tipo_cartao_id');
     const validadeInput = document.getElementById('validade');
     const limiteGroup = document.getElementById('limite_group');
+    const btnSave = document.getElementById('btn_save');
+    const numeroInput = document.getElementById('numero_cartao');
 
-    function formatMask(num) {
-        if (!num) return '---- ---- ---- ----';
-        return num.replace(/(\d{4})(?=\d)/g, '$1 ');
+    function showLimiteIfCredit(opt) {
+        const label = (opt && opt.text) ? opt.text.toLowerCase() : '';
+        if (label.includes('crédito') || label.includes('credit')) {
+            limiteGroup.style.display = 'block';
+        } else {
+            limiteGroup.style.display = 'none';
+            const lim = document.getElementById('limite'); if (lim) lim.value = '';
+        }
     }
-
-    btn.addEventListener('click', function () {
-        // generate 16-digit number: BIN 4000 + 12 random digits
-        btn.disabled = true;
-        btn.textContent = 'Gerando...';
-        setTimeout(() => {
-            const random = Math.floor(Math.random() * 999999999999).toString().padStart(12, '0');
-            const numero = '4000' + random;
-            numeroInput.value = numero;
-            maskPreview.textContent = 'Preview: ' + formatMask(numero);
-            btn.disabled = false;
-            btn.textContent = 'Gerar';
-        }, 500); // small delay for UX
-    });
 
     tipoSelect && tipoSelect.addEventListener('change', function () {
         const opt = tipoSelect.options[tipoSelect.selectedIndex];
@@ -119,33 +109,45 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!isNaN(years)) {
             const d = new Date();
             d.setFullYear(d.getFullYear() + years);
-            // set to last day of that month
             const yyyy = d.getFullYear();
             const mm = (d.getMonth() + 1).toString().padStart(2, '0');
             const dd = (d.getDate()).toString().padStart(2, '0');
             validadeInput.value = `${yyyy}-${mm}-${dd}`;
         }
-        // Show limite input for credit cards - convention: option text contains 'crédito' or 'credit'
-        const label = opt.text.toLowerCase();
-        if (label.includes('crédito') || label.includes('credit')) {
-            limiteGroup.style.display = 'block';
-        } else {
-            limiteGroup.style.display = 'none';
-            document.getElementById('limite').value = '';
-        }
+        showLimiteIfCredit(opt);
     });
+
+    // Masking for card number: format as 4 groups while typing
+    function formatCardNumber(v){
+        const digits = v.replace(/\D/g, '').slice(0,16);
+        return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+    }
+
+    numeroInput && numeroInput.addEventListener('input', function(e){
+        const formatted = formatCardNumber(this.value);
+        this.value = formatted;
+        const clean = (this.value || '').replace(/\D/g, '');
+        const hidden = document.getElementById('numero_cartao_clean');
+        if(hidden) hidden.value = clean;
+    });
+
+    // Populate hidden before submit in case user didn't type after paste
+    const form = document.querySelector('form');
+    if(form){
+        form.addEventListener('submit', function(){
+            const hidden = document.getElementById('numero_cartao_clean');
+            const visible = document.getElementById('numero_cartao');
+            if(hidden && visible){
+                hidden.value = (visible.value || '').replace(/\D/g, '');
+            }
+        });
+    }
+
+    // Ensure Save remains enabled for create (server will validate stricter)
+    if(btnSave) btnSave.disabled = false;
 });
 </script>
-@endsection
-@extends('layouts.app')
+@endpush
 
-@section('title', 'Criar Cartão')
-@section('page-title', 'Criar Cartão')
-
-@section('content')
-<div class="card">
-    <div class="card-body">
-        <p>Página de criação de cartão (placeholder).</p>
-    </div>
 </div>
 @endsection

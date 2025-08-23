@@ -48,15 +48,7 @@
                 </li>
                 @endcan
 
-                <!-- Cartões -->
-                @can('cartoes.view')
-                <li class="nav-item">
-                    <a href="{{ route('admin.cartoes.index') }}" class="nav-link {{ request()->routeIs('admin.cartoes.*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-credit-card"></i>
-                        <p>Cartões</p>
-                    </a>
-                </li>
-                @endcan
+                {{-- Cartões menu removed per request; creation is via account details only --}}
 
                 <!-- Transações -->
                 @can('transacoes.view')

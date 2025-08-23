@@ -8,6 +8,58 @@
 <li class="breadcrumb-item active">Transações</li>
 @endsection
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('btn_quick_search');
+    const input = document.getElementById('quick_numero_conta');
+    const results = document.getElementById('quick_search_results');
+    const error = document.getElementById('quick_search_error');
+
+    function doSearch(url = null){
+        const numero = input.value.trim();
+        if(!numero){ error.style.display='block'; error.textContent='Informe o número da conta.'; results.style.display='none'; return; }
+        error.style.display='none';
+
+        fetch(url || '{{ route('transacoes.searchByConta') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ numero_conta: numero })
+        }).then(r => {
+            if(r.status === 404) return r.json().then(j => { throw new Error(j.error || 'Conta não encontrada'); });
+            return r.json();
+        }).then(data => {
+            results.innerHTML = data.html || '<p>Sem resultados.</p>';
+            results.style.display = 'block';
+
+            // intercept pagination links inside results to use AJAX
+            results.querySelectorAll('a').forEach(a => {
+                const href = a.getAttribute('href') || '';
+                if(href.includes('?page=')){
+                    a.addEventListener('click', function(e){
+                        e.preventDefault();
+                        const u = href;
+                        // attach page to our endpoint
+                        doSearch('{{ route('transacoes.searchByConta') }}?'+u.split('?')[1]);
+                    });
+                }
+            });
+        }).catch(err => {
+            error.style.display='block';
+            error.textContent = err.message || 'Erro ao buscar conta.';
+            results.style.display='none';
+        });
+    }
+
+    btn && btn.addEventListener('click', function(e){ e.preventDefault(); doSearch(); });
+    input && input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); doSearch(); } });
+});
+</script>
+@endpush
+
 @section('content')
 <div class="row">
     <div class="col-12">
@@ -18,6 +70,20 @@
 
             <!-- Filtros -->
             <div class="card-body">
+                <!-- Quick lookup by account number -->
+                <div class="mb-3">
+                    <label for="quick_numero_conta"><strong>Pesquisar por Número da Conta</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="quick_numero_conta" class="form-control" placeholder="Digite o número da conta">
+                        <div class="input-group-append">
+                            <button id="btn_quick_search" class="btn btn-primary">Pesquisar</button>
+                        </div>
+                    </div>
+                    <div id="quick_search_error" class="text-danger mt-2" style="display:none;"></div>
+                </div>
+
+                <div id="quick_search_results" style="display:none;"></div>
+
                 <form method="GET" action="{{ route('transacoes.index') }}" class="mb-3">
                     <div class="row">
                         <div class="col-md-2">

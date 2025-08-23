@@ -151,30 +151,7 @@
                         </ul>
                     </li>
 
-                    <!-- Cartões -->
-                    <li class="nav-item {{ request()->routeIs('cartoes.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('cartoes.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-credit-card"></i>
-                            <p>
-                                Cartões
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('cartoes.index') }}" class="nav-link {{ request()->routeIs('cartoes.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Listar Cartões</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('cartoes.create') }}" class="nav-link {{ request()->routeIs('cartoes.create') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Novo Cartão</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    {{-- Cartões removed from sidebar per request --}}
 
                     <!-- Transações -->
                     <li class="nav-item {{ request()->routeIs('transacoes.*') ? 'menu-open' : '' }}">

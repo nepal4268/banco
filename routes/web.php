@@ -51,6 +51,9 @@ Route::middleware(['auth'])->group(function () {
 	Route::resource('cartoes', CartaoWebController::class);
 	Route::resource('transacoes', TransacaoWebController::class);
 
+	// AJAX search transactions by account number (used by Listar Transações UI)
+	Route::post('transacoes/search-by-conta', [TransacaoWebController::class, 'searchByConta'])->name('transacoes.searchByConta');
+
 	// Seguros (prefix)
 	Route::prefix('seguros')->name('seguros.')->group(function () {
 		Route::resource('apolices', SeguroWebController::class);

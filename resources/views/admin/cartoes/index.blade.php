@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title">Cartões</h3>
-        <a href="{{ route('cartoes.create') }}" class="btn btn-success btn-sm">Novo Cartão</a>
+        <!-- Novo Cartão removido: criação somente via detalhes da conta -->
     </div>
     <div class="card-body">
         @if($cartoes->count() > 0)

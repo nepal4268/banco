@@ -8,6 +8,7 @@ use App\Models\TipoConta;
 use App\Models\StatusConta;
 use App\Models\Moeda;
 use App\Models\Agencia;
+use App\Models\StatusCartao;
 use Illuminate\Http\Request;
 use App\Http\Requests\ContaStoreRequest;
 use App\Http\Requests\ContaUpdateRequest;
@@ -231,22 +232,7 @@ class ContaWebController extends Controller
         return redirect()->route('admin.contas.index')->with('success', 'Conta criada com sucesso!');
     }
 
-    public function show(Conta $conta)
-    {
-        $conta->load([
-            'cliente', 
-            'tipoConta', 
-            'statusConta', 
-            'moeda', 
-            'transacoesOrigem.tipoTransacao',
-            'transacoesDestino.tipoTransacao'
-        ]);
-        
-        // Combine as transações de origem e destino para a view
-        $transacoes = $conta->transacoes()->get();
-        
-        return view('admin.contas.show', compact('conta', 'transacoes'));
-    }
+    
 
     public function edit(Conta $conta)
     {
@@ -271,19 +257,43 @@ class ContaWebController extends Controller
     return redirect()->route('admin.contas.index')->with('success', 'Conta atualizada com sucesso!');
     }
 
-    public function destroy(Conta $conta)
+    public function show(Conta $conta)
     {
-        $conta->delete();
+        // Load related data including cartoes
+        $conta->load([
+            'cliente', 
+            'tipoConta', 
+            'statusConta', 
+            'moeda', 
+            'transacoesOrigem.tipoTransacao',
+            'transacoesDestino.tipoTransacao',
+            'cartoes.statusCartao'
+        ]);
+
+        // Update cartao status to 'Expirado' when validade has passed
+        try {
+            $statusExpirado = \App\Models\StatusCartao::where('nome', 'Expirado')->first();
+            foreach ($conta->cartoes as $cartao) {
+                if ($cartao->validade) {
+                    $val = \Carbon\Carbon::parse($cartao->validade)->endOfDay();
+                    if ($val->lt(now()) && optional($cartao->statusCartao)->nome !== 'Expirado') {
+                        if ($statusExpirado) {
+                            $cartao->update(['status_cartao_id' => $statusExpirado->id]);
+                            // refresh relation
+                            $cartao->load('statusCartao');
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // don't break the page if status update fails; log if necessary
+        }
+
+    // Combine as transações de origem e destino para a view
+    $transacoes = $conta->transacoes()->get();
+    $statusCartao = StatusCartao::all();
         
-    return redirect()->route('admin.contas.index')->with('success', 'Conta excluída com sucesso!');
+    return view('admin.contas.show', compact('conta', 'transacoes', 'statusCartao'));
     }
 
-    private function gerarNumeroConta()
-    {
-        do {
-            $numero = '1000' . str_pad(rand(1, 999999), 6, '0', STR_PAD_LEFT);
-        } while (Conta::where('numero_conta', $numero)->exists());
-
-        return $numero;
-    }
 }

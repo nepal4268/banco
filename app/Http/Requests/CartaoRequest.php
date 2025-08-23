@@ -24,6 +24,11 @@ class CartaoRequest extends FormRequest
     {
         $cartaoId = $this->route('cartao') ? $this->route('cartao')->id : null;
 
+    // normalize incoming card number for validation (strip non-digits)
+    // this helps when the UI sends a masked value with spaces
+    // prepareForValidation ensures rules/closures see the cleaned value
+    // Note: FormRequest has prepareForValidation lifecycle method, but we'll also ensure here
+
         return [
             'conta_id' => ['required', 'exists:contas,id'],
             'tipo_cartao_id' => ['required', 'exists:tipos_cartao,id'],
@@ -66,5 +71,20 @@ class CartaoRequest extends FormRequest
             'status_cartao_id.required' => 'O status do cartão é obrigatório.',
             'status_cartao_id.exists' => 'O status do cartão selecionado é inválido.',
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('numero_cartao')) {
+            $clean = preg_replace('/\D/', '', $this->input('numero_cartao'));
+            $this->merge(['numero_cartao' => $clean]);
+        }
+        // also accept numero_cartao_clean if the UI provides it
+        if ($this->has('numero_cartao_clean')) {
+            $this->merge(['numero_cartao' => preg_replace('/\D/', '', $this->input('numero_cartao_clean'))]);
+        }
     }
 }
