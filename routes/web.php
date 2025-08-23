@@ -44,8 +44,10 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/dashboard', [DashboardController::class, 'index']);
 
 	// Recursos básicos referenciados pelo dashboard
-	Route::resource('cartoes', CartaoWebController::class);
-	Route::resource('transacoes', TransacaoWebController::class);
+	// Cartões - web actions: bloquear / ativar / substituir (POST)
+	Route::post('cartoes/{carto}/bloquear', [CartaoWebController::class, 'bloquear'])->name('cartoes.web.bloquear');
+	Route::post('cartoes/{carto}/ativar', [CartaoWebController::class, 'ativar'])->name('cartoes.web.ativar');
+	Route::post('cartoes/{carto}/substituir', [CartaoWebController::class, 'substituir'])->name('cartoes.web.substituir');
 	Route::resource('cartoes', CartaoWebController::class);
 	Route::resource('transacoes', TransacaoWebController::class);
 
@@ -63,8 +65,15 @@ Route::middleware(['auth'])->group(function () {
 	Route::resource('agencias', AdminWebController::class);
 	Route::resource('perfis', \App\Http\Controllers\AdminPerfilController::class);
 	Route::resource('permissoes', \App\Http\Controllers\AdminPermissaoController::class);
-	Route::resource('clientes', ClienteWebController::class);
-	Route::resource('contas', ContaWebController::class);
+		Route::resource('clientes', ClienteWebController::class);
+
+		// BI flow and auxiliary endpoints (placed before resource 'contas' to avoid route parameter conflicts)
+		Route::get('contas/find-by-bi', [\App\Http\Controllers\ContaWebController::class, 'findByBiForm'])->name('contas.findByBi.form');
+		Route::post('contas/find-by-bi', [\App\Http\Controllers\ContaWebController::class, 'findByBi'])->name('contas.findByBi');
+		Route::get('contas/create-for-client/{cliente}', [\App\Http\Controllers\ContaWebController::class, 'createForClient'])->name('contas.createForClient');
+		Route::get('contas/generate-account', [\App\Http\Controllers\ContaWebController::class, 'generateAccount'])->name('contas.generateAccount');
+
+		Route::resource('contas', ContaWebController::class);
 
 	// Generic lookups manager: admin/lookups/{key}
 	Route::prefix('lookups')->name('lookups.')->group(function () {
@@ -83,4 +92,6 @@ Route::middleware(['auth'])->group(function () {
 		// Outros recursos administrativos podem ser adicionados aqui
 	});
 });
+
+// (Removed public fallback route for generate-account) - use authenticated route in admin group
 

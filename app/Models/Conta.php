@@ -93,15 +93,18 @@ class Conta extends Model
     // Métodos auxiliares para IBAN e número da conta
     public static function gerarNumeroConta(Agencia $agencia): string
     {
-        // Formato: AAAACCCCCCCC (4 dígitos agência + 8 dígitos sequencial)
+        // Formato: BBBBAAAACCCCCCCC (4 dígitos banco + 4 dígitos agência + 8 dígitos sequencial)
         $ultimaConta = self::where('agencia_id', $agencia->id)
             ->orderBy('id', 'desc')
             ->first();
-        
-        $proximoSequencial = $ultimaConta ? 
+
+        $proximoSequencial = $ultimaConta ?
             intval(substr($ultimaConta->numero_conta, -8)) + 1 : 1;
-        
-        return $agencia->codigo_agencia . str_pad($proximoSequencial, 8, '0', STR_PAD_LEFT);
+
+        $codigoBanco = $agencia->codigo_banco ?? '0042';
+        $codigoAgencia = $agencia->codigo_agencia;
+
+        return str_pad($codigoBanco, 4, '0', STR_PAD_LEFT) . str_pad($codigoAgencia, 4, '0', STR_PAD_LEFT) . str_pad($proximoSequencial, 8, '0', STR_PAD_LEFT);
     }
 
     public function gerarIban(): string

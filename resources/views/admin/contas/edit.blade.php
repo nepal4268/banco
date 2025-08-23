@@ -72,7 +72,7 @@
                 </div>
                 <div class="card-footer">
                     <button class="btn btn-primary">Salvar</button>
-                    <a href="{{ route('admin.contas.show', $conta) }}" class="btn btn-secondary">Cancelar</a>
+                    <a href="{{ route('admin.contas.index') }}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
         </div>

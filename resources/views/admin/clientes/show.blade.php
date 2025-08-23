@@ -52,7 +52,7 @@
             <div class="card-header">
                 <h3 class="card-title">Contas do Cliente</h3>
                 <div class="card-tools">
-                    <a href="{{ route('admin.contas.create', ['cliente_id' => $cliente->id]) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.contas.createForClient', $cliente->id) }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Nova Conta
                     </a>
                 </div>
@@ -139,7 +139,7 @@
                 <h3 class="card-title">Ações Rápidas</h3>
             </div>
             <div class="card-body">
-                <a href="{{ route('admin.contas.create', ['cliente_id' => $cliente->id]) }}" class="btn btn-primary btn-block">
+                <a href="{{ route('admin.contas.createForClient', $cliente->id) }}" class="btn btn-primary btn-block">
                     <i class="fas fa-university"></i> Nova Conta
                 </a>
                 <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-warning btn-block">

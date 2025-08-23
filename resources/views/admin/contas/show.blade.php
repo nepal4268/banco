@@ -55,7 +55,11 @@
                 <p><strong>Agência:</strong> {{ $conta->agencia->nome ?? 'N/A' }}</p>
                 <p><strong>IBAN:</strong> {{ $conta->iban ?? 'N/A' }}</p>
                 <p><strong>Criada em:</strong> {{ $conta->created_at->format('d/m/Y H:i') }}</p>
-                <a href="{{ route('admin.contas.index') }}" class="btn btn-secondary btn-block">Voltar</a>
+                <div class="d-flex flex-column">
+                    <a href="{{ route('cartoes.index') }}?conta_id={{ $conta->id }}" class="btn btn-info btn-block mb-2">Ver Cartões</a>
+                    <a href="{{ route('cartoes.create', ['conta_id' => $conta->id]) }}" class="btn btn-primary btn-block">Adicionar Cartão</a>
+                    <a href="{{ route('admin.contas.index') }}" class="btn btn-secondary btn-block mt-2">Voltar</a>
+                </div>
             </div>
         </div>
     </div>

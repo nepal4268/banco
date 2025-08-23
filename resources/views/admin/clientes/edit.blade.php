@@ -125,9 +125,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer">
+                    <div class="card-footer">
                     <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                    <a href="{{ route('admin.clientes.show', $cliente) }}" class="btn btn-secondary">Cancelar</a>
+                    <a href="{{ route('admin.clientes.index') }}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
         </div>

@@ -96,11 +96,14 @@
                                 <td>{{ $cliente->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{{ route('admin.clientes.show', $cliente) }}" class="btn btn-info btn-sm">
+                                        <a href="{{ route('admin.clientes.show', $cliente) }}" class="btn btn-info btn-sm" title="Ver">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-warning btn-sm">
+                                        <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-warning btn-sm" title="Editar">
                                             <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ route('admin.contas.createForClient', $cliente->id) }}" class="btn btn-success btn-sm" title="Abrir Conta">
+                                            <i class="fas fa-university"></i>
                                         </a>
                                         <form method="POST" action="{{ route('admin.clientes.destroy', $cliente) }}" style="display: inline;">
                                             @csrf

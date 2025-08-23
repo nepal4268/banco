@@ -15,7 +15,7 @@
             <div class="card-header">
                 <h3 class="card-title">Lista de Contas</h3>
                     <div class="card-tools">
-                    <a href="{{ route('admin.contas.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.contas.findByBi.form') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Nova Conta
                     </a>
                 </div>

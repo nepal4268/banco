@@ -88,4 +88,11 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
 		}
 		return false;
 	}
+
+	// Verificar se usuário é administrador
+	public function isAdmin(): bool
+	{
+		return $this->hasPermission('admin.all') ||
+		       ($this->perfil && isset($this->perfil->nivel) && $this->perfil->nivel >= 3);
+	}
 }

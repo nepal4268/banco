@@ -143,7 +143,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.contas.create') }}" class="nav-link {{ request()->routeIs('admin.contas.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.contas.findByBi.form') }}" class="nav-link {{ request()->routeIs('admin.contas.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Nova Conta</p>
                                 </a>
@@ -385,6 +385,24 @@ $(function() {
 </script>
 
 @stack('scripts')
+
+@if(session('success'))
+<script>
+    $(function(){
+        // Simple modal using Bootstrap's modal if available
+        var msg = {!! json_encode(session('success')) !!};
+        var modalHtml = '<div class="modal fade" id="successModal" tabindex="-1" role="dialog">\n' +
+            '<div class="modal-dialog" role="document">\n' +
+            '<div class="modal-content">\n' +
+            '<div class="modal-header"><h5 class="modal-title">Sucesso</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>\n' +
+            '<div class="modal-body">' + msg + '</div>\n' +
+            '<div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button></div>\n' +
+            '</div></div></div>';
+        $('body').append(modalHtml);
+        $('#successModal').modal('show');
+    });
+</script>
+@endif
 
 </body>
 </html>
