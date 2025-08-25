@@ -75,9 +75,11 @@ class TransacaoWebController extends Controller
             return response()->json(['error' => 'Conta não encontrada.'], 404);
         }
 
-        // Fetch all transactions for this account, grouped by year-month (desc)
-        $transacoesAll = Transacao::with(['tipoTransacao','statusTransacao'])
-            ->where('conta_id', $conta->id)
+        // Fetch all transactions for this account (either as origin or destination), grouped by year-month (desc)
+        $transacoesAll = Transacao::with(['tipoTransacao','statusTransacao','moeda'])
+            ->where(function($q) use ($conta){
+                $q->where('conta_origem_id', $conta->id)->orWhere('conta_destino_id', $conta->id);
+            })
             ->orderBy('created_at','desc')
             ->get()
             ->groupBy(function($t){ return $t->created_at->format('Y-m'); });

@@ -15,9 +15,11 @@ use Illuminate\Support\Str;
             @php
                 $all = collect();
                 foreach($transacoesGrouped as $items) $all = $all->concat($items);
-                $grandTotal = $all->sum('valor');
-                $grandCredits = $all->where('valor','>',0)->sum('valor');
-                $grandDebits = $all->where('valor','<',0)->sum('valor');
+                // compute totals from the perspective of the current account: credits when conta_destino_id == conta->id, debits when conta_origem_id == conta->id
+                $grandCredits = $all->filter(function($t) use($conta){ return ($t->conta_destino_id ?? null) == $conta->id; })->sum('valor');
+                $grandDebits = $all->filter(function($t) use($conta){ return ($t->conta_origem_id ?? null) == $conta->id; })->sum('valor');
+                // grand total as credits - debits
+                $grandTotal = $grandCredits - $grandDebits;
             @endphp
             <div class="mb-3 d-flex align-items-center gap-3">
                 <div><strong>Total geral:</strong> {{ number_format($grandTotal,2,',','.') }} AOA</div>
@@ -31,15 +33,16 @@ use Illuminate\Support\Str;
 
             <div id="porContaAccordion">
                 @foreach($transacoesGrouped as $ym => $items)
-                    @php
-                        $label = \Carbon\Carbon::parse($ym . '-01')->format('F Y');
-                        $count = $items->count();
-                        $total = $items->sum('valor');
-                        $credits = $items->where('valor', '>', 0)->sum('valor');
-                        $debits = $items->where('valor', '<', 0)->sum('valor');
-                        // first loop -> most recent month (collection was ordered desc)
-                        $open = $loop->first ? true : false;
-                    @endphp
+                        @php
+                            $label = \Carbon\Carbon::parse($ym . '-01')->format('F Y');
+                            $count = $items->count();
+                            // compute totals for this month from account perspective
+                            $credits = $items->filter(function($t) use($conta){ return ($t->conta_destino_id ?? null) == $conta->id; })->sum('valor');
+                            $debits = $items->filter(function($t) use($conta){ return ($t->conta_origem_id ?? null) == $conta->id; })->sum('valor');
+                            $total = $credits - $debits;
+                            // first loop -> most recent month (collection was ordered desc)
+                            $open = $loop->first ? true : false;
+                        @endphp
                     <div class="card mb-2">
                         <div class="card-header p-2" id="heading-{{ $ym }}">
                             <h5 class="mb-0 d-flex align-items-center">
@@ -81,7 +84,12 @@ use Illuminate\Support\Str;
                                                 <td>{{ $t->id }}</td>
                                                 <td>{{ $t->created_at->format('d/m/Y H:i') }}</td>
                                                 <td>{{ $t->tipoTransacao->nome ?? 'N/A' }}</td>
-                                                <td>{{ $t->valor > 0 ? '+' : '' }}{{ number_format($t->valor,2,',','.') }} AOA</td>
+                                                @php
+                                                    // determine sign relative to current account
+                                                    if(($t->conta_origem_id ?? null) == $conta->id){ $sign = '-'; $display = number_format(abs($t->valor),2,',','.'); }
+                                                    else { $sign = '+'; $display = number_format($t->valor,2,',','.'); }
+                                                @endphp
+                                                <td>{{ $sign }}{{ $display }} AOA</td>
                                                 <td>{{ $t->statusTransacao->nome ?? 'N/A' }}</td>
                                                 <td>{{ Str::limit($t->descricao ?? '-', 120) }}</td>
                                             </tr>

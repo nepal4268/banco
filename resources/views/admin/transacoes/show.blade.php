@@ -42,7 +42,7 @@
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label>Moeda</label>
-                                        <select name="moeda_id" id="deposit_moeda_show" class="form-control"></select>
+                                        <select name="moeda_id" id="deposit_moeda" class="form-control"></select>
                                         <div class="invalid-feedback" data-field="moeda_id"></div>
                                     </div>
                                 </div>
@@ -82,7 +82,7 @@
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label>Moeda</label>
-                                        <select name="moeda_id" id="withdraw_moeda_show" class="form-control"></select>
+                                        <select name="moeda_id" id="withdraw_moeda" class="form-control"></select>
                                         <div class="invalid-feedback" data-field="moeda_id"></div>
                                     </div>
                                 </div>
@@ -113,6 +113,11 @@
                                     </div>
                                 </div>
                                 <small class="form-text text-muted" id="transfer_origem_info"></small>
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input" type="checkbox" value="1" id="transfer_origem_externa">
+                                    <label class="form-check-label small" for="transfer_origem_externa">Origem externa</label>
+                                </div>
+                                <input type="text" id="transfer_origem_externa_num" class="form-control form-control-sm mt-2" placeholder="Conta externa (IBAN/RC)" style="display:none;" />
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Conta Destino (número)</label>
@@ -123,6 +128,11 @@
                                     </div>
                                 </div>
                                 <small class="form-text text-muted" id="transfer_destino_info"></small>
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input" type="checkbox" value="1" id="transfer_destino_externa">
+                                    <label class="form-check-label small" for="transfer_destino_externa">Destino externo</label>
+                                </div>
+                                <input type="text" id="transfer_destino_externa_num" class="form-control form-control-sm mt-2" placeholder="Conta externa (IBAN/RC)" style="display:none;" />
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Valor</label>
@@ -133,7 +143,7 @@
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Moeda</label>
-                                    <select name="moeda_id" id="transfer_moeda_show" class="form-control"></select>
+                                        <select name="moeda_id" id="transfer_moeda" class="form-control"></select>
                                     <div class="invalid-feedback" data-field="moeda_id"></div>
                                 </div>
                                 <div class="form-group col-md-6 text-right align-self-end">
@@ -175,7 +185,7 @@
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label>Moeda</label>
-                                        <select name="moeda_id" id="pay_moeda_show" class="form-control"></select>
+                                        <select name="moeda_id" id="pay_moeda" class="form-control"></select>
                                         <div class="invalid-feedback" data-field="moeda_id"></div>
                                     </div>
                                     <div class="form-group col-md-3 text-right align-self-end">
@@ -283,7 +293,16 @@ document.addEventListener('DOMContentLoaded', function(){
     }));
 
     async function postJson(url, data){
-        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }, body: JSON.stringify(data) });
+        const r = await fetch(url, { 
+            method: 'POST', 
+            headers: { 
+                'Content-Type':'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }, 
+            credentials: 'same-origin',
+            body: JSON.stringify(data) 
+        });
         // read as text first to avoid JSON.parse errors for HTML/error pages
         const text = await r.text();
         let json = null;
@@ -316,12 +335,12 @@ document.addEventListener('DOMContentLoaded', function(){
                 // if initialMoedaId is available, show only that moeda and disable
                 if(initialMoedaId){
                     const chosen = data.find(x => x.id == initialMoedaId);
-                    if(chosen){ sel.innerHTML = ''; const opt = document.createElement('option'); opt.value = chosen.id; opt.textContent = (chosen.codigo?chosen.codigo+' - ':'') + (chosen.nome||''); sel.appendChild(opt); sel.value = chosen.id; sel.disabled = true; }
+                    if(chosen){ sel.innerHTML = ''; const opt = document.createElement('option'); opt.value = chosen.id; opt.textContent = (chosen.codigo?chosen.codigo+' - ':'') + (chosen.nome||''); sel.appendChild(opt); sel.value = chosen.id; }
                 }
             });
         }catch(e){ console.warn('Erro carregando moedas', e); }
     }
-    loadMoedasInto(['deposit_moeda_show','withdraw_moeda_show','transfer_moeda_show','pay_moeda_show']);
+    loadMoedasInto(['deposit_moeda','withdraw_moeda','transfer_moeda','pay_moeda']);
 
     // debounce helper
     function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=> fn.apply(this,args), wait); }; }
@@ -342,30 +361,33 @@ document.addEventListener('DOMContentLoaded', function(){
                         const s = document.getElementById(selId); if(!s) return;
                         s.innerHTML = '';
                         const opt = document.createElement('option'); opt.value = moeda.id; opt.textContent = (moeda.codigo?moeda.codigo+' - ':'') + (moeda.nome||''); s.appendChild(opt);
-                        s.value = moeda.id; s.disabled = true;
+                        s.value = moeda.id;
                     };
                     if(role === 'deposit'){
-                        setSingle('deposit_moeda_show', conta.moeda);
+                        setSingle('deposit_moeda', conta.moeda);
                     } else if(role === 'withdraw'){
-                        setSingle('withdraw_moeda_show', conta.moeda);
+                        setSingle('withdraw_moeda', conta.moeda);
                     } else if(role === 'pay'){
-                        setSingle('pay_moeda_show', conta.moeda);
+                        setSingle('pay_moeda', conta.moeda);
                     } else if(role.startsWith('transfer')){
                         // when verifying transfer accounts, prefer destination currency when both present
                         const ori = document.querySelector('.conta-input[data-role="transfer-origem"]');
                         const dst = document.querySelector('.conta-input[data-role="transfer-destino"]');
                         // if verifying destination, always set to destination moeda
                         if(role === 'transfer-destino'){
-                            setSingle('transfer_moeda_show', conta.moeda);
+                            setSingle('transfer_moeda', conta.moeda);
                         } else if(role === 'transfer-origem'){
                             // only set if destination not yet verified
-                            if(!(dst && dst.dataset.contaId)) setSingle('transfer_moeda_show', conta.moeda);
+                            if(!(dst && dst.dataset.contaId)) setSingle('transfer_moeda', conta.moeda);
                         }
                     }
                 }
             // store conta id on the input to mark verified and also set hidden form fields
             const input = document.querySelector('.conta-input[data-role="'+role+'"]');
-            if(input) input.dataset.contaId = conta.id;
+                    if(input) {
+                        input.dataset.contaId = conta.id;
+                        if(conta.moeda && conta.moeda.id) input.dataset.moedaId = conta.moeda.id;
+                    }
             try{
                 if(role === 'deposit') { document.getElementById('deposit_conta_id').value = conta.id; }
                 else if(role === 'withdraw') { document.getElementById('withdraw_conta_id').value = conta.id; }
@@ -378,7 +400,38 @@ document.addEventListener('DOMContentLoaded', function(){
                 const ori = document.querySelector('.conta-input[data-role="transfer-origem"]');
                 const dst = document.querySelector('.conta-input[data-role="transfer-destino"]');
                 const opBody = document.querySelector('#op_transfer .op_body');
-                if(opBody){ if(ori && ori.dataset.contaId && dst && dst.dataset.contaId) opBody.style.display='block'; else opBody.style.display='none'; }
+                if(opBody){
+                    if(ori && ori.dataset.contaId && dst && dst.dataset.contaId){
+                        // both accounts verified: ensure same moeda
+                        const oriMoeda = ori.dataset.moedaId;
+                        const dstMoeda = dst.dataset.moedaId;
+                        const oriInfo = document.getElementById('transfer_origem_info');
+                        const dstInfo = document.getElementById('transfer_destino_info');
+                        if(oriMoeda && dstMoeda && oriMoeda !== dstMoeda){
+                            // show inline error and block operation
+                            const msg = 'Moedas diferentes: origem (' + (oriMoeda) + ') ≠ destino (' + (dstMoeda) + '). Transferência não permitida.';
+                            if(oriInfo){ oriInfo.textContent = msg; oriInfo.classList.add('text-danger'); }
+                            if(dstInfo){ dstInfo.textContent = msg; dstInfo.classList.add('text-danger'); }
+                            opBody.style.display = 'none';
+                        } else {
+                            // clear any previous error styling
+                            if(oriInfo){ oriInfo.classList.remove('text-danger'); oriInfo.textContent = (ori.dataset.contaId ? oriInfo.textContent : oriInfo.textContent); }
+                            if(dstInfo){ dstInfo.classList.remove('text-danger'); dstInfo.textContent = (dst.dataset.contaId ? dstInfo.textContent : dstInfo.textContent); }
+                            // set transfer moeda to the common currency (if known)
+                            const moedaId = oriMoeda || dstMoeda;
+                            if(moedaId){
+                                const moedaObj = allMoedas.find(x => x.id == moedaId || x.id == String(moedaId));
+                                if(moedaObj){
+                                    const s = document.getElementById('transfer_moeda');
+                                    if(s){ s.innerHTML = ''; const opt = document.createElement('option'); opt.value = moedaObj.id; opt.textContent = (moedaObj.codigo?moedaObj.codigo+' - ':'') + (moedaObj.nome||''); s.appendChild(opt); s.value = moedaObj.id; }
+                                }
+                            }
+                            opBody.style.display = 'block';
+                        }
+                    } else {
+                        opBody.style.display = 'none';
+                    }
+                }
             } else {
                 const map = { deposit: 'op_deposit', withdraw: 'op_withdraw', pay: 'op_pay' };
                 const form = document.getElementById(map[role]); if(form){ const body = form.querySelector('.op_body'); if(body) body.style.display='block'; }
@@ -404,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function(){
             }
             // re-enable selects and restore full options from allMoedas if available
             if(!initialMoedaId && allMoedas && allMoedas.length){
-                ['deposit_moeda_show','withdraw_moeda_show','transfer_moeda_show','pay_moeda_show'].forEach(id => {
+                ['deposit_moeda','withdraw_moeda','transfer_moeda','pay_moeda'].forEach(id => {
                     const s = document.getElementById(id); if(!s) return; s.disabled = false; s.innerHTML = ''; allMoedas.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = (m.codigo?m.codigo+' - ':'') + (m.nome||''); s.appendChild(opt); });
                 });
             }
@@ -420,6 +473,14 @@ document.addEventListener('DOMContentLoaded', function(){
         verifyAccount(input.value.trim(), role);
     }));
 
+    // wire external account checkboxes for transfer
+    const oriExternaCb = document.getElementById('transfer_origem_externa');
+    const dstExternaCb = document.getElementById('transfer_destino_externa');
+    const oriExternaNum = document.getElementById('transfer_origem_externa_num');
+    const dstExternaNum = document.getElementById('transfer_destino_externa_num');
+    if(oriExternaCb){ oriExternaCb.addEventListener('change', function(){ if(this.checked){ oriExternaNum.style.display='block'; } else { oriExternaNum.style.display='none'; } }); }
+    if(dstExternaCb){ dstExternaCb.addEventListener('change', function(){ if(this.checked){ dstExternaNum.style.display='block'; } else { dstExternaNum.style.display='none'; } }); }
+
     // attach blur with debounce to inputs
     document.querySelectorAll('.conta-input').forEach(inp => {
         inp.addEventListener('blur', debounce(function(e){ const role = this.dataset.role; verifyAccount(this.value.trim(), role); }, 600));
@@ -434,6 +495,7 @@ document.addEventListener('DOMContentLoaded', function(){
         try{
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
+            console.log('DEPOSIT moeda_id:', data.moeda_id, 'form:', this.querySelector('[name="moeda_id"]').value, 'disabled:', this.querySelector('[name="moeda_id"]').disabled);
             // prefer conta_id hidden field
             const contaId = formData.get('conta_id') || (this.querySelector('.conta-input[data-role="deposit"]')?.dataset.contaId);
             if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger');
@@ -442,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function(){
             const btn = this.querySelector('button[type="submit"], button.btn-success'); if(btn){ btn.disabled = true; oldHtml = btn.innerHTML; btn.innerHTML = 'Processando...'; }
             // set moeda from conta and lock selects
             
-            const resp = await postJson('/transacoes/conta/' + contaId + '/depositar', { valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao, referencia_externa: data.referencia_externa });
+            const resp = await postJson('/api/contas/' + contaId + '/depositar', { valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao, referencia_externa: data.referencia_externa });
             setOpsAlert(resp.message || 'Depósito efetuado','success');
             // refresh page part: update saldo element if present
             if(resp.conta) document.getElementById('mi_saldo') && (document.getElementById('mi_saldo').textContent = Number(resp.conta.saldo).toFixed(2));
@@ -462,11 +524,12 @@ document.addEventListener('DOMContentLoaded', function(){
         try{
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
+            console.log('WITHDRAW moeda_id:', data.moeda_id, 'form:', this.querySelector('[name="moeda_id"]').value, 'disabled:', this.querySelector('[name="moeda_id"]').disabled);
             const contaId = formData.get('conta_id') || (this.querySelector('.conta-input[data-role="withdraw"]')?.dataset.contaId);
             if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger');
             let oldHtml = null;
             const btn = this.querySelector('button[type="submit"], button.btn-warning'); if(btn){ btn.disabled = true; oldHtml = btn.innerHTML; btn.innerHTML = 'Processando...'; }
-            const resp = await postJson('/transacoes/conta/' + contaId + '/levantar', { valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao, referencia_externa: data.referencia_externa });
+            const resp = await postJson('/api/contas/' + contaId + '/levantar', { valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao, referencia_externa: data.referencia_externa });
             setOpsAlert(resp.message || 'Levantamento efetuado','success');
             if(resp.conta) document.getElementById('mi_saldo') && (document.getElementById('mi_saldo').textContent = Number(resp.conta.saldo).toFixed(2));
             try{ const inEl = this.querySelector('.conta-input[data-role="withdraw"]'); if(inEl) verifyAccount(inEl.value.trim(), 'withdraw'); }catch(e){}
@@ -480,13 +543,37 @@ document.addEventListener('DOMContentLoaded', function(){
         try{
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
-            const contaOrigemId = formData.get('conta_origem_id') || (this.querySelector('.conta-input[data-role="transfer-origem"]')?.dataset.contaId);
-            const contaDestinoId = formData.get('conta_destino_id') || (this.querySelector('.conta-input[data-role="transfer-destino"]')?.dataset.contaId);
+            console.log('TRANSFER moeda_id:', data.moeda_id, 'form:', this.querySelector('[name="moeda_id"]').value, 'disabled:', this.querySelector('[name="moeda_id"]').disabled);
+            const origemInput = this.querySelector('.conta-input[data-role="transfer-origem"]');
+            const destinoInput = this.querySelector('.conta-input[data-role="transfer-destino"]');
+            const contaOrigemId = formData.get('conta_origem_id') || (origemInput?.dataset.contaId);
+            const contaDestinoId = formData.get('conta_destino_id') || (destinoInput?.dataset.contaId);
+            // ensure both accounts verified
             if(!contaOrigemId || !contaDestinoId) return setOpsAlert('Verifique origem e destino antes de submeter', 'danger');
+            // determine whether this is an external transfer (either checkbox checked) -> allow if backend supports external
+            const origemExterna = document.getElementById('transfer_origem_externa')?.checked;
+            const destinoExterna = document.getElementById('transfer_destino_externa')?.checked;
+            const origemMoeda = origemInput?.dataset.moedaId;
+            const destinoMoeda = destinoInput?.dataset.moedaId;
+            console.log('TRANSFER moeda_id:', data.moeda_id, 'origemMoeda:', origemMoeda, 'destinoMoeda:', destinoMoeda, 'origemExterna:', origemExterna, 'destinoExterna:', destinoExterna);
+            // if both accounts are internal (not externa), enforce same moeda
+            if(!origemExterna && !destinoExterna && origemMoeda && destinoMoeda && origemMoeda !== destinoMoeda){
+                return setOpsAlert('Não é possível transferir entre contas com moedas diferentes.', 'danger');
+            }
             const contaId = contaOrigemId;
             let oldHtml = null;
             const btn = this.querySelector('button[type="submit"], button.btn-primary'); if(btn){ btn.disabled = true; oldHtml = btn.innerHTML; btn.innerHTML = 'Processando...'; }
-            const resp = await postJson('/transacoes/conta/' + contaId + '/transferir', { conta_destino_numero: data.numero_destino, conta_destino_id: contaDestinoId, valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao, referencia_externa: data.referencia_externa });
+            // route to external transfer endpoint when appropriate
+            let endpoint = '/api/transacoes/transferir';
+            const payload = { conta_origem_id: contaOrigemId, conta_destino_id: contaDestinoId, valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao };
+            if(origemExterna || destinoExterna){
+                endpoint = '/api/transacoes/transferir-externo';
+                payload.origem_externa = origemExterna ? true : false;
+                payload.destino_externa = destinoExterna ? true : false;
+                if(oriExternaNum && oriExternaNum.value) payload.conta_externa_origem = oriExternaNum.value;
+                if(dstExternaNum && dstExternaNum.value) payload.conta_externa_destino = dstExternaNum.value;
+            }
+            const resp = await postJson(endpoint, payload);
             setOpsAlert(resp.message || 'Transferência efetuada','success');
             if(resp.conta) document.getElementById('mi_saldo') && (document.getElementById('mi_saldo').textContent = Number(resp.conta.saldo).toFixed(2));
             try{ const inOri = this.querySelector('.conta-input[data-role="transfer-origem"]'); if(inOri) verifyAccount(inOri.value.trim(), 'transfer-origem'); const inDst = this.querySelector('.conta-input[data-role="transfer-destino"]'); if(inDst) verifyAccount(inDst.value.trim(), 'transfer-destino'); }catch(e){}
@@ -500,11 +587,12 @@ document.addEventListener('DOMContentLoaded', function(){
         try{
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
+            console.log('PAY moeda_id:', data.moeda_id, 'form:', this.querySelector('[name="moeda_id"]').value, 'disabled:', this.querySelector('[name="moeda_id"]').disabled);
             const contaId = formData.get('conta_id') || (this.querySelector('.conta-input[data-role="pay"]')?.dataset.contaId);
             if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger');
             let oldHtml = null;
             const btn = this.querySelector('button[type="submit"], button.btn-danger'); if(btn){ btn.disabled = true; oldHtml = btn.innerHTML; btn.innerHTML = 'Processando...'; }
-            const resp = await postJson('/transacoes/conta/' + contaId + '/pagar', { parceiro: data.parceiro, referencia: data.referencia, valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao });
+            const resp = await postJson('/api/contas/' + contaId + '/pagar', { parceiro: data.parceiro, referencia: data.referencia, valor: data.valor, moeda_id: data.moeda_id, descricao: data.descricao });
             setOpsAlert(resp.message || 'Pagamento efetuado','success');
             if(resp.conta) document.getElementById('mi_saldo') && (document.getElementById('mi_saldo').textContent = Number(resp.conta.saldo).toFixed(2));
             try{ const inEl = this.querySelector('.conta-input[data-role="pay"]'); if(inEl) verifyAccount(inEl.value.trim(), 'pay'); }catch(e){}

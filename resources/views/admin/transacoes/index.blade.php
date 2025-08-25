@@ -126,7 +126,8 @@ document.addEventListener('DOMContentLoaded', function(){
                                 <th>ID</th>
                                 <th>Data/Hora</th>
                                 <th>Cliente</th>
-                                <th>Conta</th>
+                                <th>Conta Origem</th>
+                                <th>Conta Destino</th>
                                 <th>Tipo</th>
                                 <th>Valor</th>
                                 <th>Status</th>
@@ -139,15 +140,41 @@ document.addEventListener('DOMContentLoaded', function(){
                             <tr>
                                 <td>{{ $transacao->id }}</td>
                                 <td>{{ $transacao->created_at->format('d/m/Y H:i:s') }}</td>
-                                <td>{{ $transacao->conta->cliente->nome ?? 'N/A' }}</td>
-                                <td>{{ $transacao->conta->numero_conta ?? 'N/A' }}</td>
+                                @php
+                                    $isInternalTransfer = ($transacao->conta_origem_id && $transacao->conta_destino_id);
+                                    // prefer origem client name if available, otherwise destino
+                                    $clientName = 'N/A';
+                                    if($transacao->contaOrigem && $transacao->contaOrigem->cliente) $clientName = $transacao->contaOrigem->cliente->nome;
+                                    elseif($transacao->contaDestino && $transacao->contaDestino->cliente) $clientName = $transacao->contaDestino->cliente->nome;
+                                @endphp
+                                <td>{{ $clientName }}</td>
+                                <td>
+                                    @if($transacao->contaOrigem)
+                                        {{ $transacao->contaOrigem->numero_conta }}
+                                        <button class="btn btn-sm btn-link open-conta-modal" data-conta="{{ $transacao->contaOrigem->numero_conta }}">Abrir</button>
+                                    @else
+                                        {{ $transacao->conta_externa_origem ?? 'Externa' }}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($transacao->contaDestino)
+                                        {{ $transacao->contaDestino->numero_conta }}
+                                        <button class="btn btn-sm btn-link open-conta-modal" data-conta="{{ $transacao->contaDestino->numero_conta }}">Abrir</button>
+                                    @else
+                                        {{ $transacao->conta_externa_destino ?? 'Externa' }}
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge badge-info">{{ $transacao->tipoTransacao->nome ?? 'N/A' }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-{{ $transacao->valor > 0 ? 'success' : 'danger' }}">
-                                        {{ $transacao->valor > 0 ? '+' : '' }}{{ number_format($transacao->valor, 2, ',', '.') }} AOA
-                                    </span>
+                                    @if($isInternalTransfer)
+                                        <span class="badge badge-danger">-{{ number_format(abs($transacao->valor), 2, ',', '.') }} AOA</span>
+                                        <span class="badge badge-success ml-2">+{{ number_format($transacao->valor, 2, ',', '.') }} AOA</span>
+                                    @else
+                                        @php $isDebit = (bool) $transacao->conta_origem_id; $badge = $isDebit ? 'danger' : 'success'; $sign = $isDebit ? '-' : ($transacao->valor > 0 ? '+' : ''); @endphp
+                                        <span class="badge badge-{{ $badge }}">{{ $sign }}{{ number_format($transacao->valor, 2, ',', '.') }} AOA</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="badge badge-{{ $transacao->statusTransacao->nome == 'concluida' ? 'success' : 'warning' }}">
@@ -163,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="9" class="text-center">Nenhuma transação encontrada</td>
+                                <td colspan="10" class="text-center">Nenhuma transação encontrada</td>
                             </tr>
                             @endforelse
                         </tbody>

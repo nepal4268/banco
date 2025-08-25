@@ -93,6 +93,11 @@ class TransacaoController extends Controller
         } else {
             $destino = Conta::findOrFail($data['conta_destino_id']);
         }
+        // Server-side validation: internal transfers must be between accounts with the same currency
+        if($origem && $destino && $origem->moeda_id !== $destino->moeda_id){
+            \Illuminate\Support\Facades\Log::info('transferirInterno blocked - different currencies', ['origem_id' => $origem->id, 'origem_moeda' => $origem->moeda_id, 'destino_id' => $destino->id, 'destino_moeda' => $destino->moeda_id, 'payload' => $data]);
+            return response()->json(['error' => 'Contas têm moedas diferentes; transferência interna não permitida.'], 400);
+        }
         $transacao = $service->transferInternal($origem, $destino, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null);
         return response()->json(['message' => 'Transferência efetuada', 'transacao' => $transacao]);
     }
