@@ -39,7 +39,11 @@
                 <label>Status atual: <span id="label_status">{{ $cartao->statusCartao->nome ?? '-' }}</span></label>
             </div>
 
-            <form id="cartaoForm" method="POST" action="{{ $updateAction ?? '' }}">
+            @php
+                // IDs permitidos para substituição: Bloqueado, Expirado, Cancelado
+                $allowedStatusIds = \App\Models\StatusCartao::whereIn('nome', ['Bloqueado','Expirado','Cancelado'])->pluck('id')->toArray();
+            @endphp
+            <form id="cartaoForm" method="POST" action="{{ $updateAction ?? '' }}" data-allowed-status-ids="{{ implode(',', $allowedStatusIds) }}">
                 @csrf
                 @method('PUT')
 
@@ -83,6 +87,7 @@
                 const novoInput = document.getElementById('novo_numero');
                 const selStatus = document.querySelector('select[name="status_cartao_id"]');
                 const cardNumberDisplay = document.getElementById('card_number_display');
+                const allowedStatusIds = (document.getElementById('cartaoForm').dataset.allowedStatusIds || '').split(',').map(Number);
                 let substituteMode = false;
 
                 // format card number display in groups of 4
@@ -93,9 +98,8 @@
                 }
                 if(cardNumberDisplay) cardNumberDisplay.textContent = formatCardNumberDisplay(cardNumberDisplay.textContent);
 
-                function isAllowedForSubstitute(statusText){
-                    const s = (statusText || '').toLowerCase();
-                    return ['bloqueado','expirado','cancelado'].includes(s);
+                function isAllowedForSubstitute(statusId){
+                    return allowedStatusIds.includes(Number(statusId));
                 }
 
                 btnToggle && btnToggle.addEventListener('click', function(){
@@ -103,9 +107,9 @@
                     if(substituteMode){
                         subBlock.style.display = 'block';
                         novoInput.disabled = false;
-                        // when enabling substitute, ensure status is not 'Ativo' (set to 'Bloqueado' if available)
+                        // ao ativar substituição, se status não for permitido, muda para o primeiro permitido
                         const options = Array.from(selStatus.options);
-                        const prefer = options.find(o => o.text.toLowerCase() === 'bloqueado') || options.find(o => o.text.toLowerCase() !== 'ativo');
+                        const prefer = options.find(o => allowedStatusIds.includes(Number(o.value)));
                         if(prefer) selStatus.value = prefer.value;
                         btnToggle.classList.remove('btn-outline-danger');
                         btnToggle.classList.add('btn-danger');
@@ -124,16 +128,16 @@
                     const labelStatus = document.getElementById('label_status');
                     if(labelStatus) labelStatus.textContent = opt ? opt.text : '-';
 
-                    // enable substitute button only if selected status is allowed
-                    const allowed = isAllowedForSubstitute(opt ? opt.text : '');
+                    // habilita botão substituir apenas se status for permitido
+                    const allowed = isAllowedForSubstitute(opt ? opt.value : null);
                     if(btnToggle) btnToggle.disabled = !allowed;
                 });
 
-                // initial state: enable Save, set substitute based on current status
+                // estado inicial: habilita Salvar, define substituição conforme status atual
                 if(btnSave) btnSave.disabled = false;
                 if(selStatus){
                     const curOpt = selStatus.options[selStatus.selectedIndex];
-                    const allowed = isAllowedForSubstitute(curOpt ? curOpt.text : '');
+                    const allowed = isAllowedForSubstitute(curOpt ? curOpt.value : null);
                     if(btnToggle) btnToggle.disabled = !allowed;
                 }
             });

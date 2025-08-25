@@ -54,6 +54,21 @@ Route::middleware(['auth'])->group(function () {
 	// AJAX search transactions by account number (used by Listar Transações UI)
 	Route::post('transacoes/search-by-conta', [TransacaoWebController::class, 'searchByConta'])->name('transacoes.searchByConta');
 
+	// Find account by number (AJAX for modal)
+	Route::post('transacoes/find-conta', [TransacaoWebController::class, 'findConta'])->name('transacoes.findConta');
+
+	// Web endpoints for performing account operations from modal (AJAX)
+	Route::post('transacoes/conta/{conta}/depositar', [TransacaoWebController::class, 'depositarConta'])->name('transacoes.conta.depositar');
+	Route::post('transacoes/conta/{conta}/levantar', [TransacaoWebController::class, 'levantarConta'])->name('transacoes.conta.levantar');
+	Route::post('transacoes/conta/{conta}/pagar', [TransacaoWebController::class, 'pagarConta'])->name('transacoes.conta.pagar');
+	Route::post('transacoes/conta/{conta}/transferir', [TransacaoWebController::class, 'transferirConta'])->name('transacoes.conta.transferir');
+
+	// Página para buscar transações por número da conta (submenu dedicado)
+	Route::get('transacoes/por-conta', [TransacaoWebController::class, 'porConta'])->name('transacoes.byConta');
+
+	// Export CSV for a given account and month (YYYY-MM)
+	Route::get('transacoes/por-conta/{conta}/export/{ym}.csv', [TransacaoWebController::class, 'exportByContaMonthCsv'])->name('transacoes.exportByContaMonthCsv');
+
 	// Seguros (prefix)
 	Route::prefix('seguros')->name('seguros.')->group(function () {
 		Route::resource('apolices', SeguroWebController::class);

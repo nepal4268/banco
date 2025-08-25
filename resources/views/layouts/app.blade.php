@@ -169,8 +169,17 @@
                                     <p>Listar Transações</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.byConta') }}" class="nav-link {{ request()->routeIs('transacoes.byConta') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Por Conta</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
+
+                    <!-- Modal trigger: add a hidden trigger for opening full-account modal from sidebar via JS -->
+                    <!-- The actual 'Por Conta' page will also open the modal; we add a global modal here so it's available in all pages -->
 
                     <!-- Seguros -->
                     <li class="nav-item {{ request()->routeIs('seguros.*') ? 'menu-open' : '' }}">
@@ -355,13 +364,288 @@ $(function() {
         "responsive": true,
         "autoWidth": false,
         "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json"
+            "url": "https://cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json"
         }
     });
 });
 </script>
 
 @stack('scripts')
+
+<!-- Account operations modal (global) -->
+<div class="modal fade" id="contaOperationsModal" tabindex="-1" role="dialog" aria-labelledby="contaOperationsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contaOperationsModalLabel">Operações por Conta</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row mb-3">
+            <div class="col">
+                <input type="text" id="modal_numero_conta" class="form-control" placeholder="Número da conta">
+            </div>
+            <div class="col-auto">
+                <button id="modal_load_conta" class="btn btn-primary">Carregar</button>
+            </div>
+        </div>
+
+        <div id="modal_conta_info" style="display:none;">
+            <div class="mb-2"><strong>Conta:</strong> <span id="mi_numero"></span> — <span id="mi_cliente"></span></div>
+            <div class="mb-2"><strong>Agência:</strong> <span id="mi_agencia"></span> — <strong>Saldo:</strong> <span id="mi_saldo"></span> <small id="mi_moeda"></small></div>
+
+            <ul class="nav nav-tabs" id="modalTabs" role="tablist">
+                <li class="nav-item"><a class="nav-link active" id="tab-deposito" data-toggle="tab" href="#pane-deposito">Depósito</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-levantamento" data-toggle="tab" href="#pane-levantamento">Levantamento</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-transferencia" data-toggle="tab" href="#pane-transferencia">Transferência</a></li>
+                <li class="nav-item"><a class="nav-link" id="tab-pagamento" data-toggle="tab" href="#pane-pagamento">Pagamento</a></li>
+            </ul>
+
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="pane-deposito">
+                    <form id="form_deposito">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Valor</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" name="valor">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Moeda</label>
+                                <select class="form-control" name="moeda_id" id="deposito_moeda"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input class="form-control" name="descricao">
+                        </div>
+                        <div class="form-group">
+                            <label>Referência externa</label>
+                            <input class="form-control" name="referencia_externa">
+                        </div>
+                        <div class="text-right">
+                            <button class="btn btn-success" id="btn_depositar">Depositar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="pane-levantamento">
+                    <form id="form_levantamento">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Valor</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" name="valor">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Moeda</label>
+                                <select class="form-control" name="moeda_id" id="levantamento_moeda"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input class="form-control" name="descricao">
+                        </div>
+                        <div class="form-group">
+                            <label>Referência externa</label>
+                            <input class="form-control" name="referencia_externa">
+                        </div>
+                        <div class="text-right">
+                            <button class="btn btn-warning" id="btn_levantar">Levantar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="pane-transferencia">
+                    <form id="form_transferencia">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Conta destino (número)</label>
+                                <input class="form-control" name="conta_destino_numero">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Valor</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" name="valor">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Moeda</label>
+                                <select class="form-control" name="moeda_id" id="transfer_moeda"></select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Referência externa</label>
+                                <input class="form-control" name="referencia_externa">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input class="form-control" name="descricao">
+                        </div>
+                        <div class="text-right">
+                            <button class="btn btn-primary" id="btn_transferir">Transferir</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="pane-pagamento">
+                    <form id="form_pagamento">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Parceiro</label>
+                                <input class="form-control" name="parceiro">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Referência</label>
+                                <input class="form-control" name="referencia">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Valor</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" name="valor">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Moeda</label>
+                                <select class="form-control" name="moeda_id" id="pagamento_moeda"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input class="form-control" name="descricao">
+                        </div>
+                        <div class="text-right">
+                            <button class="btn btn-danger" id="btn_pagar">Pagar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal_conta_notfound" style="display:none;" class="text-danger">Conta não encontrada.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    async function loadMoedas(){
+        try{
+            const r = await fetch('/api/moedas', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+            if(!r.ok) return;
+            const json = await r.json();
+            const lists = ['deposito_moeda','levantamento_moeda','transfer_moeda','pagamento_moeda'];
+            lists.forEach(id => {
+                const sel = document.getElementById(id);
+                if(!sel) return;
+                sel.innerHTML = '';
+                (json.data || []).forEach(m => {
+                    const opt = document.createElement('option'); opt.value = m.id; opt.textContent = (m.codigo?m.codigo+' - ':'') + (m.nome||''); sel.appendChild(opt);
+                });
+            });
+        }catch(e){ console.warn('Não foi possível carregar moedas', e); }
+    }
+    loadMoedas();
+
+    const modal = $('#contaOperationsModal');
+    const mi = {
+        numero: document.getElementById('mi_numero'),
+        cliente: document.getElementById('mi_cliente'),
+        agencia: document.getElementById('mi_agencia'),
+        saldo: document.getElementById('mi_saldo'),
+        moeda: document.getElementById('mi_moeda')
+    };
+
+    // UI helpers
+    function showLoading(el){ if(el) el.style.opacity = '0.6'; }
+    function hideLoading(el){ if(el) el.style.opacity = ''; }
+
+    function setInlineError(msg){
+        let div = document.getElementById('modal_inline_error');
+        if(!div){ div = document.createElement('div'); div.id = 'modal_inline_error'; div.className = 'alert alert-danger mt-2'; document.querySelector('#contaOperationsModal .modal-body').prepend(div); }
+        div.textContent = msg; div.style.display = msg ? 'block' : 'none';
+    }
+
+    function renderLastTransactions(list){
+        let container = document.getElementById('modal_last_tx');
+        if(!container){ container = document.createElement('div'); container.id = 'modal_last_tx'; container.className = 'mt-3'; document.getElementById('modal_conta_info').appendChild(container); }
+        if(!list || !list.length){ container.innerHTML = '<small class="text-muted">Sem movimentos recentes.</small>'; return; }
+        let html = '<h6>Últimos movimentos</h6><ul class="list-group">';
+        list.forEach(t => { html += '<li class="list-group-item d-flex justify-content-between align-items-center"><div><strong>#' + t.id + '</strong> ' + t.data + '<br/><small>' + (t.tipo||'') + ' — ' + (t.descricao||'') + '</small></div><span>' + Number(t.valor).toFixed(2) + ' ' + (t.moeda||'') + '</span></li>'; });
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    document.getElementById('modal_load_conta').addEventListener('click', async function(e){
+        e.preventDefault();
+        setInlineError('');
+        const numero = document.getElementById('modal_numero_conta').value.trim();
+        if(!numero){ setInlineError('Informe o número da conta'); return; }
+        const btn = this; btn.disabled = true; showLoading(btn);
+        try{
+            const r = await fetch('{{ route('transacoes.findConta') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                body: JSON.stringify({ numero_conta: numero })
+            });
+            if(r.status === 403){ setInlineError('Não autorizado'); document.getElementById('modal_conta_info').style.display='none'; document.getElementById('modal_conta_notfound').style.display='none'; return; }
+            if(r.status === 404){ document.getElementById('modal_conta_info').style.display='none'; document.getElementById('modal_conta_notfound').style.display='block'; return; }
+            const json = await r.json();
+            const conta = json.conta;
+            document.getElementById('modal_conta_notfound').style.display='none';
+            document.getElementById('modal_conta_info').style.display='block';
+            mi.numero.textContent = conta.numero_conta;
+            mi.cliente.textContent = (conta.cliente && conta.cliente.nome) ? conta.cliente.nome : '—';
+            mi.agencia.textContent = (conta.agencia && conta.agencia.nome) ? conta.agencia.nome : '—';
+            mi.saldo.textContent = (conta.saldo !== undefined) ? Number(conta.saldo).toFixed(2) : conta.saldo;
+            mi.moeda.textContent = conta.moeda ? (conta.moeda.codigo || '') : '';
+            modal.data('conta-id', conta.id);
+            renderLastTransactions(json.lastTransactions || []);
+        }catch(err){ console.error(err); setInlineError('Erro carregando conta: ' + (err.message||'')); }
+        finally{ btn.disabled = false; hideLoading(btn); }
+    });
+
+    async function submitForm(url, form){
+        setInlineError('');
+        const btn = form.querySelector('button[type="submit"], button[id]') || null;
+        if(btn) btn.disabled = true; if(btn) showLoading(btn);
+        const data = {};
+        new FormData(form).forEach((v,k) => data[k] = v);
+        try{
+            const r = await fetch(url, {
+                method: 'POST', headers: { 'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                body: JSON.stringify(data)
+            });
+            const json = await r.json();
+            if(!r.ok){ throw new Error(json.error || 'Erro'); }
+            // update conta saldo if present
+            if(json.conta){
+                mi.saldo.textContent = (json.conta.saldo !== undefined) ? Number(json.conta.saldo).toFixed(2) : json.conta.saldo;
+            }
+            renderLastTransactions(json.lastTransactions || []);
+            // visual success
+            const successMsg = json.message || 'Operação concluída';
+            const sdiv = document.createElement('div'); sdiv.className = 'alert alert-success mt-2'; sdiv.textContent = successMsg;
+            form.parentElement.prepend(sdiv);
+            setTimeout(()=>{ if(sdiv) sdiv.remove(); }, 4000);
+        }catch(e){ setInlineError('Erro: ' + (e.message||'')); }
+        finally{ if(btn) btn.disabled = false; if(btn) hideLoading(btn); }
+    }
+
+    document.getElementById('btn_depositar').addEventListener('click', function(e){ e.preventDefault(); const contaId = modal.data('conta-id'); if(!contaId) return alert('Carregue a conta primeiro'); submitForm('/transacoes/conta/' + contaId + '/depositar', document.getElementById('form_deposito')); });
+    document.getElementById('btn_levantar').addEventListener('click', function(e){ e.preventDefault(); const contaId = modal.data('conta-id'); if(!contaId) return alert('Carregue a conta primeiro'); submitForm('/transacoes/conta/' + contaId + '/levantar', document.getElementById('form_levantamento')); });
+    document.getElementById('btn_transferir').addEventListener('click', function(e){ e.preventDefault(); const contaId = modal.data('conta-id'); if(!contaId) return alert('Carregue a conta primeiro'); submitForm('/transacoes/conta/' + contaId + '/transferir', document.getElementById('form_transferencia')); });
+    document.getElementById('btn_pagar').addEventListener('click', function(e){ e.preventDefault(); const contaId = modal.data('conta-id'); if(!contaId) return alert('Carregue a conta primeiro'); submitForm('/transacoes/conta/' + contaId + '/pagar', document.getElementById('form_pagamento')); });
+
+    document.querySelectorAll('a[href="{{ route('transacoes.byConta') }}"]').forEach(a => { a.addEventListener('click', function(e){ e.preventDefault(); $('#contaOperationsModal').modal('show'); }); });
+});
+</script>
+@endpush
 
 @if(session('success'))
 <script>
