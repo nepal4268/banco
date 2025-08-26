@@ -399,6 +399,8 @@ $(function() {
     });
 });
 </script>
+<!-- Lightweight fallback bundle for transacoes helpers (no npm required) -->
+<script src="{{ asset('js/transacoes.bundle.js') }}"></script>
 
 @stack('scripts')
 

@@ -6,50 +6,60 @@
 @section('content')
 <div class="card">
     <div class="card-body">
-        <h5>Pagamento</h5>
+        <h1 class="h4">Pagamento</h1>
         <p class="text-muted">Formulário para efetuar pagamentos.</p>
 
-        <form id="op_pay" class="op_form" style="">
+        <div id="ops_alert" aria-live="polite" class="mb-2"></div>
+
+        <div id="pag_account_summary" class="card mb-3" style="display:none;" aria-hidden="true">
+            <div class="card-body" id="pag_account_summary_body"></div>
+        </div>
+
+        <form id="op_pay" novalidate>
             <input type="hidden" name="conta_id" id="pay_conta_id" />
             <div class="form-row">
                 <div class="form-group col-md-4">
-                    <label>Conta (número)</label>
+                    <label for="pay_numero_conta">Conta (número)</label>
                     <div class="input-group">
-                        <input name="numero_conta" class="form-control conta-input" data-role="pay" />
+                        <input id="pay_numero_conta" name="numero_conta" class="form-control conta-input" data-role="pay" aria-describedby="pay_account_info" autocomplete="off" />
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-verify" type="button" data-role="pay">🔎</button>
+                            <button class="btn btn-outline-secondary btn-verify" type="button" data-role="pay" aria-label="Verificar conta">🔎</button>
                         </div>
                     </div>
-                    <small class="form-text text-muted" id="pay_account_info"></small>
+                    <small id="pay_account_info" class="form-text text-muted">&nbsp;</small>
                 </div>
                 <div class="form-group col-md-4">
-                    <label>Parceiro</label>
-                    <input name="parceiro" class="form-control" />
+                    <label for="pay_parceiro">Parceiro</label>
+                    <input id="pay_parceiro" name="parceiro" class="form-control" />
                 </div>
                 <div class="form-group col-md-4">
-                    <label>Referência</label>
-                    <input name="referencia" class="form-control" />
+                    <label for="pay_referencia">Referência</label>
+                    <input id="pay_referencia" name="referencia" class="form-control" />
                 </div>
             </div>
             <div class="op_body" style="display:none; width:100%;">
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label>Valor</label>
-                        <input type="number" step="0.01" min="0.01" name="valor" class="form-control" />
+                        <label for="pay_valor">Valor</label>
+                        <input id="pay_valor" type="number" step="0.01" min="0.01" name="valor" class="form-control" required />
                     </div>
                     <div class="form-group col-md-3">
-                        <label>Moeda</label>
-                        <select name="moeda_id" id="pay_moeda" class="form-control"></select>
-                        <div class="invalid-feedback" data-field="moeda_id"></div>
+                        <label for="pay_moeda">Moeda</label>
+                        <select name="moeda_id" id="pay_moeda" class="form-control" required aria-required="true"></select>
+                        <div class="invalid-feedback" data-field="moeda_id">Selecione a moeda.</div>
                     </div>
                     <div class="form-group col-md-3 text-right align-self-end">
-                        <button class="btn btn-danger">Executar Pagamento</button>
+                        <button class="btn btn-danger" type="submit">Executar Pagamento</button>
                     </div>
                 </div>
             </div>
         </form>
+
         <div class="card mt-3" id="last_operation_card" style="display:none;">
-            <div class="card-header"><h5 class="card-title">Detalhes da Última Operação</h5></div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Detalhes da última Operação</h5>
+                <button id="pag_export_btn" class="btn btn-sm btn-outline-secondary" type="button" aria-disabled="true">Exportar CSV</button>
+            </div>
             <div class="card-body" id="last_operation_details"></div>
         </div>
     </div>
@@ -59,39 +69,26 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    async function postJson(url, data){
-        const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')}, credentials:'same-origin', body: JSON.stringify(data)});
-        const txt = await r.text(); try{ const j = txt?JSON.parse(txt):null; if(!r.ok) throw new Error(j?.message || txt || 'Erro'); return j; }catch(e){ if(!r.ok) throw e; return null; }
+    const findRoute = '{{ route('transacoes.findConta') }}';
+    if(window.Transacoes && window.Transacoes.loadMoedasInto) window.Transacoes.loadMoedasInto(['pay_moeda']);
+
+    async function fetchAndRenderAccount(numero, role){ if(!numero) return; try{ const json = await window.Transacoes.postJson(findRoute, { numero_conta: numero }); renderAccountInfo(json.conta, role, json.lastTransactions || []); return json.conta; }catch(e){ document.getElementById(role + '_info')?.textContent = 'Conta não encontrada'; const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display='none'; return null; } }
+
+    function renderAccountInfo(conta, role, lastTransactions){ const sum = document.getElementById('pag_account_summary'); const sumBody = document.getElementById('pag_account_summary_body'); if(sum && sumBody){ sumBody.innerHTML = `<dl class="row mb-0"><dt class="col-sm-3">Conta</dt><dd class="col-sm-9">${conta.numero_conta||'—'}</dd><dt class="col-sm-3">Titular</dt><dd class="col-sm-9">${conta.cliente?.nome||'—'}</dd><dt class="col-sm-3">Agência</dt><dd class="col-sm-9">${conta.agencia?.nome||conta.agencia?.id||'—'}</dd><dt class="col-sm-3">Moeda</dt><dd class="col-sm-9">${conta.moeda?.codigo||conta.moeda?.nome||'—'}</dd></dl>`; sum.style.display='block'; sum.setAttribute('aria-hidden','false'); }
+        const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display='block'; const details = document.getElementById('last_operation_details'); if(details && lastTransactions && lastTransactions.length){ let thtml = '<table class="table table-sm"><thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Moeda</th></tr></thead><tbody>'; lastTransactions.slice(0,5).forEach(t=>{ thtml += `<tr><td>${t.data||t.created_at||'—'}</td><td>${t.tipo||'—'}</td><td>${(t.valor!==undefined?Number(t.valor).toFixed(2):'—')}</td><td>${t.moeda||'—'}</td></tr>`; }); thtml += '</tbody></table>'; details.innerHTML = thtml; document.getElementById('last_operation_card').style.display='block'; }
     }
 
-    let allMoedas = [];
-    async function loadMoedasInto(ids){
-        try{ const r = await fetch('/api/moedas', { headers:{'Accept':'application/json'}, credentials:'same-origin'}); if(!r.ok) return; const json = await r.json(); const data = json.data || []; allMoedas = data; ids.forEach(id => { const sel = document.getElementById(id); if(!sel) return; sel.innerHTML = ''; data.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = (m.codigo?m.codigo+' - ':'') + (m.nome||''); sel.appendChild(opt); }); }); }catch(e){ console.warn('Erro carregando moedas', e); }
-    }
-    loadMoedasInto(['pay_moeda']);
+    document.querySelectorAll('.btn-verify').forEach(b => b.addEventListener('click', function(){ const role = this.dataset.role; const input = document.querySelector('.conta-input[data-role="'+role+'"]'); if(!input) return; fetchAndRenderAccount(input.value.trim(), role); }));
+    document.querySelectorAll('.conta-input').forEach(inp => inp.addEventListener('blur', function(){ const role = this.dataset.role; setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 250); }));
 
-    async function verifyAccount(numero, role){ if(!numero) return { error: 'Informe número' }; try{ const json = await postJson('{{ route('transacoes.findConta') }}', { numero_conta: numero }); const conta = json.conta; const infoEl = document.getElementById('pay_account_info'); if(infoEl){ infoEl.textContent = (conta.cliente ? (conta.cliente.nome || '') : '') + ' — ' + (conta.agencia ? (conta.agencia.nome||conta.agencia.id) : ''); }
-            const input = document.querySelector('.conta-input[data-role="pay"]'); if(input){ input.dataset.contaId = conta.id; if(conta.moeda && conta.moeda.id) input.dataset.moedaId = conta.moeda.id; if(conta.moeda && conta.moeda.codigo) input.dataset.moedaCodigo = conta.moeda.codigo; }
-            try{ document.getElementById('pay_conta_id').value = conta.id; }catch(e){}
-            const opBody = document.querySelector('#op_pay .op_body'); if(opBody){ opBody.style.display = (input && input.dataset.contaId) ? 'block' : 'none'; }
-            return { conta };
-        }catch(e){ const infoEl = document.getElementById('pay_account_info'); if(infoEl) infoEl.textContent = 'Conta não encontrada'; const input = document.querySelector('.conta-input[data-role="pay"]'); if(input) delete input.dataset.contaId; const opBody = document.querySelector('#op_pay .op_body'); if(opBody) opBody.style.display='none'; return { error: e.message || 'Conta não encontrada' }; } }
-
-    document.querySelectorAll('.btn-verify').forEach(b => b.addEventListener('click', function(){ const role = this.dataset.role; const input = document.querySelector('.conta-input[data-role="'+role+'"]'); if(!input) return; verifyAccount(input.value.trim(), role); }));
-    document.querySelectorAll('.conta-input').forEach(inp => { inp.addEventListener('blur', function(e){ const role = this.dataset.role; verifyAccount(this.value.trim(), role); }); });
-
-    function setOpsAlert(msg, type='success'){ const d = document.getElementById('ops_alert'); if(!d){ const wrapper = document.querySelector('.card-body'); if(wrapper){ const div = document.createElement('div'); div.id='ops_alert'; wrapper.prepend(div); } } const dd = document.getElementById('ops_alert'); dd.innerHTML = '<div class="alert alert-'+type+'">'+msg+'</div>'; setTimeout(()=>{ dd.innerHTML=''; }, 4000); }
-
-    async function renderTransacaoDetails(t){ if(!t) return; const container = document.getElementById('last_operation_details'); const card = document.getElementById('last_operation_card'); if(!container || !card) return; const dt = t.created_at || t.createdAt || null; let html = '<table class="table table-sm">'; html += '<tr><th>ID</th><td>'+ (t.id||'—') +'</td></tr>'; html += '<tr><th>Data / Hora</th><td>'+ (dt ? dt.replace('T',' ').replace('Z','') : '—') +'</td></tr>'; html += '<tr><th>Tipo</th><td>'+ ((t.tipoTransacao && t.tipoTransacao.nome) || (t.tipo_transacao && t.tipo_transacao.nome) || '—') +'</td></tr>'; html += '<tr><th>Valor</th><td>'+ (t.valor !== undefined ? Number(t.valor).toFixed(2) : '—') +'</td></tr>'; html += '<tr><th>Moeda</th><td>'+ ((t.moeda && (t.moeda.codigo || t.moeda.nome)) || '—') +'</td></tr>'; html += '<tr><th>Status</th><td>'+ ((t.statusTransacao && t.statusTransacao.nome) || '—') +'</td></tr>'; html += '<tr><th>Descrição</th><td>'+ (t.descricao || '—') +'</td></tr>'; html += '</table>'; container.innerHTML = html; card.style.display = 'block'; card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-
-    document.getElementById('op_pay').addEventListener('submit', async function(e){ e.preventDefault(); try{ const formData = new FormData(this); const data = Object.fromEntries(formData.entries()); const contaId = formData.get('conta_id') || document.querySelector('.conta-input[data-role="pay"]')?.dataset.contaId; if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger'); const payload = { valor: data.valor, moeda_id: data.moeda_id, parceiro: data.parceiro, referencia: data.referencia };
-        const resp = await postJson('/api/contas/' + contaId + '/pagar', payload);
-        setOpsAlert(resp.message || 'Pagamento efetuado', 'success'); if(resp.transacao && resp.transacao.id){ try{ const r2 = await fetch('/api/transacoes/' + resp.transacao.id); if(r2.ok){ const json = await r2.json(); renderTransacaoDetails(json); } }catch(e){}
+    document.getElementById('op_pay').addEventListener('submit', async function(e){ e.preventDefault(); try{ const formData = new FormData(this); const data = Object.fromEntries(formData.entries()); const contaId = formData.get('conta_id') || document.querySelector('.conta-input[data-role="pay"]')?.dataset.contaId; if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger'); const btn = this.querySelector('button[type="submit"]'); if(btn){ btn.disabled = true; var old = btn.innerHTML; btn.innerHTML='Processando...'; } const resp = await window.Transacoes.postJson('/api/contas/' + contaId + '/pagar', { valor: data.valor, moeda_id: data.moeda_id, parceiro: data.parceiro, referencia: data.referencia }); setOpsAlert(resp.message || 'Pagamento efetuado', 'success'); if(resp.transacao && resp.transacao.id && window.Transacoes && window.Transacoes.renderTransacaoDetailsTo){ window.Transacoes.renderTransacaoDetailsTo('last_operation_details', resp.transacao); }
+        if(btn){ btn.disabled = false; btn.innerHTML = old; }
     }catch(err){ setOpsAlert(err.message || 'Erro', 'danger'); } });
 
-});
+    if(window.Transacoes && window.Transacoes.prefillFromQuery){ window.Transacoes.prefillFromQuery({ numero_conta: { selector: '.conta-input[data-role="pay"]', role: 'pay', options: { findContaRoute: findRoute, infoIdPrefix: 'pay_account_info' } } }); }
 
-    // Prefill from query params
-    try{ const params = new URLSearchParams(window.location.search); const numero = params.get('numero_conta') || ''; if(numero){ const input = document.querySelector('.conta-input[data-role="pay"]'); if(input){ input.value = numero; verifyAccount(numero, 'pay'); } } }catch(e){}
+    function setOpsAlert(msg, type='success'){ const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
+});
 </script>
 @endpush
+ 

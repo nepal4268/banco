@@ -92,18 +92,6 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('transacoes.ted') }}" class="nav-link {{ request()->routeIs('transacoes.ted') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>TED</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('transacoes.pix') }}" class="nav-link {{ request()->routeIs('transacoes.pix') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>PIX</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="{{ route('transacoes.cambio') }}" class="nav-link {{ request()->routeIs('transacoes.cambio') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Câmbio</p>

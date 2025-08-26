@@ -54,12 +54,6 @@ class TransacaoWebController extends Controller
         return view('admin.transacoes.index', compact('transacoes', 'tiposTransacao', 'statusTransacao'));
     }
 
-    public function show(Transacao $transacao)
-    {
-        $transacao->load(['conta.cliente', 'tipoTransacao', 'statusTransacao']);
-        
-        return view('admin.transacoes.show', compact('transacao'));
-    }
 
     public function searchByConta(Request $request)
     {

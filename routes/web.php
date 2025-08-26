@@ -49,7 +49,8 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('cartoes/{carto}/ativar', [CartaoWebController::class, 'ativar'])->name('cartoes.web.ativar');
 	Route::post('cartoes/{carto}/substituir', [CartaoWebController::class, 'substituir'])->name('cartoes.web.substituir');
 	Route::resource('cartoes', CartaoWebController::class);
-	Route::resource('transacoes', TransacaoWebController::class);
+	// Only use the needed transaction resource routes
+	Route::resource('transacoes', TransacaoWebController::class)->only(['index']);
 
 	// AJAX search transactions by account number (used by Listar Transações UI)
 	Route::post('transacoes/search-by-conta', [TransacaoWebController::class, 'searchByConta'])->name('transacoes.searchByConta');
