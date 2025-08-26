@@ -53,8 +53,9 @@
                                 <input id="deposit_descricao" name="descricao" class="form-control" />
                             </div>
                             <div class="form-group col-md-3">
-                                <label for="deposit_depositante">Nome do depositante</label>
-                                <input id="deposit_depositante" name="depositante" class="form-control" placeholder="Nome da pessoa que fez o depósito" />
+                                <label for="deposit_depositante">Nome do depositante <span class="text-danger">*</span></label>
+                                <input id="deposit_depositante" name="depositante" class="form-control" placeholder="Nome da pessoa que fez o depósito" required aria-required="true" />
+                                <div class="invalid-feedback" data-field="depositante">Informe o nome do depositante.</div>
                             </div>
                             <div class="form-group col-md-3 text-right align-self-end">
                                 <button class="btn btn-success" type="submit">Executar Depósito</button>
@@ -107,6 +108,11 @@
         }
         // fill hidden id
         try{ document.getElementById(role + '_conta_id').value = conta.id; }catch(e){}
+        // set dataset on the input so other scripts can read contaId/moeda
+        try{
+            const inputEl = document.querySelector('.conta-input[data-role="'+role+'"]');
+            if(inputEl){ inputEl.dataset.contaId = conta.id; if(conta.moeda && conta.moeda.id) inputEl.dataset.moedaId = conta.moeda.id; if(conta.moeda && conta.moeda.codigo) inputEl.dataset.moedaCodigo = conta.moeda.codigo; }
+        }catch(e){}
 
         // populate account summary card
         const sum = document.getElementById(role + '_account_summary');
@@ -150,10 +156,14 @@
         document.getElementById('last_operation_card').style.display = 'none';
     }
 
-    // wire verify buttons to our fetch function
+    // wire verify buttons to our fetch function and add debounced input handling
     document.querySelectorAll('.btn-verify').forEach(b => b.addEventListener('click', function(){ const role = this.dataset.role; const input = document.querySelector('.conta-input[data-role="'+role+'"]'); if(!input) return; fetchAndRenderAccount(input.value.trim(), role); }));
 
-    document.querySelectorAll('.conta-input').forEach(inp => inp.addEventListener('blur', function(){ const role = this.dataset.role; setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 250); }));
+    document.querySelectorAll('.conta-input').forEach(function(inp){
+        let t;
+        inp.addEventListener('blur', function(){ const role = this.dataset.role; setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 250); });
+        inp.addEventListener('input', function(){ const role = this.dataset.role; clearTimeout(t); t = setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 600); });
+    });
 
     // Submit
     document.getElementById('op_deposit').addEventListener('submit', async function(e){
@@ -161,6 +171,12 @@
         try{
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
+            // client-side required check for depositante
+            if(!data.depositante || !data.depositante.trim()){
+                setOpsAlert('Informe o nome do depositante antes de submeter', 'danger');
+                const depEl = document.getElementById('deposit_depositante'); if(depEl){ depEl.classList.add('is-invalid'); depEl.focus(); }
+                return;
+            }
             const contaId = formData.get('conta_id') || (this.querySelector('.conta-input[data-role="deposit"]')?.dataset.contaId);
             if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger');
             const btn = this.querySelector('button[type="submit"]'); if(btn){ btn.disabled = true; var old = btn.innerHTML; btn.innerHTML='Processando...'; }
@@ -172,22 +188,31 @@
                 const details = document.getElementById('last_operation_details');
                 // date/time: prefer server timestamps, fallback to now
                 const rawDate = t.created_at || t.data || t.data_operacao || t.data_hora || t.timestamp || new Date().toISOString();
-                let dateStr = rawDate; try{ const dt = new Date(rawDate); if(!isNaN(dt)) dateStr = dt.toLocaleString(); }catch(e){}
+                let dateStr = rawDate;
+                try{
+                    const dt = new Date(rawDate);
+                    if(!isNaN(dt)) dateStr = dt.toLocaleString();
+                }catch(e){ /* keep raw */ }
                 // moeda
                 const moeda = (t.moeda && (t.moeda.codigo || t.moeda.nome)) || (t.moeda_codigo) || (document.getElementById('deposit_moeda')?.selectedOptions[0]?.text) || '';
-                // account number: try transaction.conta.numero_conta, transaction.numero_conta, fallback to known contaId or first dd in summary
-                const accountNumber = (t.conta && (t.conta.numero_conta || t.conta.numero || t.conta.numeroConta)) || t.numero_conta || t.conta_numero || contaId || document.querySelector('#deposit_account_summary_body dd')?.textContent || (t.conta_id || '—');
-                // titular name: prefer conta.cliente.nome, then cliente.nome, then t.titular
-                const titular = (t.conta && t.conta.cliente && (t.conta.cliente.nome || t.conta.cliente.nome_completo)) || (t.cliente && (t.cliente.nome || t.cliente.nome_completo)) || t.titular || document.querySelector('#deposit_account_summary_body dd:nth-of-type(2)')?.textContent || '—';
+                // account number: try transaction.conta.numero_conta or explicit summary dd:nth-of-type(1)
+                const acctFromTrans = (t.conta && (t.conta.numero_conta || t.conta.numero || t.conta.numeroConta)) || t.numero_conta || t.conta_numero || t.conta_id;
+                const acctFromSummary = document.querySelector('#deposit_account_summary_body dd:nth-of-type(1)')?.textContent || null;
+                const accountNumber = (acctFromTrans || acctFromSummary || contaId || '—')?.toString().trim();
+                // titular name: prefer conta.cliente.nome, then cliente.nome, otherwise summary dd:nth-of-type(2)
+                const titularFromTrans = (t.conta && t.conta.cliente && (t.conta.cliente.nome || t.conta.cliente.nome_completo)) || (t.cliente && (t.cliente.nome || t.cliente.nome_completo)) || t.titular;
+                const titularFromSummary = document.querySelector('#deposit_account_summary_body dd:nth-of-type(2)')?.textContent || null;
+                const titular = (titularFromTrans || titularFromSummary || '—')?.toString().trim();
                 const depositante = t.depositante || data.depositante || document.getElementById('deposit_depositante')?.value || '—';
                 const valorStr = (t.valor!==undefined ? Number(t.valor).toFixed(2) : (data.valor ? Number(data.valor).toFixed(2) : '—'));
                 const invoiceHtml = `
                     <div class="invoice p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="mb-3">
                             <h4>Recibo de Depósito</h4>
-                            <small>#${t.id || '—'} — ${dateStr}</small>
                         </div>
                         <dl class="row">
+                            <dt class="col-sm-3">ID</dt><dd class="col-sm-9">${t.id || '—'}</dd>
+                            <dt class="col-sm-3">Data / Hora</dt><dd class="col-sm-9">${dateStr}</dd>
                             <dt class="col-sm-3">Conta</dt><dd class="col-sm-9">${accountNumber}</dd>
                             <dt class="col-sm-3">Titular</dt><dd class="col-sm-9">${titular}</dd>
                             <dt class="col-sm-3">Depositante</dt><dd class="col-sm-9">${depositante}</dd>
@@ -199,6 +224,8 @@
                     </div>
                 `;
                 if(details) details.innerHTML = invoiceHtml;
+                // clear form and hide UI sections to match levantamento behaviour
+                this.reset(); const body = document.querySelector('#op_deposit .op_body'); if(body) body.style.display = 'none'; const sum = document.getElementById('deposit_account_summary'); if(sum) sum.style.display = 'none';
                 document.getElementById('last_operation_card').style.display = 'block';
             }
             if(btn){ btn.disabled = false; btn.innerHTML = old; }

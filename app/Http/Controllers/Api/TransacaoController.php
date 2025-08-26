@@ -98,6 +98,14 @@ class TransacaoController extends Controller
             \Illuminate\Support\Facades\Log::info('transferirInterno blocked - different currencies', ['origem_id' => $origem->id, 'origem_moeda' => $origem->moeda_id, 'destino_id' => $destino->id, 'destino_moeda' => $destino->moeda_id, 'payload' => $data]);
             return response()->json(['error' => 'Contas têm moedas diferentes; transferência interna não permitida.'], 400);
         }
+        // Optional BI check for origin account owner
+        if (!empty($data['bi_origem'])) {
+            $cliente = $origem->cliente;
+            $clienteBi = $cliente?->bi ?? null;
+            if (!$clienteBi || trim($clienteBi) !== trim($data['bi_origem'])) {
+                return response()->json(['error' => 'BI do titular da conta de origem não confere.'], 400);
+            }
+        }
         $transacao = $service->transferInternal($origem, $destino, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null);
         return response()->json(['message' => 'Transferência efetuada', 'transacao' => $transacao]);
     }

@@ -15,12 +15,12 @@ use InvalidArgumentException;
 
 class TransactionService
 {
-    public function deposit(Conta $conta, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null): Transacao
+    public function deposit(Conta $conta, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null, ?string $depositante = null): Transacao
     {
         $this->assertPositiveAmount($valor);
         $this->assertSameCurrency($conta->moeda_id, $moedaId, 'Depósito deve utilizar a mesma moeda da conta.');
 
-        return DB::transaction(function () use ($conta, $valor, $moedaId, $descricao, $referenciaExterna) {
+    return DB::transaction(function () use ($conta, $valor, $moedaId, $descricao, $referenciaExterna, $depositante) {
             $contaLocked = Conta::whereKey($conta->id)->lockForUpdate()->firstOrFail();
             $contaLocked->saldo = round(((float)$contaLocked->saldo) + $valor, 2);
             $contaLocked->save();
@@ -34,17 +34,18 @@ class TransactionService
                 descricao: $descricao,
                 referenciaExterna: $referenciaExterna,
                 origemExterna: true,
-                destinoExterna: false
+                destinoExterna: false,
+                depositante: $depositante
             );
         });
     }
 
-    public function withdraw(Conta $conta, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null): Transacao
+    public function withdraw(Conta $conta, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null, ?string $depositante = null): Transacao
     {
         $this->assertPositiveAmount($valor);
         $this->assertSameCurrency($conta->moeda_id, $moedaId, 'Levantamento deve utilizar a mesma moeda da conta.');
 
-        return DB::transaction(function () use ($conta, $valor, $moedaId, $descricao, $referenciaExterna) {
+    return DB::transaction(function () use ($conta, $valor, $moedaId, $descricao, $referenciaExterna, $depositante) {
             $contaLocked = Conta::whereKey($conta->id)->lockForUpdate()->firstOrFail();
             $this->assertSufficientFunds($contaLocked->saldo, $valor);
             $contaLocked->saldo = round(((float)$contaLocked->saldo) - $valor, 2);
@@ -59,7 +60,8 @@ class TransactionService
                 descricao: $descricao,
                 referenciaExterna: $referenciaExterna,
                 origemExterna: false,
-                destinoExterna: true
+                destinoExterna: true,
+                depositante: $depositante
             );
         });
     }
@@ -288,7 +290,7 @@ class TransactionService
         });
     }
 
-    private function criarTransacao(?int $contaOrigemId, ?int $contaDestinoId, string $tipo, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null, bool $origemExterna = false, bool $destinoExterna = false): Transacao
+    private function criarTransacao(?int $contaOrigemId, ?int $contaDestinoId, string $tipo, float $valor, int $moedaId, ?string $descricao = null, ?string $referenciaExterna = null, bool $origemExterna = false, bool $destinoExterna = false, ?string $depositante = null): Transacao
     {
         if (!empty($referenciaExterna)) {
             $existente = Transacao::where('referencia_externa', $referenciaExterna)->first();
@@ -296,11 +298,15 @@ class TransactionService
                 return $existente;
             }
         }
-        $transacao = new Transacao();
+            $transacao = new Transacao();
         $transacao->conta_origem_id = $contaOrigemId;
         $transacao->conta_destino_id = $contaDestinoId;
         $transacao->origem_externa = $origemExterna;
         $transacao->destino_externa = $destinoExterna;
+            // optionally store depositante (who made the operation at the counter)
+            if (!empty($depositante)) {
+                $transacao->depositante = $depositante;
+            }
         $transacao->tipo_transacao_id = $this->tipoIdPorNome($tipo);
         $transacao->valor = $valor;
         $transacao->moeda_id = $moedaId;

@@ -17,7 +17,9 @@
 
         <form id="op_pay" novalidate>
             <input type="hidden" name="conta_id" id="pay_conta_id" />
-            <div class="form-row">
+            <fieldset>
+                <legend class="sr-only">Dados do pagamento</legend>
+                <div class="form-row">
                 <div class="form-group col-md-4">
                     <label for="pay_numero_conta">Conta (número)</label>
                     <div class="input-group">
@@ -37,11 +39,16 @@
                     <input id="pay_referencia" name="referencia" class="form-control" />
                 </div>
             </div>
-            <div class="op_body" style="display:none; width:100%;">
+                <div class="op_body" style="display:none; width:100%;">
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="pay_valor">Valor</label>
                         <input id="pay_valor" type="number" step="0.01" min="0.01" name="valor" class="form-control" required />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="pay_bi">BI do titular <span class="text-danger">*</span></label>
+                        <input id="pay_bi" name="bi" class="form-control" placeholder="BI do titular" required />
+                        <div class="invalid-feedback" data-field="bi">Informe o BI do titular.</div>
                     </div>
                     <div class="form-group col-md-3">
                         <label for="pay_moeda">Moeda</label>
@@ -72,16 +79,48 @@ document.addEventListener('DOMContentLoaded', function(){
     const findRoute = '{{ route('transacoes.findConta') }}';
     if(window.Transacoes && window.Transacoes.loadMoedasInto) window.Transacoes.loadMoedasInto(['pay_moeda']);
 
-    async function fetchAndRenderAccount(numero, role){ if(!numero) return; try{ const json = await window.Transacoes.postJson(findRoute, { numero_conta: numero }); renderAccountInfo(json.conta, role, json.lastTransactions || []); return json.conta; }catch(e){ document.getElementById(role + '_info')?.textContent = 'Conta não encontrada'; const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display='none'; return null; } }
+    async function fetchAndRenderAccount(numero, role){
+        if(!numero) return;
+        try{
+            const json = await window.Transacoes.postJson(findRoute, { numero_conta: numero });
+            const conta = json.conta;
+            renderAccountInfo(conta, role);
+            try{ const inputEl = document.querySelector('.conta-input[data-role="'+role+'"]'); if(inputEl){ inputEl.dataset.contaId = conta.id; if(conta.moeda && conta.moeda.id) inputEl.dataset.moedaId = conta.moeda.id; if(conta.moeda && conta.moeda.codigo) inputEl.dataset.moedaCodigo = conta.moeda.codigo; } }catch(e){}
+            return conta;
+        }catch(e){
+            document.getElementById(role + '_info')?.textContent = 'Conta não encontrada';
+            const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display='none';
+            document.getElementById('last_operation_card').style.display = 'none';
+            return null;
+        }
+    }
 
-    function renderAccountInfo(conta, role, lastTransactions){ const sum = document.getElementById('pag_account_summary'); const sumBody = document.getElementById('pag_account_summary_body'); if(sum && sumBody){ sumBody.innerHTML = `<dl class="row mb-0"><dt class="col-sm-3">Conta</dt><dd class="col-sm-9">${conta.numero_conta||'—'}</dd><dt class="col-sm-3">Titular</dt><dd class="col-sm-9">${conta.cliente?.nome||'—'}</dd><dt class="col-sm-3">Agência</dt><dd class="col-sm-9">${conta.agencia?.nome||conta.agencia?.id||'—'}</dd><dt class="col-sm-3">Moeda</dt><dd class="col-sm-9">${conta.moeda?.codigo||conta.moeda?.nome||'—'}</dd></dl>`; sum.style.display='block'; sum.setAttribute('aria-hidden','false'); }
-        const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display='block'; const details = document.getElementById('last_operation_details'); if(details && lastTransactions && lastTransactions.length){ let thtml = '<table class="table table-sm"><thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Moeda</th></tr></thead><tbody>'; lastTransactions.slice(0,5).forEach(t=>{ thtml += `<tr><td>${t.data||t.created_at||'—'}</td><td>${t.tipo||'—'}</td><td>${(t.valor!==undefined?Number(t.valor).toFixed(2):'—')}</td><td>${t.moeda||'—'}</td></tr>`; }); thtml += '</tbody></table>'; details.innerHTML = thtml; document.getElementById('last_operation_card').style.display='block'; }
+    function renderAccountInfo(conta, role){
+        const sum = document.getElementById('pag_account_summary'); const sumBody = document.getElementById('pag_account_summary_body'); if(sum && sumBody){ sumBody.innerHTML = `<dl class="row mb-0"><dt class="col-sm-3">Conta</dt><dd class="col-sm-9">${conta.numero_conta||'—'}</dd><dt class="col-sm-3">Saldo disponível</dt><dd class="col-sm-9">${(typeof conta.saldo !== 'undefined' ? Number(conta.saldo).toFixed(2) : '—')}</dd><dt class="col-sm-3">Titular</dt><dd class="col-sm-9">${conta.cliente?.nome||'—'}</dd><dt class="col-sm-3">Agência</dt><dd class="col-sm-9">${conta.agencia?.nome||conta.agencia?.id||'—'}</dd><dt class="col-sm-3">Moeda</dt><dd class="col-sm-9">${conta.moeda?.codigo||conta.moeda?.nome||'—'}</dd></dl>`; sum.style.display='block'; sum.setAttribute('aria-hidden','false'); }
+        const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display='block';
     }
 
     document.querySelectorAll('.btn-verify').forEach(b => b.addEventListener('click', function(){ const role = this.dataset.role; const input = document.querySelector('.conta-input[data-role="'+role+'"]'); if(!input) return; fetchAndRenderAccount(input.value.trim(), role); }));
-    document.querySelectorAll('.conta-input').forEach(inp => inp.addEventListener('blur', function(){ const role = this.dataset.role; setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 250); }));
+    document.querySelectorAll('.conta-input').forEach(function(inp){ let t; inp.addEventListener('blur', function(){ const role = this.dataset.role; setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 250); }); inp.addEventListener('input', function(){ const role = this.dataset.role; clearTimeout(t); t = setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 600); }); });
 
-    document.getElementById('op_pay').addEventListener('submit', async function(e){ e.preventDefault(); try{ const formData = new FormData(this); const data = Object.fromEntries(formData.entries()); const contaId = formData.get('conta_id') || document.querySelector('.conta-input[data-role="pay"]')?.dataset.contaId; if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger'); const btn = this.querySelector('button[type="submit"]'); if(btn){ btn.disabled = true; var old = btn.innerHTML; btn.innerHTML='Processando...'; } const resp = await window.Transacoes.postJson('/api/contas/' + contaId + '/pagar', { valor: data.valor, moeda_id: data.moeda_id, parceiro: data.parceiro, referencia: data.referencia }); setOpsAlert(resp.message || 'Pagamento efetuado', 'success'); if(resp.transacao && resp.transacao.id && window.Transacoes && window.Transacoes.renderTransacaoDetailsTo){ window.Transacoes.renderTransacaoDetailsTo('last_operation_details', resp.transacao); }
+    document.getElementById('op_pay').addEventListener('submit', async function(e){ e.preventDefault(); try{ const formData = new FormData(this); const data = Object.fromEntries(formData.entries()); const contaId = formData.get('conta_id') || document.querySelector('.conta-input[data-role="pay"]')?.dataset.contaId; if(!contaId) return setOpsAlert('Verifique a conta antes de submeter', 'danger'); // require BI client-side
+        const bi = document.getElementById('pay_bi')?.value || '';
+        if(!bi) return setOpsAlert('Informe o BI do titular antes de submeter', 'danger');
+        // client-side saldo check
+        const saldo = Number(document.querySelector('#pag_account_summary_body dd:nth-of-type(2)')?.textContent || 0);
+        const valor = Number(data.valor || 0);
+        if(valor <= 0) return setOpsAlert('Valor deve ser maior que zero', 'danger');
+        if(!isNaN(saldo) && valor > saldo) return setOpsAlert('Valor não pode ser maior que o saldo disponível', 'danger');
+        const btn = this.querySelector('button[type="submit"]'); if(btn){ btn.disabled = true; var old = btn.innerHTML; btn.innerHTML='Processando...'; }
+        const resp = await window.Transacoes.postJson('/api/contas/' + contaId + '/pagar', { valor: data.valor, moeda_id: data.moeda_id, parceiro: data.parceiro, referencia: data.referencia, bi: bi });
+        setOpsAlert(resp.message || 'Pagamento efetuado', 'success');
+        if(resp.transacao && resp.transacao.id && window.Transacoes && window.Transacoes.renderTransacaoDetailsTo){
+            window.Transacoes.renderTransacaoDetailsTo('last_operation_details', resp.transacao);
+        }
+        // clear form and hide UI sections
+        this.reset();
+        const body = document.querySelector('#op_pay .op_body'); if(body) body.style.display = 'none';
+        const sum = document.getElementById('pag_account_summary'); if(sum) sum.style.display = 'none';
         if(btn){ btn.disabled = false; btn.innerHTML = old; }
     }catch(err){ setOpsAlert(err.message || 'Erro', 'danger'); } });
 

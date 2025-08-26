@@ -11,7 +11,84 @@ export function debounce(fn, wait=600){ let t; return function(...args){ clearTi
 
 function setOpsAlert(msg, type='success'){ const d = document.getElementById('ops_alert'); if(!d){ const wrapper = document.querySelector('.card-body'); if(wrapper){ const div = document.createElement('div'); div.id='ops_alert'; wrapper.prepend(div); } } const dd = document.getElementById('ops_alert'); if(dd) dd.innerHTML = '<div class="alert alert-'+type+'">'+msg+'</div>'; setTimeout(()=>{ if(dd) dd.innerHTML=''; }, 4000); }
 
-export async function renderTransacaoDetailsTo(containerId, t){ if(!t) return; const container = document.getElementById(containerId); const card = document.getElementById('last_operation_card'); if(!container || !card) return; const dt = t.created_at || t.createdAt || null; let html = '<table class="table table-sm">'; html += '<tr><th>ID</th><td>'+ (t.id||'—') +'</td></tr>'; html += '<tr><th>Data / Hora</th><td>'+ (dt ? dt.replace('T',' ').replace('Z','') : '—') +'</td></tr>'; html += '<tr><th>Tipo</th><td>'+ ((t.tipoTransacao && t.tipoTransacao.nome) || (t.tipo_transacao && t.tipo_transacao.nome) || '—') +'</td></tr>'; html += '<tr><th>Valor</th><td>'+ (t.valor !== undefined ? Number(t.valor).toFixed(2) : '—') +'</td></tr>'; html += '<tr><th>Moeda</th><td>'+ ((t.moeda && (t.moeda.codigo || t.moeda.nome)) || '—') +'</td></tr>'; html += '<tr><th>Status</th><td>'+ ((t.statusTransacao && t.statusTransacao.nome) || '—') +'</td></tr>'; html += '<tr><th>Descrição</th><td>'+ (t.descricao || '—') +'</td></tr>'; html += '<tr><th>Conta Origem</th><td>' + ((t.contaOrigem && t.contaOrigem.numero_conta) || (t.conta_externa_origem) || '—') + '</td></tr>'; html += '<tr><th>Conta Destino</th><td>' + ((t.contaDestino && t.contaDestino.numero_conta) || (t.conta_externa_destino) || '—') + '</td></tr>'; html += '<tr><th>Referência</th><td>' + (t.referencia_externa || '—') + '</td></tr>'; html += '</table>'; container.innerHTML = html; card.style.display = 'block'; card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+export async function renderTransacaoDetailsTo(containerId, t){
+    if(!t) return;
+    const container = document.getElementById(containerId);
+    const card = document.getElementById('last_operation_card');
+    if(!container || !card) return;
+
+    const dtRaw = t.created_at || t.createdAt || t.data || null;
+    let dt = dtRaw || new Date().toISOString();
+    try{ const tmp = new Date(dtRaw); if(!isNaN(tmp)) dt = tmp.toLocaleString(); }catch(e){}
+
+    // Resolve common fields with fallbacks
+    const tipoNome = (t.tipoTransacao && t.tipoTransacao.nome) || (t.tipo_transacao && t.tipo_transacao.nome) || (t.tipo) || 'Operação';
+    const title = 'Recibo de ' + tipoNome;
+    const id = t.id || '—';
+    const descricao = t.descricao || t.observacao || '—';
+    // Show absolute value (no leading sign) and format
+    const valor = (t.valor !== undefined ? Math.abs(Number(t.valor)).toFixed(2) : '—');
+    // Resolve moeda: prefer relation, then provided code, then try to read from visible account summary
+    let moeda = (t.moeda && (t.moeda.codigo || t.moeda.nome)) || t.moeda_codigo || null;
+
+    // account / titular heuristics
+    const acctFromTrans = (t.conta && (t.conta.numero_conta || t.conta.numero)) || t.numero_conta || t.conta_numero || null;
+    const acctFromDest = (t.contaDestino && (t.contaDestino.numero_conta || t.contaDestino.numero)) || null;
+    // Try to extract account number and titular from a visible account summary card on the page using dt label match
+    function findVisibleSummary(){
+        const candidates = Array.from(document.querySelectorAll('[id$="_account_summary_body"]'));
+        for(const el of candidates){
+            // consider visible
+            if(el.offsetParent === null) continue;
+            return el;
+        }
+        return null;
+    }
+
+    const summaryEl = findVisibleSummary();
+    let acctFromSumm = null, titularFromSumm = null, moedaFromSumm = null;
+    if(summaryEl){
+        const dts = summaryEl.querySelectorAll('dt');
+        for(const dtEl of dts){
+            const key = (dtEl.textContent || '').trim().toLowerCase();
+            const dd = dtEl.nextElementSibling;
+            if(!dd) continue;
+            if(key.startsWith('conta')) acctFromSumm = dd.textContent.trim();
+            if(key.startsWith('titular')) titularFromSumm = dd.textContent.trim();
+            if(key.startsWith('moeda')) moedaFromSumm = dd.textContent.trim();
+        }
+    }
+
+    const accountNumber = (acctFromTrans || acctFromDest || acctFromSumm || (t.conta_id || t.conta_origem_id || t.conta_destino_id) || '—')?.toString().trim();
+    const titularFromTrans = (t.conta && t.conta.cliente && (t.conta.cliente.nome || t.conta.cliente.nome_completo)) || (t.cliente && (t.cliente.nome || t.cliente.nome_completo)) || null;
+    const titular = (titularFromTrans || titularFromSumm || '—')?.toString().trim();
+
+    // actor: depositante / parceiro / origem external label
+    // If moeda not resolved yet, try from summary
+    if(!moeda && moedaFromSumm) moeda = moedaFromSumm;
+    if(!moeda) moeda = '—';
+
+    let html = `
+        <div class="invoice p-3">
+            <div class="mb-3"><h4>${title}</h4></div>
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt><dd class="col-sm-9">${id}</dd>
+                <dt class="col-sm-3">Data / Hora</dt><dd class="col-sm-9">${dt}</dd>
+                <dt class="col-sm-3">Conta</dt><dd class="col-sm-9">${accountNumber}</dd>
+                <dt class="col-sm-3">Titular</dt><dd class="col-sm-9">${titular}</dd>
+                <dt class="col-sm-3">Valor</dt><dd class="col-sm-9">${valor}</dd>
+                <dt class="col-sm-3">Moeda</dt><dd class="col-sm-9">${moeda}</dd>
+                ${ (t.conta && (typeof t.conta.saldo !== 'undefined')) ? (`<dt class="col-sm-3">Saldo disponível</dt><dd class="col-sm-9">${Number(t.conta.saldo).toFixed(2)}</dd>`) : '' }
+                <dt class="col-sm-3">Descrição</dt><dd class="col-sm-9">${descricao}</dd>
+            </dl>
+            <div class="mt-3"><small class="text-muted">Este documento comprova que a operação foi registrada no sistema.</small></div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 
 export function initContaLookupBehavior(){
     return {

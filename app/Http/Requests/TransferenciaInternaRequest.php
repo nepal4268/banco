@@ -17,6 +17,8 @@ class TransferenciaInternaRequest extends FormRequest
             'conta_origem_id' => ['required', 'integer', 'exists:contas,id'],
             'conta_destino_id' => ['nullable', 'integer', 'exists:contas,id'],
             'iban_destino' => ['nullable', 'string', 'max:34'],
+            // BI for origin account verification (required)
+            'bi_origem' => ['required', 'string', 'max:50'],
             'valor' => ['required', 'numeric', 'min:0.01', 'max:999999999999999999.99'],
             'moeda_id' => ['required', 'integer', 'exists:moedas,id'],
             'descricao' => ['nullable', 'string', 'max:255'],

@@ -156,8 +156,9 @@ class ContaController extends Controller
      */
     public function depositar(Conta $conta, ContaOperacaoRequest $request, TransactionService $service): JsonResponse
     {
-        $data = $request->validated();
-        $transacao = $service->deposit($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null);
+    $data = $request->validated();
+    $depositante = $data['depositante'] ?? null;
+    $transacao = $service->deposit($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null, $depositante);
         return response()->json(['message' => 'Depósito efetuado', 'transacao' => $transacao]);
     }
 
@@ -185,8 +186,19 @@ class ContaController extends Controller
     public function levantar(Conta $conta, ContaOperacaoRequest $request, TransactionService $service): JsonResponse
     {
         $data = $request->validated();
-        $transacao = $service->withdraw($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null);
-        return response()->json(['message' => 'Levantamento efetuado', 'transacao' => $transacao]);
+        // If BI provided, enforce it belongs to the account owner
+        if (!empty($data['bi'])) {
+            $cliente = $conta->cliente;
+            $clienteBi = $cliente?->bi ?? null;
+            if (!$clienteBi || trim($clienteBi) !== trim($data['bi'])) {
+                return response()->json(['error' => 'BI do titular não confere com a conta informada.'], 400);
+            }
+        }
+
+    $transacao = $service->withdraw($conta, (float)$data['valor'], (int)$data['moeda_id'], $data['descricao'] ?? null, $data['referencia_externa'] ?? null);
+    // Return updated account so client can display new balance
+    $contaAtualizada = Conta::with(['cliente','agencia','moeda','statusConta'])->find($conta->id);
+    return response()->json(['message' => 'Levantamento efetuado', 'transacao' => $transacao, 'conta' => $contaAtualizada]);
     }
 
     /**

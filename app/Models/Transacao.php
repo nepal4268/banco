@@ -26,6 +26,7 @@ class Transacao extends Model
         'moeda_id',
         'status_transacao_id',
         'descricao',
+    'depositante',
         'referencia_externa',
     ];
 

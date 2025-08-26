@@ -20,6 +20,8 @@ class TransacaoCambioRequest extends FormRequest
             'moeda_origem_id' => ['required', 'integer', 'exists:moedas,id'],
             'moeda_destino_id' => ['required', 'integer', 'different:moeda_origem_id', 'exists:moedas,id'],
             'valor_origem' => ['required', 'numeric', 'gt:0'],
+            // require BI of origin account for security
+            'bi_origem' => ['required', 'string', 'max:50'],
             'descricao' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
     }
