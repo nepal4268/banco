@@ -63,6 +63,13 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('transacoes/conta/{conta}/pagar', [TransacaoWebController::class, 'pagarConta'])->name('transacoes.conta.pagar');
 	Route::post('transacoes/conta/{conta}/transferir', [TransacaoWebController::class, 'transferirConta'])->name('transacoes.conta.transferir');
 
+	// Pages per transaction type (standalone views)
+	Route::get('transacoes/deposito', function(){ return view('admin.transacoes.deposito'); })->name('transacoes.deposito');
+	Route::get('transacoes/levantamento', function(){ return view('admin.transacoes.levantamento'); })->name('transacoes.levantamento');
+	Route::get('transacoes/transferencia', function(){ return view('admin.transacoes.transferencia'); })->name('transacoes.transferencia');
+	Route::get('transacoes/pagamento', function(){ return view('admin.transacoes.pagamento'); })->name('transacoes.pagamento');
+	Route::get('transacoes/cambio', function(){ return view('admin.transacoes.cambio'); })->name('transacoes.cambio');
+
 	// Página para buscar transações por número da conta (submenu dedicado)
 	Route::get('transacoes/por-conta', [TransacaoWebController::class, 'porConta'])->name('transacoes.byConta');
 

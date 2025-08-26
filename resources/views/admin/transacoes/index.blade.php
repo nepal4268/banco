@@ -183,9 +183,24 @@ document.addEventListener('DOMContentLoaded', function(){
                                 </td>
                                 <td>{{ Str::limit($transacao->descricao ?? 'N/A', 50) }}</td>
                                 <td>
-                                    <a href="{{ route('transacoes.show', $transacao) }}" class="btn btn-info btn-sm">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            @php
+                                                $contaOrig = $transacao->contaOrigem->numero_conta ?? null;
+                                                $contaDst = $transacao->contaDestino->numero_conta ?? null;
+                                                $depositoConta = $contaDst ?? $contaOrig ?? '';
+                                                $levantamentoConta = $contaOrig ?? $contaDst ?? '';
+                                            @endphp
+                                            <a class="dropdown-item" href="{{ route('transacoes.deposito') }}?numero_conta={{ urlencode($depositoConta) }}">Abrir Depósito</a>
+                                            <a class="dropdown-item" href="{{ route('transacoes.levantamento') }}?numero_conta={{ urlencode($levantamentoConta) }}">Abrir Levantamento</a>
+                                            <a class="dropdown-item" href="{{ route('transacoes.transferencia') }}?numero_origem={{ urlencode($contaOrig ?? '') }}&numero_destino={{ urlencode($contaDst ?? '') }}">Abrir Transferência</a>
+                                            <a class="dropdown-item" href="{{ route('transacoes.pagamento') }}?numero_conta={{ urlencode($levantamentoConta) }}">Abrir Pagamento</a>
+                                            <a class="dropdown-item" href="{{ route('transacoes.cambio') }}?numero_origem={{ urlencode($contaOrig ?? '') }}&numero_destino={{ urlencode($contaDst ?? '') }}">Abrir Câmbio</a>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             @empty

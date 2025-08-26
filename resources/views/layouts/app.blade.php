@@ -163,18 +163,48 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('transacoes.index') }}" class="nav-link {{ request()->routeIs('transacoes.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Listar Transações</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('transacoes.byConta') }}" class="nav-link {{ request()->routeIs('transacoes.byConta') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Por Conta</p>
-                                </a>
-                            </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.index') }}" class="nav-link {{ request()->routeIs('transacoes.index') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Listar Transações</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.byConta') }}" class="nav-link {{ request()->routeIs('transacoes.byConta') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Por Conta</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.deposito') }}" class="nav-link {{ request()->routeIs('transacoes.deposito') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Depósito</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.levantamento') }}" class="nav-link {{ request()->routeIs('transacoes.levantamento') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Levantamento</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.transferencia') }}" class="nav-link {{ request()->routeIs('transacoes.transferencia') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Transferência</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.pagamento') }}" class="nav-link {{ request()->routeIs('transacoes.pagamento') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Pagamento</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('transacoes.cambio') }}" class="nav-link {{ request()->routeIs('transacoes.cambio') ? 'active' : '' }}">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Câmbio</p>
+                                        </a>
+                                    </li>
                         </ul>
                     </li>
 

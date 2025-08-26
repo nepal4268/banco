@@ -24,11 +24,22 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            // Project uses Portuguese column names on `usuarios` table
+            'nome' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'bi' => fake()->unique()->bothify('########??'),
+            'sexo' => fake()->randomElement(['M', 'F']),
+            'data_nascimento' => fake()->optional()->date(),
+            // telefone is json in the migration; store as JSON string
+            'telefone' => json_encode([fake()->phoneNumber()]),
+            // senha column stores hashed password
+            'senha' => static::$password ??= Hash::make('password'),
+            // optional relations left null by default
+            'perfil_id' => null,
+            'agencia_id' => null,
+            'endereco' => null,
+            'cidade' => null,
+            'provincia' => null,
         ];
     }
 

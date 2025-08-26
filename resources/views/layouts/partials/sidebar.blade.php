@@ -52,12 +52,65 @@
 
                 <!-- Transações -->
                 @can('transacoes.view')
-                <li class="nav-item">
-                    <a href="{{ route('admin.transacoes.index') }}" class="nav-link {{ request()->routeIs('admin.transacoes.*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-exchange-alt"></i>
-                        <p>Transações</p>
-                    </a>
-                </li>
+                    <li class="nav-item has-treeview {{ request()->routeIs('admin.transacoes.*') || request()->routeIs('transacoes.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('admin.transacoes.*') || request()->routeIs('transacoes.*') ? 'active' : '' }}">
+                            <i class="fas fa-exchange-alt"></i>
+                            <p>
+                                Transações
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview" style="display: block;">
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.index') }}" class="nav-link {{ request()->routeIs('transacoes.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Lista</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.deposito') }}" class="nav-link {{ request()->routeIs('transacoes.deposito') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Depósito</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.levantamento') }}" class="nav-link {{ request()->routeIs('transacoes.levantamento') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Levantamento</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.transferencia') }}" class="nav-link {{ request()->routeIs('transacoes.transferencia') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Transferência</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.pagamento') }}" class="nav-link {{ request()->routeIs('transacoes.pagamento') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Pagamento</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.ted') }}" class="nav-link {{ request()->routeIs('transacoes.ted') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>TED</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.pix') }}" class="nav-link {{ request()->routeIs('transacoes.pix') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>PIX</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('transacoes.cambio') }}" class="nav-link {{ request()->routeIs('transacoes.cambio') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Câmbio</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 @endcan
 
                 <!-- Câmbio -->
