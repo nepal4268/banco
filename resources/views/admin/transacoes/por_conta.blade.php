@@ -44,30 +44,27 @@ document.addEventListener('DOMContentLoaded', function(){
     if(loading) loading.style.display = 'inline-block';
     results.style.display = 'none';
 
-    fetch('{{ route('transacoes.searchByConta') }}' + (pageQuery ? ('?' + pageQuery) : ''), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ numero_conta: numero })
-        }).then(r => {
-            if(r.status === 404) return r.json().then(j => { throw new Error(j.error || 'Conta não encontrada'); });
-            return r.json();
-        }).then(data => {
+    // small UX spinner delay of 2s for visual feedback
+    const doSearch = async () => {
+        try{
+            const json = await (window.Transacoes ? window.Transacoes.postJson('{{ route('transacoes.searchByConta') }}' + (pageQuery ? ('?' + pageQuery) : ''), { numero_conta: numero }) : Promise.reject(new Error('Utilitário indisponível')));
             if(loading) loading.style.display = 'none';
-            results.innerHTML = data.html || '<p>Sem resultados.</p>';
+            results.innerHTML = (json && json.html) ? json.html : '<p>Sem resultados.</p>';
             results.style.display = 'block';
-        }).catch(err => {
+        }catch(err){
             if(loading) loading.style.display = 'none';
             error.style.display='block';
-            error.textContent = err.message || 'Erro ao buscar conta.';
+            error.textContent = (err && err.message) ? err.message : 'Erro ao buscar conta.';
             results.style.display='none';
-        });
+        }
+    };
+    setTimeout(doSearch, 2000);
     }
 
     btn && btn.addEventListener('click', function(e){ e.preventDefault(); search(); });
     input && input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); search(); } });
+    // block form submission by Enter anywhere on the page for this lookup
+    document.addEventListener('keydown', function(e){ if(e.key === 'Enter' && (document.activeElement === input)){ e.preventDefault(); search(); }});
 });
 </script>
 @endpush

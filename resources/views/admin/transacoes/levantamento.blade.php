@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if(window.Transacoes && window.Transacoes.prefillFromQuery){ window.Transacoes.prefillFromQuery({ numero_conta: { selector: '.conta-input[data-role="withdraw"]', role: 'withdraw', options: { findContaRoute: findRoute, infoIdPrefix: 'withdraw_account_info' } } }); }
 
-    function setOpsAlert(msg, type='success'){ const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
+    function setOpsAlert(msg, type='success'){ if(window.showToast){ window.showToast(msg, type); } const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
 });
 </script>
 @endpush
