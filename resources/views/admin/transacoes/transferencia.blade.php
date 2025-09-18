@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if(window.Transacoes && window.Transacoes.prefillFromQuery){ window.Transacoes.prefillFromQuery({ numero_origem: { selector: '.conta-input[data-role="transfer-origem"]', role: 'transfer-origem', options: { findContaRoute: findRoute, infoIdPrefix: 'transfer_origem_info' } }, numero_destino: { selector: '.conta-input[data-role="transfer-destino"]', role: 'transfer-destino', options: { findContaRoute: findRoute, infoIdPrefix: 'transfer_destino_info' } } }); }
 
-    function setOpsAlert(msg, type='success'){ const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
+    function setOpsAlert(msg, type='success'){ if(window.showToast){ window.showToast(msg, type); } const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
 });
 </script>
 @endpush

@@ -336,6 +336,9 @@
                     </div>
                 @endif
 
+                <!-- Toast container top-right -->
+                <div id="toast-container" style="position: fixed; top: 1rem; right: 1rem; z-index: 1080; display:flex; flex-direction:column; gap: .5rem;"></div>
+
                 @yield('content')
             </div>
         </section>
@@ -398,6 +401,23 @@ $(function() {
         }
     });
 });
+</script>
+<script>
+// Minimal toast helper across the app
+window.showToast = function(message, type='success'){
+    try{
+        var container = document.getElementById('toast-container');
+        if(!container){ return alert(message); }
+        var div = document.createElement('div');
+        div.className = 'alert alert-' + (type || 'success') + ' shadow';
+        div.setAttribute('role','alert');
+        div.style.minWidth = '260px';
+        div.innerHTML = '<div class="d-flex align-items-center"><div class="flex-fill">'+ message +'</div><button type="button" class="close ml-2" aria-label="Close">&times;</button></div>';
+        container.appendChild(div);
+        var closer = div.querySelector('.close'); if(closer){ closer.addEventListener('click', function(){ div.remove(); }); }
+        setTimeout(function(){ if(div && div.parentNode){ div.remove(); } }, 5000);
+    }catch(e){ console.warn('toast error', e); }
+}
 </script>
 <!-- Lightweight fallback bundle for transacoes helpers (no npm required) -->
 <script src="{{ asset('js/transacoes.bundle.js') }}"></script>

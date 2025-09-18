@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-body">
         <h1 class="h4">Câmbio</h1>
-        <p class="text-muted">Operações de câmbio (cotação, compra/venda de moeda).</p>
+        <p class="text-muted">Operações de câmbio entre contas com moedas diferentes.</p>
 
         <div id="ops_alert" aria-live="polite" class="mb-2"></div>
 
@@ -59,15 +59,24 @@
                     </div>
                     <div class="form-group col-md-3">
                         <label for="cambio_cotacao">Cotação</label>
-                        <input id="cambio_cotacao" type="number" step="0.0001" name="cotacao" class="form-control" />
-                        <small class="form-text text-muted"><a href="#" id="btn_buscar_cotacao">Buscar cotação</a></small>
+                        <div class="input-group">
+                            <input id="cambio_cotacao" type="number" step="0.0001" name="cotacao" class="form-control" />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" id="btn_buscar_cotacao" type="button">Atualizar</button>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Cotação do dia conforme tabela de taxas de câmbio.</small>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="cambio_valor_destino_preview">Valor final aprox.</label>
+                        <input id="cambio_valor_destino_preview" type="text" class="form-control" readonly />
                     </div>
                     <div class="form-group col-md-3">
                         <label for="cambio_bi_origem">BI do titular (origem)</label>
                         <input id="cambio_bi_origem" name="bi_origem" class="form-control" placeholder="BI do titular da conta origem" />
                     </div>
                     <div class="form-group col-md-3 text-right align-self-end">
-                        <button class="btn btn-primary" type="submit">Executar Câmbio</button>
+                        <button class="btn btn-primary" type="submit" id="cambio_submit_btn">Executar Câmbio</button>
                     </div>
                 </div>
             </div>
@@ -100,6 +109,15 @@ document.addEventListener('DOMContentLoaded', function(){
                 const inputEl = document.querySelector('.conta-input[data-role="'+role+'"]');
                 if(inputEl){ inputEl.dataset.contaId = json.conta.id; if(json.conta.moeda && json.conta.moeda.id) inputEl.dataset.moedaId = json.conta.moeda.id; if(json.conta.moeda && json.conta.moeda.codigo) inputEl.dataset.moedaCodigo = json.conta.moeda.codigo; }
             }catch(e){}
+            // if both contas known, prefill moedas and update cotação
+            try{
+                const oriInput = document.querySelector('.conta-input[data-role="cambio-origem"]');
+                const dstInput = document.querySelector('.conta-input[data-role="cambio-destino"]');
+                const moOri = oriInput?.dataset.moedaId; const moDst = dstInput?.dataset.moedaId;
+                if(moOri){ const selOri = document.getElementById('cambio_moeda_origem'); if(selOri){ if(!selOri.querySelector('option[value="'+moOri+'"]').value){ /* no-op safe */ } selOri.value = moOri; } }
+                if(moDst){ const selDst = document.getElementById('cambio_moeda_destino'); if(selDst){ if(!selDst.querySelector('option[value="'+moDst+'"]').value){ /* no-op safe */ } selDst.value = moDst; } }
+                if(moOri && moDst && moOri !== moDst){ atualizarCotacao(true); }
+            }catch(e){}
             return json.conta;
         }catch(e){
             document.getElementById(role + '_info')?.textContent = 'Conta não encontrada';
@@ -116,9 +134,16 @@ document.addEventListener('DOMContentLoaded', function(){
     // debounced fetch on typing
     document.querySelectorAll('.conta-input').forEach(function(inp){ let t; inp.addEventListener('blur', function(){ const role = this.dataset.role; setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 250); }); inp.addEventListener('input', function(){ const role = this.dataset.role; clearTimeout(t); t = setTimeout(()=> fetchAndRenderAccount(this.value.trim(), role), 600); }); });
 
-    document.getElementById('btn_buscar_cotacao').addEventListener('click', async function(e){ e.preventDefault(); try{ const moOrig = document.getElementById('cambio_moeda_origem').value; const moDst = document.getElementById('cambio_moeda_destino').value; if(!moOrig || !moDst) return alert('Selecione ambas as moedas'); const r = await fetch('/api/taxas-cambio/cotacao?moeda_origem='+moOrig+'&moeda_destino='+moDst, { headers:{'Accept':'application/json'}, credentials:'same-origin'}); if(!r.ok) return alert('Erro ao buscar cotação'); const j = await r.json(); const cot = j.cotacao || j.data?.cotacao || j.data?.valor || null; if(cot) document.getElementById('cambio_cotacao').value = cot; else alert('Cotação não disponível'); }catch(e){ console.warn(e); alert('Erro ao buscar cotação'); } });
+    async function atualizarCotacao(auto=false){ try{ const moOrig = document.getElementById('cambio_moeda_origem').value; const moDst = document.getElementById('cambio_moeda_destino').value; if(!moOrig || !moDst){ if(!auto) setOpsAlert('Selecione ambas as moedas','danger'); return; } const btnC = document.getElementById('btn_buscar_cotacao'); if(btnC){ btnC.disabled = true; var oldC = btnC.innerHTML; btnC.innerHTML = 'Atualizando...'; } await new Promise(r=> setTimeout(r, 2000)); const r = await fetch('/api/taxas-cambio/cotacao?moeda_origem='+moOrig+'&moeda_destino='+moDst, { headers:{'Accept':'application/json'}, credentials:'same-origin'}); if(!r.ok) throw new Error('Erro ao buscar cotação'); const j = await r.json(); const cot = j.cotacao || j.data?.cotacao || j.data?.valor || null; if(cot) document.getElementById('cambio_cotacao').value = cot; else setOpsAlert('Cotação não disponível','warning'); if(btnC){ btnC.disabled = false; btnC.innerHTML = oldC; } atualizarValorDestinoPreview(); }catch(e){ console.warn(e); setOpsAlert(e.message || 'Erro ao buscar cotação','danger'); } }
+    document.getElementById('btn_buscar_cotacao').addEventListener('click', function(e){ e.preventDefault(); atualizarCotacao(false); });
 
-    function setOpsAlert(msg, type='success'){ const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
+    function atualizarValorDestinoPreview(){ try{ const valOrig = Number(document.getElementById('cambio_valor_origem').value || 0); const cot = Number(document.getElementById('cambio_cotacao').value || 0); if(valOrig>0 && cot>0){ const valorDst = valOrig * cot; document.getElementById('cambio_valor_destino_preview').value = valorDst.toFixed(2); } else { document.getElementById('cambio_valor_destino_preview').value = ''; } }catch(e){} }
+    document.getElementById('cambio_valor_origem').addEventListener('input', atualizarValorDestinoPreview);
+    document.getElementById('cambio_cotacao').addEventListener('input', atualizarValorDestinoPreview);
+    document.getElementById('cambio_moeda_origem').addEventListener('change', function(){ atualizarCotacao(true); });
+    document.getElementById('cambio_moeda_destino').addEventListener('change', function(){ atualizarCotacao(true); });
+
+    function setOpsAlert(msg, type='success'){ if(window.showToast){ window.showToast(msg, type); } const d = document.getElementById('ops_alert'); if(!d) return; d.innerHTML = '<div class="alert alert-'+type+'" role="alert">'+msg+'</div>'; setTimeout(()=>{ d.innerHTML=''; }, 5000); }
 
     document.getElementById('op_cambio').addEventListener('submit', async function(e){ e.preventDefault(); try{ const fd = new FormData(this); const data = Object.fromEntries(fd.entries()); const contaOrig = fd.get('conta_origem_id') || document.querySelector('.conta-input[data-role="cambio-origem"]')?.dataset.contaId; const contaDst = fd.get('conta_destino_id') || document.querySelector('.conta-input[data-role="cambio-destino"]')?.dataset.contaId; if(!contaOrig || !contaDst) return setOpsAlert('Verifique contas antes de submeter','danger'); const moOrig = data.moeda_origem_id; const moDst = data.moeda_destino_id; if(!moOrig || !moDst || moOrig === moDst) return setOpsAlert('Selecione moedas diferentes','danger');
         // require BI and ensure <= saldo origem
@@ -129,14 +154,20 @@ document.addEventListener('DOMContentLoaded', function(){
         const saldoOrig = Number(document.querySelector('#cambio_account_summary_body dd:nth-of-type(2)')?.textContent || 0);
         if(!isNaN(saldoOrig) && valorOrig > saldoOrig) return setOpsAlert('Valor não pode ser maior que o saldo disponível na conta de origem','danger');
         const payload = { conta_origem_id: contaOrig, conta_destino_id: contaDst, valor_origem: data.valor_origem, moeda_origem_id: moOrig, moeda_destino_id: moDst, cotacao: data.cotacao, bi_origem: bi };
+    // confirm modal
+    if(!confirm('Confirmar execução do câmbio?')) return;
+    const btn = document.getElementById('cambio_submit_btn'); if(btn){ btn.disabled = true; var old = btn.innerHTML; btn.innerHTML='Processando...'; }
+    await new Promise(r=> setTimeout(r, 2000));
     const resp = await window.Transacoes.postJson('/api/transacoes/cambio', payload);
     setOpsAlert(resp.message || 'Câmbio efetuado', 'success');
     if(resp.operacao_cambio && resp.operacao_cambio.id && window.Transacoes && window.Transacoes.renderTransacaoDetailsTo){ window.Transacoes.renderTransacaoDetailsTo('last_operation_details', resp.operacao_cambio); }
     // clear form and hide UI
-    this.reset(); const body = document.querySelector('#op_cambio .op_body'); if(body) body.style.display = 'none'; const sum = document.getElementById('cambio_account_summary'); if(sum) sum.style.display = 'none';
+    this.reset(); const body = document.querySelector('#op_cambio .op_body'); if(body) body.style.display = 'none'; const sum = document.getElementById('cambio_account_summary'); if(sum) sum.style.display = 'none'; document.getElementById('last_operation_card').style.display = 'block'; if(btn){ btn.disabled = false; btn.innerHTML = old; }
     }catch(err){ setOpsAlert(err.message || 'Erro', 'danger'); } });
 
     if(window.Transacoes && window.Transacoes.prefillFromQuery){ try{ const params = new URLSearchParams(window.location.search); const numOrig = params.get('numero_origem') || ''; const numDst = params.get('numero_destino') || ''; if(numOrig){ const i = document.querySelector('.conta-input[data-role="cambio-origem"]'); if(i){ i.value = numOrig; fetchAndRenderAccount(numOrig, 'cambio-origem'); } } if(numDst){ const i2 = document.querySelector('.conta-input[data-role="cambio-destino"]'); if(i2){ i2.value = numDst; fetchAndRenderAccount(numDst, 'cambio-destino'); } } }catch(e){} }
+    // prevent Enter from submitting the whole page during lookups
+    ['cambio_numero_origem','cambio_numero_destino'].forEach(id => { const el = document.getElementById(id); if(el){ el.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); const role = this.id.includes('origem') ? 'cambio-origem' : 'cambio-destino'; const numero = this.value.trim(); if(numero) fetchAndRenderAccount(numero, role); } }); } });
 });
 </script>
 @endpush
